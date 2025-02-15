@@ -63,12 +63,7 @@ const loginUser = () => {
       >
         <VCardText style="flex: 0" class="pa-0 mb-4 mb-lg-6 mb-xl-10">
           <div class="d-flex justify-center pt-2">
-            <img
-              class="auth-logo-img"
-              src="/logo-sm.svg"
-              alt="logo"
-              width="350"
-            />
+            <img class="auth-logo-img" src="/logo.svg" alt="logo" width="350" />
           </div>
         </VCardText>
         <VCardText style="flex: 0">
@@ -200,12 +195,12 @@ const loginUser = () => {
         <div
           class="app-logo d-flex align-center justify-center flex-column w-100 h-100"
         >
-          <img
+          <!-- <img
             class="auth-bg__vector"
             src="/imgs/login-vector.png"
             alt="logo"
             width="800"
-          />
+          /> -->
         </div>
       </div>
     </VCol>
