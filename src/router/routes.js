@@ -1,0 +1,88 @@
+import DashboardLayout from "@/layouts/DashboardLayout";
+import LoginPage from "@/pages/auth/login";
+import DashboardHome from "@/pages/home";
+import UsersPage from "@/pages/users/users.vue";
+import SitesPage from "@/pages/sites";
+import TeamsPage from "@/pages/teams";
+import MainSectorsPage from "@/pages/main-sectors";
+import RolesPage from "@/pages/roles";
+import NotesPage from "@/pages/notes";
+import NotFoundPage from "@/pages/NotFound";
+// import TempPage from "@/pages/temp";
+
+export default [
+  {
+    path: "/",
+    component: DashboardLayout,
+    children: [
+      {
+        path: "",
+        name: "home",
+        component: DashboardHome,
+      },
+      {
+        path: "/sites",
+        name: "sites",
+        component: SitesPage,
+      },
+      {
+        path: "/teams",
+        name: "teams",
+        component: TeamsPage,
+      },
+      {
+        path: "/main-sectors",
+        name: "main-sectors",
+        component: MainSectorsPage,
+      },
+      {
+        path: "/roles",
+        name: "roles",
+        component: RolesPage,
+      },
+      {
+        path: "/users",
+        name: "users",
+        component: UsersPage,
+      },
+      {
+        path: "/notes",
+        name: "notes",
+        component: NotesPage,
+      },
+
+      // {
+      //   path: "/temp",
+      //   name: "temp",
+      //   component: TempPage,
+      // },
+
+      // {
+      //   path: "/settings",
+      //   component: SettingsIndexPage,
+      //   children: [
+      //     {
+      //       path: "",
+      //       name: "settings",
+      //       component: SettingsPage,
+      //     },
+      //     {
+      //       path: ":id",
+      //       name: "setting",
+      //       component: SettingPage,
+      //     },
+      //   ],
+      // },
+    ],
+  },
+  {
+    path: "/auth/login",
+    name: "login",
+    component: LoginPage,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: NotFoundPage,
+  },
+];
