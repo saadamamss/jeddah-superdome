@@ -60,7 +60,7 @@ const search = ref("");
           label="البحث"
           rounded="lg"
           clearable
-          height="43"
+          height="55"
           class="bg-white d-none d-sm-block"
           style="
             max-width: 320px;
