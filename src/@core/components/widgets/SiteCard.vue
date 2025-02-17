@@ -28,6 +28,7 @@
               </svg>
             </v-btn>
             <v-btn
+              :to="`/sites/housing-details?siteId=${siteId}`"
               size="small"
               variant="tonal"
               class="text-none font-weight-medium px-2 me-2 bg-primary-100 rounded-pill"
