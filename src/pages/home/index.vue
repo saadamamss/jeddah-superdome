@@ -334,7 +334,7 @@ onMounted(() => {
                   label="بحث المواقع"
                   rounded="lg"
                   clearable
-                  height="96px"
+                  height="48"
                   class="bg-white"
                   style="
                     width: 320px;
@@ -570,7 +570,12 @@ onMounted(() => {
                   </VMenu>
                 </VBtn>
 
-                <VBtn elevation="0" class="rounded-lg" append-icon="mdi-plus">
+                <VBtn
+                  height="48"
+                  elevation="0"
+                  class="rounded-lg"
+                  append-icon="mdi-plus"
+                >
                   إضافة موقع جديد
                 </VBtn>
               </div>
@@ -612,7 +617,7 @@ onMounted(() => {
               class="d-flex align-center justify-space-between ga-4"
             >
               <h2 class="text-h5 font-weight-bold">الفرق الميدانية</h2>
-              <div class="d-flex align-center ga-2">
+              <div class="d-flex ga-2">
                 <v-select
                   v-model="teamLocation"
                   :items="[
@@ -631,7 +636,12 @@ onMounted(() => {
                 >
                 </v-select>
 
-                <VBtn elevation="0" class="rounded-lg" append-icon="mdi-plus">
+                <VBtn
+                  height="48"
+                  elevation="0"
+                  class="rounded-lg"
+                  append-icon="mdi-plus"
+                >
                   إضافة فريق ميداني
                 </VBtn>
               </div>

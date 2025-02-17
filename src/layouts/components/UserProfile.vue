@@ -23,8 +23,8 @@ const logout = () => {
 <template>
   <div>
     <v-btn
+      height="48"
       color="white"
-      v-bind="props"
       elevation="0"
       class="btn-user-profile px-3"
     >

@@ -23,7 +23,7 @@ const emit = defineEmits(["click:readAllNotifications"]);
 </script>
 
 <template>
-  <VBtn color="default" size="small" class="btn-icon" elevation="0">
+  <VBtn height="48" color="default" class="btn-icon" elevation="0">
     <VBadge
       :model-value="!!props.notifications?.length"
       color="primary"

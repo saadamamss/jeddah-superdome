@@ -207,9 +207,8 @@ body
   padding: 14px !important;
 }
 
-
 .v-btn.btn-icon {
-  --v-btn-height: 40px;
+  --v-btn-height: 48px;
   width: var(--v-btn-height) !important;
   min-width: 20px;
   border-radius: 10px;
@@ -221,6 +220,12 @@ body
 }
 
 body {
+  .layout-wrapper.layout-nav-type-vertical
+    .layout-navbar
+    .navbar-content-container {
+    block-size: 75px;
+  }
+
   .layout-page-content {
     padding-block: 0.5rem !important;
     padding-inline: 0.5 !important;
@@ -249,4 +254,11 @@ body {
 
 .v-select.v-select-no-shadow .v-field {
   box-shadow: none;
+}
+
+body {
+  .v-input--density-compact {
+    --v-input-control-height: 48px;
+    --v-input-padding-top: 8px;
+  }
 }
