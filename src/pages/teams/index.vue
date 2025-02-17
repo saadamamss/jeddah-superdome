@@ -38,7 +38,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <v-container fluid class="px-xl-0">
     <v-row v-if="isLoading">
       <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
         <VCard elevation="0">
@@ -212,7 +212,7 @@ onMounted(() => {
         </StatsWidget>
       </v-col>
     </v-row>
-  </div>
+  </v-container>
 </template>
 
 <style lang="scss" scoped>

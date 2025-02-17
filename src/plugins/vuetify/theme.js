@@ -77,7 +77,7 @@ const theme = {
         warning: "#FF9F43",
         "on-warning": "#fff",
         error: "#EA5455",
-        background: "#25293C",
+        background: "#F8F9F9",
         "on-background": "#E4E6F4",
         surface: "#2F3349",
         "on-surface": "#E4E6F4",

@@ -23,7 +23,7 @@ const emit = defineEmits(["click:readAllNotifications"]);
 </script>
 
 <template>
-  <VBtn color="default" size="small" class="btn-notification" elevation="0">
+  <VBtn color="default" size="small" class="btn-icon" elevation="0">
     <VBadge
       :model-value="!!props.notifications?.length"
       color="primary"
@@ -48,8 +48,6 @@ const emit = defineEmits(["click:readAllNotifications"]);
           fill="#B69265"
         />
       </svg>
-
-      <!-- <VIcon icon="tabler-bell" size="24" class="text-dark" /> -->
     </VBadge>
 
     <VMenu
@@ -60,7 +58,7 @@ const emit = defineEmits(["click:readAllNotifications"]);
     >
       <VList class="py-0 text-dark">
         <!-- 👉 Header -->
-        <VListItem title="الاشعارات" class="notification-section" height="48px">
+        <VListItem title="التنبيهات" class="notification-section" height="48px">
           <!-- <template #append>
             <VChip color="primary" size="small"> 2 New </VChip>
           </template> -->
@@ -231,7 +229,7 @@ const emit = defineEmits(["click:readAllNotifications"]);
         </template>
 
         <VListItem class="notification-section">
-          <VBtn color="dark" variant="text" block> عرض جميع الاشعارات </VBtn>
+          <VBtn color="dark" variant="text" block> عرض جميع التنبيهات </VBtn>
         </VListItem>
       </VList>
     </VMenu>

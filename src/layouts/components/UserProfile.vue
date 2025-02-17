@@ -1,5 +1,4 @@
 <script setup>
-import avatar1 from "/imgs/person.svg";
 import { useSettingsStore } from "@/store/Settings";
 
 const user = ref();
@@ -40,7 +39,7 @@ const logout = () => {
         />
         <img
           v-else
-          :src="avatar1"
+          src="/imgs/person.svg"
           width="30"
           height="30"
           class="avatar-img"

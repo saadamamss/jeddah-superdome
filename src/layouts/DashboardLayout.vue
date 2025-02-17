@@ -90,7 +90,7 @@ const search = ref("");
         <v-btn
           color="default"
           size="small"
-          class="btn-notification d-sm-none"
+          class="btn-icon d-sm-none"
           elevation="0"
         >
           <svg
@@ -129,9 +129,9 @@ const search = ref("");
       </Transition>
     </RouterView>
 
-    <template #footer>
+    <!-- <template #footer>
       <Footer />
-    </template>
+    </template> -->
 
     <!-- <TheCustomizer /> -->
   </VerticalNavLayout>
