@@ -29,6 +29,13 @@ const siteTypes = [
   { title: "موقع صناعي", value: "industrial" },
 ];
 
+const links = ref([
+  { title: "إدارة المواقع", href: "/", disabled: false },
+  { title: "تفاصيل للسكن", href: "/sites", disabled: false },
+  { title: "شركة رواف منى", href: "/sites/company-details", disabled: false },
+  { title: "التقييمات", href: "/sites/company-details", disabled: true },
+]);
+
 const companies = [
   { title: "شركة رواف منى", value: "rawaf" },
   { title: "شركة الخليج", value: "gulf" },
@@ -703,5 +710,25 @@ onMounted(() => {
   &:after {
     display: none;
   }
+}
+
+.custom-breadcrumbs {
+  :deep(.v-breadcrumbs-item--disabled) {
+    opacity: 1;
+  }
+
+  :deep(.v-breadcrumbs__item) {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  :deep(.v-breadcrumbs-item--disabled) {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.text-13 {
+  font-size: 13px;
 }
 </style>
