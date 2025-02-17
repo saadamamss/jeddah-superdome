@@ -1,6 +1,10 @@
 <template>
   <v-card elevation="0" class="site-card rounded-lg">
-    <v-card-text class="pa-4">
+    <v-card-text
+      class="pa-4"
+      @click="$router.push('/sites/company-details')"
+      style="cursor: pointer"
+    >
       <div class="d-flex justify-space-between align-center mb-4">
         <div class="d-flex align-center justify-space-between w-100">
           <h2 class="text-h6 font-weight-medium">رقم المخيم</h2>
