@@ -11,7 +11,7 @@ defineProps({
       <div class="d-flex flex-column gap-6 pa-4">
         <div class="d-flex justify-space-between align-center">
           <div>
-            <h2 class="text-h4 font-weight-bold text-primary">
+            <h2 class="text-h5 text-lg-h4 font-weight-bold text-primary">
               {{ number }}
             </h2>
           </div>
