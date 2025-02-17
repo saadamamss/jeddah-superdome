@@ -1,41 +1,40 @@
 <template>
-  <div class="d-flex flex-wrap justify-space-between align-center pa-4">
-    <div class="pagination-container d-flex align-center justify-space-between">
+  <div
+    class="d-flex flex-column flex-md-row align-md-center justify-md-space-between ga-2 mt-6"
+  >
+    <div class="d-flex align-center justify-space-between ga-3">
       <v-select
-        :model-value="perPage"
-        :items="perPageOptions"
-        variant="outlined"
-        density="compact"
-        class="per-page-select me-4"
-        hide-details
-        bg-color="white"
+        v-model="perPageModel"
+        :items="[5, 10, 25, 50, 100]"
+        min-width="100"
+        max-width="120"
+        bg-color="#F8F9F9"
+        rounded="lg"
+        variant="solo"
+        class="v-select-no-shadow"
         @update:model-value="$emit('update:perPage', $event)"
       />
-      <span class="text-subtitle-2 text-grey-darken-1 ms-4"
-        >تم عرض من {{ startItem }} إلى {{ endItem }} من أصل
-        {{ totalItems }}</span
-      >
+      <span class="text-sm">
+        تم عرض من <span>{{ startItem }}</span> إلى <span>{{ endItem }}</span> من
+        أصل
+        <span>{{ totalItems }}</span>
+      </span>
     </div>
     <v-pagination
-      :model-value="currentPage"
+      v-model="currentPageModel"
       :length="totalPages"
       :total-visible="5"
-      density="comfortable"
-      variant="elevated"
-      active-color="#B69265"
+      rounded="circle"
+      variant="flat"
       @update:model-value="$emit('update:page', $event)"
     />
   </div>
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
-  title: {
-    type: String,
-    required: true,
-  },
   totalItems: {
     type: Number,
     required: true,
@@ -44,9 +43,9 @@ const props = defineProps({
   perPage: {
     type: Number,
     required: true,
-    default: 6,
+    default: 10,
   },
-  currentPage: {
+  page: {
     type: Number,
     required: true,
     default: 1,
@@ -55,56 +54,45 @@ const props = defineProps({
 
 const emit = defineEmits(["update:page", "update:perPage"]);
 
-const perPageOptions = [
-  { title: "6", value: 6 },
-  { title: "12", value: 12 },
-  { title: "24", value: 24 },
-  { title: "36", value: 36 },
-];
+// Create local models for v-model binding
+const perPageModel = ref(props.perPage);
+const currentPageModel = ref(props.page);
 
+// Watch for prop changes to update local models
+watch(
+  () => props.perPage,
+  (newVal) => {
+    perPageModel.value = newVal;
+  }
+);
+
+watch(
+  () => props.page,
+  (newVal) => {
+    currentPageModel.value = newVal;
+  }
+);
+
+// Computed properties
 const totalPages = computed(
   () => Math.ceil(props.totalItems / props.perPage) || 1
 );
 
 const startItem = computed(() => {
   if (props.totalItems === 0) return 0;
-  return (Number(props.currentPage) - 1) * Number(props.perPage) + 1;
+  return (props.page - 1) * props.perPage + 1;
 });
 
 const endItem = computed(() => {
   if (props.totalItems === 0) return 0;
-  return Math.min(
-    Number(props.currentPage) * Number(props.perPage),
-    props.totalItems
-  );
+  return Math.min(props.page * props.perPage, props.totalItems);
 });
 </script>
 
-<style lang="scss">
-.pagination-container {
-  .v-field {
-    border-radius: 50px !important;
-    // min-width: 50px !important;
-    // max-width: 50px !important;
-
-    .v-field__input {
-      min-height: 32px !important;
-      padding: 0 12px !important;
-    }
-
-    .v-field__append-inner {
-      padding-inline-start: 8px !important;
-    }
+<style lang="scss" scoped>
+.v-select-no-shadow {
+  :deep(.v-field) {
+    box-shadow: none !important;
   }
-}
-
-:deep(.v-pagination__item--active) {
-  background-color: #b69265 !important;
-}
-
-.v-pagination .v-btn {
-  border-radius: 50% !important;
-  width: 32px;
-  height: 32px;
 }
 </style>
