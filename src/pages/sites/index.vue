@@ -529,8 +529,8 @@ onMounted(() => {
     <!-- Add Site Modal -->
     <v-dialog v-model="dialog" width="500" class="add-site-dialog">
       <v-card class="rounded-lg">
-        <v-card-text class="pa-6">
-          <h2 class="text-h6">
+        <v-card-text class="pa-4">
+          <h2 class="text-h6 font-weight-bold">
             {{ dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد" }}
           </h2>
           <p class="card-gray-text border-b pb-3">حدد تفاصيل الموقع الجديد</p>
