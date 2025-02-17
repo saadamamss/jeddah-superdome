@@ -166,9 +166,7 @@ onMounted(() => {
           </svg>
         </template>
         <template v-slot:divider>
-          <v-icon size="18" class="text-grey-darken-1"
-            >mdi-chevron-right</v-icon
-          >
+          <v-icon size="18" class="text-grey-darken-1">mdi-chevron-left</v-icon>
         </template>
         <template v-slot:title="{ item }">
           <router-link
