@@ -385,7 +385,7 @@ onMounted(() => {
                 append-icon="mdi-plus"
                 @click="addNewLocation"
               >
-                إضافة موقع جديد
+                اضافه شركه جديده
               </VBtn>
             </div>
           </v-card-title>
