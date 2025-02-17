@@ -190,6 +190,8 @@ thead {
 .layout-wrapper.layout-nav-type-vertical
   .layout-navbar
   .navbar-content-container {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
   background-color: #f8f9f9 !important;
   box-shadow: none;
 }
@@ -197,15 +199,15 @@ thead {
 body
   .layout-wrapper.layout-nav-type-vertical.layout-navbar-sticky
   .layout-navbar {
-  padding-top: 0.25rem;
-  padding-bottom: 0.25rem;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .notification-section {
   padding: 14px !important;
 }
 
-.v-btn.btn-notification {
+.v-btn.btn-icon {
   --v-btn-height: 40px;
 
   width: var(--v-btn-height);
@@ -231,4 +233,20 @@ body {
   .btn-card-link {
     background-color: rgba(182, 146, 101, 0.11) !important;
   }
+}
+
+.v-pagination {
+  .v-btn.v-btn--icon,
+  .v-btn--disabled.v-btn--variant-flat {
+    background: transparent;
+    opacity: 1;
+
+    .v-btn__overlay {
+      display: none;
+    }
+  }
+}
+
+.v-select.v-select-no-shadow .v-field {
+  box-shadow: none;
 }

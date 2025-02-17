@@ -14,9 +14,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
+  <v-container fluid class="px-xl-0">
     <UsersTable />
-  </div>
+  </v-container>
 </template>
 
 <style lang="scss">
