@@ -5,6 +5,8 @@ import PointIcon from "./icons/Point";
 import RolesIcon from "./icons/Roles";
 import UsersIcon from "./icons/Users";
 import NotesIcon from "./icons/Notes";
+import RatingIcon from "./icons/Rating";
+import ContractsIcon from "./icons/Contracts";
 
 export default [
   {
@@ -26,18 +28,29 @@ export default [
     permission: true,
   },
   {
-    title: "⁠⁠إدارة المحاور الرئيسية",
+    title: "⁠⁠إدارة التقييمات",
+    to: { name: "rating" },
+    icon: RatingIcon,
+    permission: true,
+  },
+  {
+    title: "إدارة التعاقدات",
+    to: { name: "contracts" },
+    icon: ContractsIcon,
+    permission: true,
+  },
+  {
+    title: "⁠⁠إدارة المحاور",
     to: { name: "main-sectors" },
     icon: PointIcon,
     permission: true,
   },
   {
-    title: "إدارة الأدوار والصلاحيات ",
-    to: { name: "roles" },
-    icon: RolesIcon,
+    title: "⁠⁠إدارة الملاحظات",
+    to: { name: "notes" },
+    icon: NotesIcon,
     permission: true,
   },
-
   {
     title: "إدارة المستخدمين",
     to: { name: "users" },
@@ -45,9 +58,9 @@ export default [
     permission: true,
   },
   {
-    title: "⁠⁠إدارة الملاحظات",
-    to: { name: "notes" },
-    icon: NotesIcon,
+    title: "إدارة الأدوار والصلاحيات ",
+    to: { name: "roles" },
+    icon: RolesIcon,
     permission: true,
   },
   // {
