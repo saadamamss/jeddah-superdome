@@ -3,7 +3,7 @@ import { useAppStore } from "@/stores/app";
 import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import Pagination from "@/@core/components/Pagination";
-import SiteCard from "@/@core/components/widgets/SiteCard.vue";
+import companyCard from "@/@core/components/widgets/companyCard.vue";
 import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
 import { ref } from "vue";
 
@@ -409,14 +409,55 @@ onMounted(() => {
                   />
                 </v-col>
               </v-row>
+                    <VListItem class="notification-section">
+                      <VBtn color="dark" variant="outlined" block>
+                        تطبيق التصفية
+                      </VBtn>
+                    </VListItem>
+                  </VList>
+                </VMenu>
+              </VBtn>
 
-              <!-- <Pagination
+              <VBtn
+                height="48"
+                elevation="0"
+                class="rounded-lg"
+                append-icon="mdi-plus"
+                @click="addNewLocation"
+              >
+                اضافه شركه جديده
+              </VBtn>
+            </div>
+          </v-card-title>
+           <v-card-text>
+           <!-- Search and Add Section -->
+
+          <!-- Tabs Section -->
+
+          <v-row class="mt-6">
+            <v-col
+              v-for="site in sites"
+              :key="site.siteId"
+              cols="12"
+              sm="6"
+              md="4"
+              lg="4"
+              class="pa-3"
+            >
+              <companyCard
+                :site-id="site.siteId"
+                :authorization-number="site.authorizationNumber"
+              />
+            </v-col>
+          </v-row>
+
+           <!-- <Pagination
                 title="الفرق الميدانية"
                 :total-items="2300"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
               /> -->
-
+              
               <!-- pagination -->
               <div
                 class="d-flex flex-column flex-md-row align-md-center justify-md-space-between ga-2 mt-6"
@@ -447,12 +488,8 @@ onMounted(() => {
                 >
                 </v-pagination>
               </div>
-            </v-card-title>
-          </VCard>
-        </v-container>
-      </div>
-
-      <!-- Add Site Modal -->
+              
+              <!-- Add Site Modal -->
       <v-dialog v-model="dialog" width="500" class="add-site-dialog">
         <v-card class="rounded-lg">
           <v-card-text class="pa-4">
@@ -592,8 +629,11 @@ onMounted(() => {
         </v-card>
       </v-dialog>
       <!-- add new location -->
-    </v-container>
-  </div>
+              
+           </v-card-text>
+        </VCard>
+      </v-container>
+    </div>
 </template>
 
 <style lang="scss" scoped>
