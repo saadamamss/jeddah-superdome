@@ -9,6 +9,9 @@ import TeamsPage from "@/pages/teams";
 import MainSectorsPage from "@/pages/main-sectors";
 import RolesPage from "@/pages/roles";
 import NotesPage from "@/pages/notes";
+import RatingPage from "@/pages/rating";
+import ContractsPage from "@/pages/contracts";
+
 import NotFoundPage from "@/pages/NotFound";
 // import TempPage from "@/pages/temp";
 
@@ -61,6 +64,16 @@ export default [
         path: "/notes",
         name: "notes",
         component: NotesPage,
+      },
+      {
+        path: "/rating",
+        name: "rating",
+        component: RatingPage,
+      },
+      {
+        path: "/contracts",
+        name: "contracts",
+        component: ContractsPage,
       },
 
       // {

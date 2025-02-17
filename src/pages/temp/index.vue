@@ -1,8 +1,6 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
 import AiAnalysisTable from "./components/table.vue";
-import PerformancePercentageWidget from "@/@core/components/widgets/PerformancePercentageWidget.vue";
-import InfrastructureStatusWidget from "@/@core/components/widgets/InfrastructureStatusWidget.vue";
 
 const appStore = useAppStore();
 
@@ -87,14 +85,6 @@ onMounted(() => {
       </v-col>
     </v-row>
     <AiAnalysisTable class="mb-6" />
-    <v-row style="height: 400px">
-      <v-col lg="4" class="d-flex">
-        <PerformancePercentageWidget class="w-100 h-100" />
-      </v-col>
-      <v-col lg="8" class="d-flex">
-        <InfrastructureStatusWidget class="w-100 h-100" />
-      </v-col>
-    </v-row>
   </div>
 </template>
 
