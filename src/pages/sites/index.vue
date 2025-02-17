@@ -14,6 +14,7 @@ const perPage = ref(6);
 const currentPage = ref(1);
 const search = ref("");
 const dialog = ref(false);
+const dialogStep = ref(1);
 const loading = ref(false);
 const siteType = ref("السكن");
 const housingPermitNumber = ref("");
@@ -79,6 +80,22 @@ const handleSubmit = async () => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
   loading.value = false;
   dialog.value = false;
+  dialogStep.value = 1;
+};
+
+const nextStep = () => {
+  if (siteType.value) {
+    dialogStep.value = 2;
+  }
+};
+
+const prevStep = () => {
+  dialogStep.value = 1;
+};
+
+const closeDialog = () => {
+  dialog.value = false;
+  dialogStep.value = 1;
 };
 
 const addNewLocation = () => {
@@ -199,154 +216,359 @@ onMounted(() => {
         </v-col>
       </v-row>
 
-      <v-container class="bg-white mt-6">
-        <!-- Header Section -->
-        <div class="d-flex justify-space-between align-center mb-6">
-          <h1 class="text-h5 font-weight-medium">إدارة المواقع</h1>
-          <div class="d-flex align-center mb-6">
-            <v-text-field
-              v-model="search"
-              placeholder="البحث للخيم او السكن..."
-              variant="outlined"
-              density="comfortable"
-              hide-details
-              class="search-field rounded-lg min-width-300px ps-0"
-              bg-color="white"
-            >
-              <template #prepend-inner>
+      <v-container fluid class="mt-6 px-0 rounded-lg">
+        <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
+          <!-- Header Section -->
+          <v-card-title
+            class="d-flex align-center justify-space-between ga-4 pt-4"
+          >
+            <h2 class="text-h5 font-weight-bold">إدارة المواقع</h2>
+            <div class="d-flex align-center ga-2">
+              <v-text-field
+                v-model="search"
+                label="البحث المخيم او المسكن... "
+                rounded="lg"
+                clearable
+                height="48"
+                class="bg-white"
+                style="
+                  width: 320px;
+                  max-width: 100%;
+                  color: #929a9f !important;
+                  border-radius: 1rem;
+                "
+              >
+                <template v-slot:prepend-inner>
+                  <svg
+                    width="1.3rem"
+                    height="1.3rem"
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      opacity="0.4"
+                      d="M16.6666 9.16669C16.6666 5.02455 13.3088 1.66669 9.16663 1.66669C5.02449 1.66669 1.66663 5.02455 1.66663 9.16669C1.66663 13.3088 5.02449 16.6667 9.16663 16.6667C13.3088 16.6667 16.6666 13.3088 16.6666 9.16669Z"
+                      fill="#B69265"
+                    />
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M9.16663 1.04169C4.67931 1.04169 1.04163 4.67937 1.04163 9.16669C1.04163 13.654 4.67931 17.2917 9.16663 17.2917C11.1853 17.2917 13.032 16.5555 14.453 15.337L17.8914 18.7753C18.1354 19.0194 18.5312 19.0194 18.7752 18.7753C19.0193 18.5312 19.0193 18.1355 18.7752 17.8914L15.3369 14.4531C16.5554 13.0321 17.2916 11.1854 17.2916 9.16669C17.2916 4.67937 13.6539 1.04169 9.16663 1.04169ZM2.29163 9.16669C2.29163 5.36973 5.36967 2.29169 9.16663 2.29169C12.9636 2.29169 16.0416 5.36973 16.0416 9.16669C16.0416 12.9636 12.9636 16.0417 9.16663 16.0417C5.36967 16.0417 2.29163 12.9636 2.29163 9.16669Z"
+                      fill="#B69265"
+                    />
+                  </svg>
+                </template>
+              </v-text-field>
+
+              <VBtn color="default" class="btn-icon border" elevation="0">
                 <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 18 18"
+                  width="1.3rem"
+                  height="1.3rem"
+                  viewBox="0 0 24 24"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     opacity="0.4"
-                    d="M15.6666 8.16669C15.6666 4.02455 12.3088 0.666687 8.16663 0.666687C4.02449 0.666687 0.666626 4.02455 0.666626 8.16669C0.666626 12.3088 4.02449 15.6667 8.16663 15.6667C12.3088 15.6667 15.6666 12.3088 15.6666 8.16669Z"
+                    d="M8.85746 12.5061C6.36901 10.6456 4.59564 8.59915 3.62734 7.44867C3.3276 7.09253 3.22938 6.8319 3.17033 6.3728C2.96811 4.8008 2.86701 4.0148 3.32795 3.5074C3.7889 3 4.60404 3 6.23433 3H17.7657C19.396 3 20.2111 3 20.672 3.5074C21.133 4.0148 21.0319 4.8008 20.8297 6.37281C20.7706 6.83191 20.6724 7.09254 20.3726 7.44867C19.403 8.60062 17.6261 10.6507 15.1326 12.5135C14.907 12.6821 14.7583 12.9567 14.7307 13.2614C14.4837 15.992 14.2559 17.4876 14.1141 18.2442C13.8853 19.4657 12.1532 20.2006 11.226 20.8563C10.6741 21.2466 10.0043 20.782 9.93278 20.1778C9.79643 19.0261 9.53961 16.6864 9.25927 13.2614C9.23409 12.9539 9.08486 12.6761 8.85746 12.5061Z"
                     fill="#B69265"
                   />
                   <path
                     fill-rule="evenodd"
                     clip-rule="evenodd"
-                    d="M8.16663 0.041687C3.67931 0.041687 0.041626 3.67937 0.041626 8.16669C0.041626 12.654 3.67931 16.2917 8.16663 16.2917C10.1853 16.2917 12.032 15.5555 13.453 14.337L16.8914 17.7753C17.1354 18.0194 17.5312 18.0194 17.7752 17.7753C18.0193 17.5312 18.0193 17.1355 17.7752 16.8914L14.3369 13.4531C15.5554 12.0321 16.2916 10.1854 16.2916 8.16669C16.2916 3.67937 12.6539 0.041687 8.16663 0.041687ZM1.29163 8.16669C1.29163 4.36973 4.36967 1.29169 8.16663 1.29169C11.9636 1.29169 15.0416 4.36973 15.0416 8.16669C15.0416 11.9636 11.9636 15.0417 8.16663 15.0417C4.36967 15.0417 1.29163 11.9636 1.29163 8.16669Z"
+                    d="M6.18176 2.24732C6.1991 2.24732 6.21649 2.24732 6.23394 2.24732L17.8175 2.24732C18.588 2.24728 19.2422 2.24725 19.7583 2.31762C20.3046 2.3921 20.8269 2.56023 21.2268 3.00041C21.6302 3.44445 21.7406 3.97957 21.7491 4.52659C21.757 5.03745 21.6753 5.67204 21.5801 6.41193L21.5732 6.46581C21.5395 6.72764 21.489 6.98088 21.3836 7.23442C21.2767 7.49184 21.1294 7.71109 20.946 7.92897C19.9664 9.09285 18.1451 11.1962 15.5811 13.1117C15.5396 13.1427 15.4872 13.2161 15.4773 13.3263C15.2282 16.0792 15.009 17.5358 14.8509 18.3796C14.6799 19.2921 13.9839 19.9237 13.3838 20.3585C13.0697 20.5861 12.7364 20.791 12.4394 20.9717C12.4156 20.9862 12.3921 21.0005 12.3689 21.0146C12.0915 21.1833 11.8557 21.3267 11.6586 21.466C11.1181 21.8482 10.4945 21.8214 10.0179 21.5437C9.56811 21.2817 9.25159 20.8038 9.1876 20.2633C9.04713 19.0769 8.79249 16.7542 8.51139 13.3199C8.50238 13.2097 8.48517 13.1778 8.48373 13.1751C8.48275 13.1733 8.48022 13.1686 8.47182 13.1594C8.46243 13.149 8.44366 13.1308 8.40798 13.1041C5.84915 11.191 4.03146 9.09132 3.05314 7.92893C2.87044 7.71185 2.71884 7.49783 2.61076 7.23754C2.50494 6.98273 2.45983 6.7282 2.42607 6.46581C2.42375 6.44778 2.42144 6.42982 2.41914 6.41192C2.32392 5.67203 2.24226 5.03744 2.25016 4.52659C2.25863 3.97957 2.36905 3.44445 2.77244 3.00041C3.17232 2.56023 3.69466 2.3921 4.24094 2.31762C4.75704 2.24725 5.4112 2.24728 6.18176 2.24732ZM4.44357 3.80387C4.05947 3.85624 3.94377 3.94181 3.88271 4.00903C3.82515 4.07239 3.75565 4.18397 3.74998 4.5498C3.74395 4.93944 3.80975 5.46543 3.91382 6.27444C3.94273 6.49924 3.96807 6.59485 3.99606 6.66228C4.02179 6.72422 4.06736 6.80453 4.20077 6.96304C5.15905 8.10163 6.8881 10.0949 9.30617 11.9027C9.50044 12.048 9.67868 12.2278 9.80763 12.4699C9.93468 12.7085 9.98668 12.9567 10.0064 13.1975C10.286 16.6131 10.5388 18.9178 10.6772 20.0869C10.6814 20.1226 10.6944 20.1578 10.7144 20.1884C10.7348 20.2197 10.7575 20.2386 10.773 20.2476C10.7749 20.2488 10.7767 20.2497 10.7781 20.2504C10.7817 20.2485 10.7865 20.2456 10.7926 20.2413C11.0347 20.0701 11.3157 19.8993 11.581 19.7382C11.6074 19.7221 11.6336 19.7062 11.6597 19.6903C11.9585 19.5085 12.2442 19.3318 12.5036 19.1439C13.0505 18.7477 13.3187 18.4124 13.3766 18.1034C13.523 17.3216 13.7369 15.9154 13.9834 13.1911C14.0286 12.692 14.2736 12.2161 14.6833 11.91C17.1063 10.0998 18.8389 8.10302 19.7985 6.96301C19.9148 6.82476 19.9666 6.73562 19.9984 6.65892C20.0319 6.57834 20.06 6.47171 20.0854 6.27444C20.1895 5.46543 20.2553 4.93944 20.2493 4.5498C20.2436 4.18397 20.1741 4.07239 20.1165 4.00903C20.0555 3.94181 19.9398 3.85624 19.5557 3.80387C19.153 3.74897 18.6023 3.74732 17.7653 3.74732H6.23394C5.3969 3.74732 4.84624 3.74897 4.44357 3.80387ZM10.7703 20.2539C10.7703 20.2539 10.7708 20.2537 10.7717 20.2535L10.7703 20.2539Z"
                     fill="#B69265"
                   />
                 </svg>
-              </template>
-            </v-text-field>
-            <v-btn icon variant="text" class="ms-4 me-4 btn-notification">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+
+                <VMenu
+                  activator="parent"
+                  width="380px"
+                  location="bottom end"
+                  offset="14px"
+                >
+                  <VList class="py-0 text-dark">
+                    <VListItem
+                      title="تصفية"
+                      class="notification-section"
+                      height="48px"
+                    >
+                    </VListItem>
+
+                    <VDivider />
+
+                    <template>
+                      <VListItem
+                        title="notification.title"
+                        subtitle="notification.subtitle"
+                        link
+                        lines="one"
+                        min-height="60px"
+                        class="text-dark"
+                      >
+                        <!-- Slot: Prepend -->
+                        <!-- Handles Avatar: Image, Icon, Text -->
+                        <template #prepend>
+                          <VListItemAction start>
+                            <div>
+                              <svg
+                                width="3.5rem"
+                                height="3.2rem"
+                                viewBox="0 0 28 29"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <rect
+                                  y="0.5"
+                                  width="28"
+                                  height="28"
+                                  rx="4"
+                                  fill="#e8e4df"
+                                />
+                                <mask
+                                  id="mask0_20_50273"
+                                  style="mask-type: luminance"
+                                  maskUnits="userSpaceOnUse"
+                                  x="4"
+                                  y="4"
+                                  width="20"
+                                  height="21"
+                                >
+                                  <path
+                                    d="M23.65 24.15V4.85H4.35V24.15H23.65Z"
+                                    fill="white"
+                                    stroke="white"
+                                    stroke-width="0.7"
+                                  />
+                                </mask>
+                                <g mask="url(#mask0_20_50273)">
+                                  <path
+                                    d="M9.25344 10.2832H4.29297"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M23.7066 10.2832H18.7461"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M22.7447 12.2831C22.7447 11.9519 22.4763 11.6835 22.1451 11.6835H19.1916C18.448 11.6835 17.7658 11.2708 17.4206 10.6122C17.0754 9.95352 16.3932 9.54086 15.6496 9.54086H12.3509C11.6073 9.54086 10.9251 9.95352 10.5799 10.6122C10.2347 11.2708 9.55254 11.6835 8.80891 11.6835H5.85543C5.52426 11.6835 5.25586 11.9519 5.25586 12.2831C5.25586 12.9533 5.7791 13.5069 6.44824 13.5447L10.5011 13.7735C10.903 13.7962 11.2866 13.9487 11.5944 14.208C11.9296 14.4905 12.3539 14.6455 12.7924 14.6455H15.2081C15.6466 14.6455 16.0709 14.4905 16.4062 14.208C16.7139 13.9487 17.0976 13.7962 17.4994 13.7735L21.5523 13.5447C22.2214 13.5069 22.7447 12.9533 22.7447 12.2831Z"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M16.9428 13.8916L16.2184 13.4361C16.0002 13.299 15.7478 13.2262 15.4901 13.2262H12.5054C12.2477 13.2262 11.9953 13.299 11.7771 13.4361L11.0527 13.8916"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M7.74011 13.6176L6.73058 19.2731C6.68933 19.5044 6.86714 19.7168 7.1021 19.7168C7.26027 19.7168 7.40167 19.6182 7.45628 19.4697L9.57179 13.721"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M20.3997 14.4014L20.2598 13.6176"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M18.4277 13.721L20.5432 19.4698C20.5979 19.6182 20.7393 19.7168 20.8974 19.7168C21.1323 19.7168 21.3102 19.5044 21.2689 19.2731L20.6411 15.7562"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M7.42473 11.6836V9.93547C7.42473 9.57547 7.13289 9.28367 6.77289 9.28367C6.41293 9.28367 6.12109 9.57547 6.12109 9.93547V11.6836"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M21.8779 11.6836V9.93547C21.8779 9.57547 21.586 9.28367 21.226 9.28367C20.8661 9.28367 20.5742 9.57547 20.5742 9.93547V11.6836"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M11.6035 17.1964V16.8266C11.6035 16.44 11.9169 16.1266 12.3035 16.1266H15.6993C16.0858 16.1266 16.3992 16.44 16.3992 16.8266V18.9387C16.3992 19.3253 16.0858 19.6387 15.6993 19.6387H12.3035C11.9169 19.6387 11.6035 19.3253 11.6035 18.9387V18.5662"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M14.7066 17.883C14.7066 18.2729 14.3906 18.5889 14.0008 18.5889C13.6109 18.5889 13.2949 18.2729 13.2949 17.883C13.2949 17.4932 13.6109 17.1773 14.0008 17.1773C14.3906 17.1773 14.7066 17.4932 14.7066 17.883Z"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M14.9316 16.127V14.6458"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                  <path
+                                    d="M13.0684 14.6458V16.127"
+                                    stroke="#B69265"
+                                    stroke-width="0.7"
+                                    stroke-miterlimit="10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                  />
+                                </g>
+                              </svg>
+                            </div>
+                          </VListItemAction>
+                        </template>
+                      </VListItem>
+                      <VDivider />
+                    </template>
+
+                    <VListItem class="notification-section">
+                      <VBtn color="dark" variant="outlined" block>
+                        تطبيق التصفية
+                      </VBtn>
+                    </VListItem>
+                  </VList>
+                </VMenu>
+              </VBtn>
+
+              <VBtn
+                height="48"
+                elevation="0"
+                class="rounded-lg"
+                append-icon="mdi-plus"
+                @click="addNewLocation"
               >
-                <path
-                  opacity="0.4"
-                  d="M6.85746 10.5061C4.36901 8.64561 2.59564 6.59915 1.62734 5.44867C1.3276 5.09253 1.22938 4.8319 1.17033 4.3728C0.968115 2.8008 0.867009 2.0148 1.32795 1.5074C1.7889 1 2.60404 1 4.23433 1H15.7657C17.396 1 18.2111 1 18.672 1.5074C19.133 2.0148 19.0319 2.8008 18.8297 4.37281C18.7706 4.83191 18.6724 5.09254 18.3726 5.44867C17.403 6.60062 15.6261 8.65071 13.1326 10.5135C12.907 10.6821 12.7583 10.9567 12.7307 11.2614C12.4837 13.992 12.2559 15.4876 12.1141 16.2442C11.8853 17.4657 10.1532 18.2006 9.22601 18.8563C8.67406 19.2466 8.0043 18.782 7.93278 18.1778C7.79643 17.0261 7.53961 14.6864 7.25927 11.2614C7.23409 10.9539 7.08486 10.6761 6.85746 10.5061Z"
-                  fill="#B69265"
-                />
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M4.18176 0.247316C4.1991 0.247317 4.21649 0.247318 4.23394 0.247318L15.8175 0.247316C16.588 0.247281 17.2422 0.247251 17.7583 0.317618C18.3046 0.392099 18.8269 0.560228 19.2268 1.00041C19.6302 1.44445 19.7406 1.97957 19.7491 2.52659C19.757 3.03745 19.6753 3.67204 19.5801 4.41193L19.5732 4.46581C19.5395 4.72764 19.489 4.98088 19.3836 5.23442C19.2767 5.49184 19.1294 5.71109 18.946 5.92897C17.9664 7.09285 16.1451 9.19621 13.5811 11.1117C13.5396 11.1427 13.4872 11.2161 13.4773 11.3263C13.2282 14.0792 13.009 15.5358 12.8509 16.3796C12.6799 17.2921 11.9839 17.9237 11.3838 18.3585C11.0697 18.5861 10.7364 18.791 10.4394 18.9717C10.4156 18.9862 10.3921 19.0005 10.3689 19.0146C10.0915 19.1833 9.85574 19.3267 9.65864 19.466C9.11813 19.8482 8.49455 19.8214 8.0179 19.5437C7.56811 19.2817 7.25159 18.8038 7.1876 18.2633C7.04713 17.0769 6.79249 14.7542 6.51139 11.3199C6.50238 11.2097 6.48517 11.1778 6.48373 11.1751C6.48275 11.1733 6.48022 11.1686 6.47182 11.1594C6.46243 11.149 6.44366 11.1308 6.40798 11.1041C3.84915 9.19099 2.03146 7.09132 1.05314 5.92893C0.870436 5.71185 0.718843 5.49783 0.610757 5.23754C0.504945 4.98273 0.459826 4.7282 0.426074 4.46581C0.423755 4.44778 0.421443 4.42982 0.419139 4.41192C0.323922 3.67203 0.242256 3.03744 0.250164 2.52659C0.258631 1.97957 0.369053 1.44445 0.772438 1.00041C1.17232 0.560228 1.69466 0.392099 2.24094 0.317618C2.75704 0.247251 3.4112 0.247281 4.18176 0.247316ZM2.44357 1.80387C2.05947 1.85624 1.94377 1.94181 1.88271 2.00903C1.82515 2.07239 1.75565 2.18397 1.74998 2.5498C1.74395 2.93944 1.80975 3.46543 1.91382 4.27444C1.94273 4.49924 1.96807 4.59485 1.99606 4.66228C2.02179 4.72422 2.06736 4.80453 2.20077 4.96304C3.15905 6.10163 4.8881 8.09487 7.30617 9.90273C7.50044 10.048 7.67868 10.2278 7.80763 10.4699C7.93468 10.7085 7.98668 10.9567 8.00639 11.1975C8.28596 14.6131 8.53877 16.9178 8.67719 18.0869C8.68141 18.1226 8.6944 18.1578 8.71438 18.1884C8.73481 18.2197 8.75752 18.2386 8.77296 18.2476C8.77493 18.2488 8.77666 18.2497 8.77815 18.2504C8.78171 18.2485 8.78651 18.2456 8.79262 18.2413C9.03472 18.0701 9.31574 17.8993 9.58097 17.7382C9.60737 17.7221 9.63362 17.7062 9.65965 17.6903C9.95846 17.5085 10.2442 17.3318 10.5036 17.1439C11.0505 16.7477 11.3187 16.4124 11.3766 16.1034C11.523 15.3216 11.7369 13.9154 11.9834 11.1911C12.0286 10.692 12.2736 10.2161 12.6833 9.91002C15.1063 8.09985 16.8389 6.10302 17.7985 4.96301C17.9148 4.82476 17.9666 4.73562 17.9984 4.65892C18.0319 4.57834 18.06 4.47171 18.0854 4.27444C18.1895 3.46543 18.2553 2.93944 18.2493 2.5498C18.2436 2.18397 18.1741 2.07239 18.1165 2.00903C18.0555 1.94181 17.9398 1.85624 17.5557 1.80387C17.153 1.74897 16.6023 1.74732 15.7653 1.74732H4.23394C3.3969 1.74732 2.84624 1.74897 2.44357 1.80387ZM8.77029 18.2539C8.77033 18.2539 8.77082 18.2537 8.77174 18.2535L8.77029 18.2539Z"
-                  fill="#B69265"
-                />
-              </svg>
-
-              <!-- <v-icon color="#B69265">mdi-filter-variant</v-icon> -->
-            </v-btn>
-
-            <v-btn
-              prepend-icon="mdi-plus"
-              color="#B69265"
-              class="text-white me-4 text-none font-weight-medium"
-              @click="addNewLocation"
-            >
-              إضافة موقع جديد
-            </v-btn>
-          </div>
-        </div>
-
-        <!-- Search and Add Section -->
-
-        <!-- Tabs Section -->
-        <div class="tabs-container mb-6">
-          <div class="d-flex">
-            <div
-              class="tab-item px-4 py-2"
-              :class="{ active: activeTab === 'all' }"
-              @click="activeTab = 'all'"
-            >
-              جميع المواقع
+                إضافة موقع جديد
+              </VBtn>
             </div>
-            <div
-              class="tab-item px-4 py-2"
-              :class="{ active: activeTab === 'correction' }"
-              @click="activeTab = 'correction'"
-            >
-              تصحيح المواقع
+          </v-card-title>
+          <!-- Search and Add Section -->
+
+          <!-- Tabs Section -->
+          <div class="tabs-container mb-6 border-b-0">
+            <div class="d-flex">
+              <div
+                class="tab-item px-4 py-2"
+                :class="{ active: activeTab === 'all' }"
+                @click="activeTab = 'all'"
+              >
+                جميع المواقع
+              </div>
+              <div
+                class="tab-item px-4 py-2"
+                :class="{ active: activeTab === 'correction' }"
+                @click="activeTab = 'correction'"
+              >
+                تصحيح المواقع
+              </div>
             </div>
+            <div class="tab-border"></div>
           </div>
-          <div class="tab-border"></div>
-        </div>
 
-        <v-row class="mt-6">
-          <v-col
-            v-for="site in sites"
-            :key="site.siteId"
-            cols="12"
-            sm="6"
-            md="4"
-            lg="4"
-            class="pa-3"
-          >
-            <SiteCard
-              :site-id="site.siteId"
-              :authorization-number="site.authorizationNumber"
-            />
-          </v-col>
-        </v-row>
+          <v-row class="mt-6">
+            <v-col
+              v-for="site in sites"
+              :key="site.siteId"
+              cols="12"
+              sm="6"
+              md="4"
+              lg="4"
+              class="pa-3"
+            >
+              <SiteCard
+                :site-id="site.siteId"
+                :authorization-number="site.authorizationNumber"
+              />
+            </v-col>
+          </v-row>
 
-        <Pagination
-          title="الفرق الميدانية"
-          :total-items="2300"
-          v-model:per-page="perPage"
-          v-model:page="currentPage"
-        />
+          <Pagination
+            title="الفرق الميدانية"
+            :total-items="2300"
+            v-model:per-page="perPage"
+            v-model:page="currentPage"
+          />
+        </VCard>
       </v-container>
     </div>
 
     <!-- Add Site Modal -->
     <v-dialog v-model="dialog" width="500" class="add-site-dialog">
       <v-card class="rounded-lg">
-        <v-card-text class="pa-6">
-          <div class="d-flex justify-space-between align-center mb-4">
-            <h2 class="text-h6">إضافة موقع جديد</h2>
-            <v-btn icon variant="text" @click="dialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </div>
-          <p class="text-subtitle-1 text-medium-emphasis mb-6">
-            حدد تفاصيل الموقع الجديد
-          </p>
-          <v-form @submit.prevent="handleSubmit">
-            <!-- Site Type -->
+        <v-card-text class="pa-4">
+          <h2 class="text-h6 font-weight-bold">
+            {{ dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد" }}
+          </h2>
+          <p class="card-gray-text border-b pb-3">حدد تفاصيل الموقع الجديد</p>
+
+          <!-- Step 1: Select Site Type -->
+          <v-form v-if="dialogStep === 1" @submit.prevent="nextStep">
             <div class="mb-4">
               <label class="text-subtitle-2 mb-2 d-block">نوع الموقع</label>
               <v-select
                 v-model="siteType"
-                :items="[{ title: 'السكن', value: 'السكن' }]"
+                :items="siteTypes"
                 variant="outlined"
                 density="comfortable"
                 placeholder="اختر نوع الموقع"
                 hide-details
                 class="rounded-lg bg-grey-lighten-4"
+                required
               />
             </div>
 
+            <!-- Action Buttons -->
+            <div class="d-flex justify-end mt-6">
+              <v-btn
+                variant="text"
+                color="grey-darken-1"
+                class="me-4"
+                @click="closeDialog"
+              >
+                إلغاء
+              </v-btn>
+              <v-btn color="#B69265" class="text-white px-6" type="submit">
+                التالي
+              </v-btn>
+            </div>
+          </v-form>
+
+          <!-- Step 2: Fill Details -->
+          <v-form v-else @submit.prevent="handleSubmit">
             <!-- Housing Permit Number -->
             <div class="mb-4">
               <label class="text-subtitle-2 mb-2 d-block"
@@ -359,6 +581,7 @@ onMounted(() => {
                 placeholder="رقم تصريح السكن"
                 hide-details
                 class="rounded-lg bg-grey-lighten-4"
+                required
               />
             </div>
 
@@ -374,16 +597,21 @@ onMounted(() => {
                   density="comfortable"
                   placeholder="00"
                   hide-details
-                  class="rounded-lg bg-grey-lighten-4"
+                  class="rounded-lg bg-grey-lighten-4 flex-grow-1"
+                  required
                 />
                 <v-select
                   value="+966"
-                  :items="[{ title: '+966', value: '+966' }]"
+                  :items="[
+                    { title: '+966', value: '+966' },
+                    { title: '+964', value: '+964' },
+                    { title: '+965', value: '+965' },
+                  ]"
                   variant="outlined"
                   density="comfortable"
                   hide-details
                   class="country-code-select ms-2 rounded-lg bg-grey-lighten-4"
-                  style="width: 120px"
+                  style="max-width: 110px"
                 />
               </div>
             </div>
@@ -399,6 +627,7 @@ onMounted(() => {
                 placeholder="اختر الشركات"
                 hide-details
                 class="rounded-lg bg-grey-lighten-4"
+                required
               />
             </div>
 
@@ -407,7 +636,7 @@ onMounted(() => {
               <label class="text-subtitle-2 mb-2 d-block">الاحداثيات</label>
               <div
                 class="map-container rounded-lg overflow-hidden"
-                style="height: 200px"
+                style="height: 100px"
               >
                 map
               </div>
@@ -419,9 +648,9 @@ onMounted(() => {
                 variant="text"
                 color="grey-darken-1"
                 class="me-4"
-                @click="dialog = false"
+                @click="prevStep"
               >
-                إلغاء
+                رجوع
               </v-btn>
               <v-btn
                 color="#B69265"
@@ -441,6 +670,11 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
+.bg-light-white {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 16px;
+  // background-color: #f00 !important;
+}
 .search-field {
   :deep(.v-field) {
     border-radius: 8px;
@@ -525,5 +759,22 @@ onMounted(() => {
 
 .min-width-300px {
   min-width: 300px;
+}
+.tabs-container .tab-border {
+  // display: none;
+  bottom: -16px;
+}
+.tabs-container {
+  // padding: 16px;
+  font-weight: bolder;
+}
+.tabs-container .tab-item.active {
+  color: #b69265;
+  background-color: rgba(248, 249, 249, 1);
+  border: none;
+  border-radius: 8px;
+  &:after {
+    display: none;
+  }
 }
 </style>

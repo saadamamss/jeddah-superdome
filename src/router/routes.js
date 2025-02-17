@@ -3,6 +3,7 @@ import LoginPage from "@/pages/auth/login";
 import DashboardHome from "@/pages/home";
 import UsersPage from "@/pages/users/users.vue";
 import SitesPage from "@/pages/sites";
+import HousingDetailsPage from "@/pages/sites/housing-details";
 import TeamsPage from "@/pages/teams";
 import MainSectorsPage from "@/pages/main-sectors";
 import RolesPage from "@/pages/roles";
@@ -24,6 +25,11 @@ export default [
         path: "/sites",
         name: "sites",
         component: SitesPage,
+      },
+      {
+        path: "/sites/housing-details",
+        name: "housing-details",
+        component: HousingDetailsPage,
       },
       {
         path: "/teams",
