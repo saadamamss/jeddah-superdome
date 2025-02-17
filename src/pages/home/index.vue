@@ -4,6 +4,7 @@ import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import NotificationWidget from "@/@core/components/widgets/NotificationWidget";
 import UserWidget from "@/@core/components/widgets/UserWidget";
 import TeamWidget from "@/@core/components/widgets/TeamWidget";
+import SiteWidget from "@/@core/components/widgets/SiteWidget";
 
 // import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
@@ -585,20 +586,29 @@ onMounted(() => {
               </div>
             </v-card-title>
             <v-card-text class="mt-2">
-              <h2>safasfa</h2>
-              <div class="d-flex align-center justify-space-between ga-2 mt-4">
-                <div class="d-flex align-center ga-3">
+              <v-row>
+                <v-col v-for="item in 4" :key="item" cols="12" md="6">
+                  <SiteWidget />
+                </v-col>
+              </v-row>
+
+              <!-- pagination -->
+              <div
+                class="d-flex flex-column flex-md-row align-md-center justify-md-space-between ga-2 mt-6"
+              >
+                <div class="d-flex align-center justify-space-between ga-3">
                   <v-select
                     v-model="perPage"
                     :items="[5, 10, 25, 50, 100]"
                     min-width="100"
+                    max-width="120"
                     bg-color="#F8F9F9"
                     rounded="lg"
                     variant="solo"
                     class="v-select-no-shadow"
                   >
                   </v-select>
-                  <span
+                  <span class="text-sm"
                     >تم عرض من <span>1</span> إلى <span>4</span> من أصل
                     <span>20</span></span
                   >
