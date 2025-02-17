@@ -207,10 +207,10 @@ body
   padding: 14px !important;
 }
 
+
 .v-btn.btn-icon {
   --v-btn-height: 40px;
-
-  width: var(--v-btn-height);
+  width: var(--v-btn-height) !important;
   min-width: 20px;
   border-radius: 10px;
 }
