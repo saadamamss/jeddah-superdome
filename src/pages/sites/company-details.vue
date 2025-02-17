@@ -237,7 +237,6 @@ onMounted(() => {
           </v-row>
 
           <Pagination
-            title="الفرق الميدانية"
             :total-items="2300"
             v-model:per-page="perPage"
             v-model:page="currentPage"
