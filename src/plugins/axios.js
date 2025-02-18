@@ -1,20 +1,20 @@
 import axios from "axios";
-
-const token = localStorage.getItem("SAR_TOKEN") || "";
+import { API_BASE_URL, LOCAL_STORAGE_TOKEN_KEY } from "@/config";
+import { getFromStorage } from "@/@core/utils/helpers";
 
 const axiosIns = axios.create({
-  baseURL: "/api/v2", // test api
+  baseURL: API_BASE_URL,
   headers: {
     Accept: "application/json",
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${getFromStorage(LOCAL_STORAGE_TOKEN_KEY)}`,
   },
 });
 
 axiosIns.interceptors.response.use(
   (response) => {
-    const token = localStorage.getItem("SAR_TOKEN") || "";
-
-    axiosIns.defaults.headers.Authorization = `Bearer ${token}`;
+    axiosIns.defaults.headers.Authorization = `Bearer ${getFromStorage(
+      LOCAL_STORAGE_TOKEN_KEY
+    )}`;
 
     return response;
   },

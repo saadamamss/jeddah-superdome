@@ -1,5 +1,5 @@
 <script setup>
-import { useSettingsStore } from "@/store/Settings";
+import { useSettingsStore } from "@/stores/Settings";
 
 const user = ref();
 const settingsListStore = useSettingsStore();

@@ -8,3 +8,6 @@ export const mapboxToken =
 // mapbox://styles/mapbox/standard-satellite
 // mapbox://styles/mapbox/light-v11
 export const mapStyleURL = "mapbox://styles/reda2508/cm3jws2cc00mg01scatducfs3";
+export const API_BASE_URL = "https://imtithal.zimam.sa/api/v1/";
+export const LOCAL_STORAGE_TOKEN_KEY = "imtethal_storage_key_token";
+export const LOCAL_STORAGE_USER_KEY = "imtethal_storage_key_user";
