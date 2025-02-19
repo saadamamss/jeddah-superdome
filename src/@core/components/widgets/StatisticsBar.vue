@@ -11,15 +11,9 @@
             <div class="main-title">
               {{ stat.label }}
             </div>
-            <v-btn
-              v-if="stat.type === 'map'"
-              color=" "
-              variant="text"
-              class="px-0 underline font-weight-bold"
-              density="comfortable"
-            >
-              عرض الخريطه
-            </v-btn>
+            <!--  -->
+            <button v-if="stat.type == 'map'"></button>
+            <!-- dilaog open and contain map -->
             <div class="text-body-1 font-weight-bold" v-else>
               {{ stat.value }}
             </div>
