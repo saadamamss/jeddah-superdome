@@ -4,7 +4,7 @@ import { useAppStore } from "@/stores/app";
 import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import Pagination from "@/@core/components/Pagination";
-import SiteCard from "@/@core/components/widgets/SiteCard.vue";
+import companyCard from "@/@core/components/widgets/companyCard.vue";
 import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
 import { ref } from "vue";
 
@@ -428,15 +428,6 @@ onMounted(() => {
                   lg="4"
                   class="pa-3"
                 >
-                  <SiteCard
-                    :site-id="site.siteId"
-                    :authorization-number="site.authorizationNumber"
-                  />
-                </v-col>
-              </v-row>
-
-              <!-- <Pagination
-                title="الفرق الميدانية"
                   <companyCard
                     :site-id="site.siteId"
                     :authorization-number="site.authorizationNumber"
@@ -449,52 +440,8 @@ onMounted(() => {
                 :total-items="2300"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
-              /> -->
-
-              <!-- pagination -->
-              <div
-                class="d-flex flex-column flex-md-row align-md-center justify-md-space-between ga-2 mt-6"
-              >
-                <div class="d-flex align-center justify-space-between ga-3">
-                  <v-select
-                    v-model="perPage"
-                    :items="[5, 10, 25, 50, 100]"
-                    min-width="100"
-                    max-width="120"
-                    bg-color="#F8F9F9"
-                    rounded="lg"
-                    variant="solo"
-                    class="v-select-no-shadow"
-                  >
-                  </v-select>
-                  <span class="text-sm"
-                    >تم عرض من <span>1</span> إلى <span>4</span> من أصل
-                    <span>20</span></span
-                  >
-                </div>
-                <v-pagination
-                  v-model="currentPage"
-                  :length="10"
-                  :total-visible="5"
-                  rounded="circle"
-                  variant="flat"
-                >
-                </v-pagination>
-              </div>
-            </v-card-title>
-          </VCard>
-        </v-container>
-      </div>
               />
 
-      <!-- Add Site Modal -->
-      <v-dialog v-model="dialog" width="500" class="add-site-dialog">
-        <v-card class="rounded-lg">
-          <v-card-text class="pa-4">
-            <h2 class="text-h6 font-weight-bold">
-              {{ dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد" }}
-            </h2>
-            <p class="card-gray-text border-b pb-3">حدد تفاصيل الموقع الجديد</p>
               <!-- Add Site Modal -->
               <v-dialog v-model="dialog" width="500" class="add-site-dialog">
                 <v-card class="rounded-lg">
@@ -625,32 +572,6 @@ onMounted(() => {
                         </div>
                       </div>
 
-              <!-- Action Buttons -->
-              <div class="d-flex justify-end mt-6">
-                <v-btn
-                  variant="text"
-                  color="grey-darken-1"
-                  class="me-4"
-                  @click="prevStep"
-                >
-                  رجوع
-                </v-btn>
-                <v-btn
-                  color="#B69265"
-                  class="text-white px-6"
-                  type="submit"
-                  :loading="loading"
-                >
-                  إضافة
-                </v-btn>
-              </div>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-      <!-- add new location -->
-    </v-container>
-  </div>
                       <!-- Action Buttons -->
                       <div class="d-flex justify-end mt-6">
                         <v-btn
