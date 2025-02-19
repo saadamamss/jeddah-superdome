@@ -5,6 +5,7 @@ import UsersPage from "@/pages/users/users.vue";
 import SitesPage from "@/pages/sites";
 import CompanyDetailsPage from "@/pages/sites/company-details";
 import HousingDetailsPage from "@/pages/sites/housing-details";
+import AddRatePage from "@/pages/sites/addRate";
 import TeamsPage from "@/pages/teams";
 import MainSectorsPage from "@/pages/main-sectors";
 import RolesPage from "@/pages/roles";
@@ -39,6 +40,11 @@ export default [
         path: "/sites/company-details",
         name: "company-details",
         component: CompanyDetailsPage,
+      },
+      {
+        path: "/sites/add-rate",
+        name: "add-rate",
+        component: AddRatePage,
       },
       {
         path: "/teams",
