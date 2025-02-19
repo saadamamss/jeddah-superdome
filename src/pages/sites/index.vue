@@ -497,42 +497,12 @@ onMounted(() => {
                 </v-col>
               </v-row>
 
-              <!-- <Pagination
-                title="الفرق الميدانية"
+              <!-- pagination -->
+              <Pagination
                 :total-items="2300"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
-              /> -->
-              <!-- pagination -->
-              <div
-                class="d-flex flex-column flex-md-row align-md-center justify-md-space-between ga-2 mt-6"
-              >
-                <div class="d-flex align-center justify-space-between ga-3">
-                  <v-select
-                    v-model="perPage"
-                    :items="[5, 10, 25, 50, 100]"
-                    min-width="100"
-                    max-width="120"
-                    bg-color="#F8F9F9"
-                    rounded="lg"
-                    variant="solo"
-                    class="v-select-no-shadow"
-                  >
-                  </v-select>
-                  <span class="text-sm"
-                    >تم عرض من <span>1</span> إلى <span>4</span> من أصل
-                    <span>20</span></span
-                  >
-                </div>
-                <v-pagination
-                  v-model="currentPage"
-                  :length="10"
-                  :total-visible="5"
-                  rounded="circle"
-                  variant="flat"
-                >
-                </v-pagination>
-              </div>
+              />
             </v-card-title>
           </VCard>
         </v-container>

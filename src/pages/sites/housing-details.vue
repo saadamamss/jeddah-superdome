@@ -1,4 +1,5 @@
 <script setup>
+// pagination added
 import { useAppStore } from "@/stores/app";
 import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import StatsWidget from "@/@core/components/widgets/StatsWidget";
@@ -28,6 +29,13 @@ const siteTypes = [
   { title: "موقع تجاري", value: "commercial" },
   { title: "موقع صناعي", value: "industrial" },
 ];
+
+const links = ref([
+  { title: "إدارة المواقع", href: "/", disabled: false },
+  { title: "تفاصيل للسكن", href: "/sites", disabled: false },
+  { title: "شركة رواف منى", href: "/sites/company-details", disabled: false },
+  { title: "التقييمات", href: "/sites/company-details", disabled: true },
+]);
 
 const companies = [
   { title: "شركة رواف منى", value: "rawaf" },
@@ -115,7 +123,7 @@ onMounted(() => {
     <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
       <v-row v-if="isLoading">
         <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
-          <VCard elevation="0">
+          <v-card elevation="0">
             <v-card-text class="px-1 py-2">
               <v-skeleton-loader
                 class="mx-auto"
@@ -124,14 +132,61 @@ onMounted(() => {
                 type="list-item-two-line, table-heading"
               ></v-skeleton-loader>
             </v-card-text>
-          </VCard>
+          </v-card>
         </v-col>
       </v-row>
 
       <div v-else>
+        <v-breadcrumbs
+          :items="links"
+          class="pa-0 mb-4 custom-breadcrumbs"
+          divider=""
+        >
+          <template v-slot:prepend>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.62516 16.0419H14.3752C15.2956 16.0419 16.0418 15.2957 16.0418 14.3752V8.12523L10.0002 3.95856L3.9585 8.12523V14.3752C3.9585 15.2957 4.70469 16.0419 5.62516 16.0419Z"
+                stroke="#25343E"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M8.12465 13.1244C8.12465 12.2039 8.87085 11.4577 9.79132 11.4577H10.208C11.1285 11.4577 11.8747 12.2039 11.8747 13.1244V16.0411H8.12465V13.1244Z"
+                stroke="#25343E"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+          <template v-slot:divider>
+            <v-icon size="18" class="text-grey-darken-1"
+              >mdi-chevron-left</v-icon
+            >
+          </template>
+          <template v-slot:title="{ item }">
+            <router-link
+              v-if="!item.disabled"
+              :to="item.href"
+              class="text-decoration-none text-grey-darken-1 text-13"
+            >
+              {{ item.title }}
+            </router-link>
+            <span v-else class="text-grey-darken-1 text-13">{{
+              item.title
+            }}</span>
+          </template>
+        </v-breadcrumbs>
         <StatisticsBar title="الشركات" />
         <v-container fluid class="mt-6 px-0 rounded-lg">
-          <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
+          <v-card elevation="0" class="rounded-lg px-4 bg-light-white">
             <!-- Header Section -->
             <v-card-title class="pt-4 pb-6">
               <div class="d-flex align-center justify-space-between ga-4">
@@ -174,7 +229,7 @@ onMounted(() => {
                     </template>
                   </v-text-field>
 
-                  <VBtn color="default" class="btn-icon border" elevation="0">
+                  <v-btn color="default" class="btn-icon border" elevation="0">
                     <svg
                       width="1.3rem"
                       height="1.3rem"
@@ -195,24 +250,24 @@ onMounted(() => {
                       />
                     </svg>
 
-                    <VMenu
+                    <v-menu
                       activator="parent"
                       width="380px"
                       location="bottom end"
                       offset="14px"
                     >
-                      <VList class="py-0 text-dark">
-                        <VListItem
+                      <v-list class="py-0 text-dark">
+                        <v-list-item
                           title="تصفية"
                           class="notification-section"
                           height="48px"
                         >
-                        </VListItem>
+                        </v-list-item>
 
-                        <VDivider />
+                        <v-divider />
 
                         <template>
-                          <VListItem
+                          <v-list-item
                             title="notification.title"
                             subtitle="notification.subtitle"
                             link
@@ -223,7 +278,7 @@ onMounted(() => {
                             <!-- Slot: Prepend -->
                             <!-- Handles Avatar: Image, Icon, Text -->
                             <template #prepend>
-                              <VListItemAction start>
+                              <v-list-item-action start>
                                 <div>
                                   <svg
                                     width="3.5rem"
@@ -328,57 +383,25 @@ onMounted(() => {
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
                                       />
-                                      <path
-                                        d="M11.6035 17.1964V16.8266C11.6035 16.44 11.9169 16.1266 12.3035 16.1266H15.6993C16.0858 16.1266 16.3992 16.44 16.3992 16.8266V18.9387C16.3992 19.3253 16.0858 19.6387 15.6993 19.6387H12.3035C11.9169 19.6387 11.6035 19.3253 11.6035 18.9387V18.5662"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M14.7066 17.883C14.7066 18.2729 14.3906 18.5889 14.0008 18.5889C13.6109 18.5889 13.2949 18.2729 13.2949 17.883C13.2949 17.4932 13.6109 17.1773 14.0008 17.1773C14.3906 17.1773 14.7066 17.4932 14.7066 17.883Z"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M14.9316 16.127V14.6458"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M13.0684 14.6458V16.127"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
                                     </g>
                                   </svg>
                                 </div>
-                              </VListItemAction>
+                              </v-list-item-action>
                             </template>
-                          </VListItem>
-                          <VDivider />
+                          </v-list-item>
+                          <v-divider />
                         </template>
 
-                        <VListItem class="notification-section">
-                          <VBtn color="dark" variant="outlined" block>
+                        <v-list-item class="notification-section">
+                          <v-btn color="dark" variant="outlined" block>
                             تطبيق التصفية
-                          </VBtn>
-                        </VListItem>
-                      </VList>
-                    </VMenu>
-                  </VBtn>
+                          </v-btn>
+                        </v-list-item>
+                      </v-list>
+                    </v-menu>
+                  </v-btn>
 
-                  <VBtn
+                  <v-btn
                     height="48"
                     elevation="0"
                     class="rounded-lg"
@@ -386,13 +409,15 @@ onMounted(() => {
                     @click="addNewLocation"
                   >
                     إضافة موقع جديد
-                  </VBtn>
+                  </v-btn>
                 </div>
               </div>
+            </v-card-title>
+
+            <v-card-text>
               <!-- Search and Add Section -->
 
               <!-- Tabs Section -->
-
               <v-row class="mt-6">
                 <v-col
                   v-for="site in sites"
@@ -412,6 +437,15 @@ onMounted(() => {
 
               <!-- <Pagination
                 title="الفرق الميدانية"
+                  <companyCard
+                    :site-id="site.siteId"
+                    :authorization-number="site.authorizationNumber"
+                  />
+                </v-col>
+              </v-row>
+
+              <!-- pagination -->
+              <Pagination
                 :total-items="2300"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
@@ -451,6 +485,7 @@ onMounted(() => {
           </VCard>
         </v-container>
       </div>
+              />
 
       <!-- Add Site Modal -->
       <v-dialog v-model="dialog" width="500" class="add-site-dialog">
@@ -460,113 +495,135 @@ onMounted(() => {
               {{ dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد" }}
             </h2>
             <p class="card-gray-text border-b pb-3">حدد تفاصيل الموقع الجديد</p>
+              <!-- Add Site Modal -->
+              <v-dialog v-model="dialog" width="500" class="add-site-dialog">
+                <v-card class="rounded-lg">
+                  <v-card-text class="pa-4">
+                    <h2 class="text-h6 font-weight-bold">
+                      {{
+                        dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد"
+                      }}
+                    </h2>
+                    <p class="card-gray-text border-b pb-3">
+                      حدد تفاصيل الموقع الجديد
+                    </p>
 
-            <!-- Step 1: Select Site Type -->
-            <v-form v-if="dialogStep === 1" @submit.prevent="nextStep">
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">نوع الموقع</label>
-                <v-select
-                  v-model="siteType"
-                  :items="siteTypes"
-                  variant="outlined"
-                  density="comfortable"
-                  placeholder="اختر نوع الموقع"
-                  hide-details
-                  class="rounded-lg bg-grey-lighten-4"
-                  required
-                />
-              </div>
+                    <!-- Step 1: Select Site Type -->
+                    <v-form v-if="dialogStep === 1" @submit.prevent="nextStep">
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >نوع الموقع</label
+                        >
+                        <v-select
+                          v-model="siteType"
+                          :items="siteTypes"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="اختر نوع الموقع"
+                          hide-details
+                          class="rounded-lg bg-grey-lighten-4"
+                          required
+                        />
+                      </div>
 
-              <!-- Action Buttons -->
-              <div class="d-flex justify-end mt-6">
-                <v-btn
-                  variant="text"
-                  color="grey-darken-1"
-                  class="me-4"
-                  @click="closeDialog"
-                >
-                  إلغاء
-                </v-btn>
-                <v-btn color="#B69265" class="text-white px-6" type="submit">
-                  التالي
-                </v-btn>
-              </div>
-            </v-form>
+                      <!-- Action Buttons -->
+                      <div class="d-flex justify-end mt-6">
+                        <v-btn
+                          variant="text"
+                          color="grey-darken-1"
+                          class="me-4"
+                          @click="closeDialog"
+                        >
+                          إلغاء
+                        </v-btn>
+                        <v-btn
+                          color="#B69265"
+                          class="text-white px-6"
+                          type="submit"
+                        >
+                          التالي
+                        </v-btn>
+                      </div>
+                    </v-form>
 
-            <!-- Step 2: Fill Details -->
-            <v-form v-else @submit.prevent="handleSubmit">
-              <!-- Housing Permit Number -->
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block"
-                  >رقم تصريح السكن</label
-                >
-                <v-text-field
-                  v-model="housingPermitNumber"
-                  variant="outlined"
-                  density="comfortable"
-                  placeholder="رقم تصريح السكن"
-                  hide-details
-                  class="rounded-lg bg-grey-lighten-4"
-                  required
-                />
-              </div>
+                    <!-- Step 2: Fill Details -->
+                    <v-form v-else @submit.prevent="handleSubmit">
+                      <!-- Housing Permit Number -->
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >رقم تصريح السكن</label
+                        >
+                        <v-text-field
+                          v-model="housingPermitNumber"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="رقم تصريح السكن"
+                          hide-details
+                          class="rounded-lg bg-grey-lighten-4"
+                          required
+                        />
+                      </div>
 
-              <!-- Authorized Contact Number -->
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block"
-                  >رقم تواصل المفوض</label
-                >
-                <div class="d-flex">
-                  <v-text-field
-                    v-model="authorizedContactNumber"
-                    variant="outlined"
-                    density="comfortable"
-                    placeholder="00"
-                    hide-details
-                    class="rounded-lg bg-grey-lighten-4 flex-grow-1"
-                    required
-                  />
-                  <v-select
-                    value="+966"
-                    :items="[
-                      { title: '+966', value: '+966' },
-                      { title: '+964', value: '+964' },
-                      { title: '+965', value: '+965' },
-                    ]"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    class="country-code-select ms-2 rounded-lg bg-grey-lighten-4"
-                    style="max-width: 110px"
-                  />
-                </div>
-              </div>
+                      <!-- Authorized Contact Number -->
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >رقم تواصل المفوض</label
+                        >
+                        <div class="d-flex">
+                          <v-text-field
+                            v-model="authorizedContactNumber"
+                            variant="outlined"
+                            density="comfortable"
+                            placeholder="00"
+                            hide-details
+                            class="rounded-lg bg-grey-lighten-4 flex-grow-1"
+                            required
+                          />
+                          <v-select
+                            value="+966"
+                            :items="[
+                              { title: '+966', value: '+966' },
+                              { title: '+964', value: '+964' },
+                              { title: '+965', value: '+965' },
+                            ]"
+                            variant="outlined"
+                            density="comfortable"
+                            hide-details
+                            class="country-code-select ms-2 rounded-lg bg-grey-lighten-4"
+                            style="max-width: 110px"
+                          />
+                        </div>
+                      </div>
 
-              <!-- Companies -->
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">الشركات</label>
-                <v-select
-                  v-model="selectedCompany"
-                  :items="companies"
-                  variant="outlined"
-                  density="comfortable"
-                  placeholder="اختر الشركات"
-                  hide-details
-                  class="rounded-lg bg-grey-lighten-4"
-                  required
-                />
-              </div>
+                      <!-- Companies -->
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >الشركات</label
+                        >
+                        <v-select
+                          v-model="selectedCompany"
+                          :items="companies"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="اختر الشركات"
+                          hide-details
+                          class="rounded-lg bg-grey-lighten-4"
+                          required
+                        />
+                      </div>
 
-              <!-- Map -->
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">الاحداثيات</label>
-                <div
-                  class="map-container rounded-lg overflow-hidden"
-                  style="height: 100px"
-                >
-                  map
-                </div>
-              </div>
+                      <!-- Map -->
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >الاحداثيات</label
+                        >
+                        <div
+                          class="map-container rounded-lg overflow-hidden"
+                          style="height: 100px"
+                        >
+                          map
+                        </div>
+                      </div>
 
               <!-- Action Buttons -->
               <div class="d-flex justify-end mt-6">
@@ -592,6 +649,36 @@ onMounted(() => {
         </v-card>
       </v-dialog>
       <!-- add new location -->
+    </v-container>
+  </div>
+                      <!-- Action Buttons -->
+                      <div class="d-flex justify-end mt-6">
+                        <v-btn
+                          variant="text"
+                          color="grey-darken-1"
+                          class="me-4"
+                          @click="prevStep"
+                        >
+                          رجوع
+                        </v-btn>
+                        <v-btn
+                          color="#B69265"
+                          class="text-white px-6"
+                          type="submit"
+                          :loading="loading"
+                        >
+                          إضافة
+                        </v-btn>
+                      </div>
+                    </v-form>
+                  </v-card-text>
+                </v-card>
+              </v-dialog>
+              <!-- add new location -->
+            </v-card-text>
+          </v-card>
+        </v-container>
+      </div>
     </v-container>
   </div>
 </template>
@@ -703,5 +790,25 @@ onMounted(() => {
   &:after {
     display: none;
   }
+}
+
+.custom-breadcrumbs {
+  :deep(.v-breadcrumbs-item--disabled) {
+    opacity: 1;
+  }
+
+  :deep(.v-breadcrumbs__item) {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 13px;
+    padding: 0 8px;
+  }
+
+  :deep(.v-breadcrumbs-item--disabled) {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.text-13 {
+  font-size: 13px;
 }
 </style>
