@@ -38,10 +38,26 @@ const supervisors = [
 ];
 
 const fieldTeamMembers = [
-  { title: "سعيد محمد", value: "saeed" },
-  { title: "فهد عبدالله", value: "fahad" },
-  { title: "خالد عمر", value: "khaled" },
-  { title: "عمر سعد", value: "omar" },
+  {
+    title: "علي الحسين",
+    value: "ali",
+    avatar: "https://i.pravatar.cc/150?img=1",
+  },
+  {
+    title: "سارة نصر",
+    value: "sara",
+    avatar: "https://i.pravatar.cc/150?img=2",
+  },
+  {
+    title: "أحمد حسين",
+    value: "ahmed",
+    avatar: "https://i.pravatar.cc/150?img=3",
+  },
+  {
+    title: "عبدالرحمن صالح",
+    value: "abdulrahman",
+    avatar: "https://i.pravatar.cc/150?img=4",
+  },
 ];
 
 const siteTypes = [
@@ -291,7 +307,7 @@ onMounted(() => {
                   density="comfortable"
                   placeholder="اختر الموقع"
                   hide-details
-                  class="rounded-lg bg-grey-lighten-4"
+                  class="rounded-lg bg-grey-lighten-4 px-2"
                 />
               </div>
 
@@ -306,7 +322,7 @@ onMounted(() => {
                   density="comfortable"
                   placeholder="اختر المشرف"
                   hide-details
-                  class="rounded-lg bg-grey-lighten-4"
+                  class="rounded-lg bg-grey-lighten-4 px-2"
                 />
               </div>
 
@@ -317,14 +333,41 @@ onMounted(() => {
                 <v-select
                   v-model="formModel.fieldTeam"
                   :items="fieldTeamMembers"
+                  item-title="title"
+                  item-value="value"
                   variant="outlined"
                   density="comfortable"
                   placeholder="اختر الفريق"
                   multiple
-                  chips
                   hide-details
                   class="rounded-lg bg-grey-lighten-4"
-                />
+                >
+                  <template v-slot:selection="{ item }">
+                    <div class="d-flex align-center ga-2 ms-n2">
+                      <v-avatar size="32" class="">
+                        <v-img :src="item.raw.avatar" :alt="item.title"></v-img>
+                      </v-avatar>
+                      <span class="text-subtitle-2">{{ item.title }}</span>
+                    </div>
+                  </template>
+
+                  <template v-slot:item="{ item, props }">
+                    <v-list-item
+                      v-bind="props"
+                      :title="item.title"
+                      class="field-team-item"
+                    >
+                      <template v-slot:prepend>
+                        <v-avatar size="32" class="me-3">
+                          <v-img
+                            :src="item.raw.avatar"
+                            :alt="item.title"
+                          ></v-img>
+                        </v-avatar>
+                      </template>
+                    </v-list-item>
+                  </template>
+                </v-select>
               </div>
 
               <div class="d-flex justify-end mt-6">
@@ -407,5 +450,39 @@ onMounted(() => {
 
 .min-width-300px {
   min-width: 300px;
+}
+
+.field-team-item {
+  padding: 8px;
+  border-radius: 8px;
+  margin: 4px 0;
+
+  &:hover {
+    background-color: rgba(182, 146, 101, 0.05);
+  }
+
+  &.v-list-item--active {
+    background-color: rgba(182, 146, 101, 0.1);
+  }
+}
+
+:deep(.v-select) {
+  .v-field__input {
+    padding-top: 0;
+    padding-bottom: 0;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  .v-field__placeholder {
+    transform: translateY(0) !important;
+    padding: 0 6px;
+    margin-top: 6px;
+  }
+
+  .v-field__field {
+    padding-top: 0 !important;
+  }
 }
 </style>

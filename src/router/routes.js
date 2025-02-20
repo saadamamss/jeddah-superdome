@@ -5,6 +5,7 @@ import UsersPage from "@/pages/users/users.vue";
 import SitesPage from "@/pages/sites";
 import CompanyDetailsPage from "@/pages/sites/company-details";
 import HousingDetailsPage from "@/pages/sites/housing-details";
+import TeamManagementPage from "@/pages/teams/team-management";
 import AddRatePage from "@/pages/sites/addRate";
 import TeamsPage from "@/pages/teams";
 import MainSectorsPage from "@/pages/main-sectors";
@@ -50,6 +51,11 @@ export default [
         path: "/teams",
         name: "teams",
         component: TeamsPage,
+      },
+      {
+        path: "/teams/team-management/:id",
+        name: "team-management",
+        component: TeamManagementPage,
       },
       {
         path: "/main-sectors",

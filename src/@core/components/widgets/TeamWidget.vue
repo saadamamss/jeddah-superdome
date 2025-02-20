@@ -88,7 +88,10 @@ const avatars = computed(() =>
           elevation="0"
           class="btn-card-link px-3 text-primary rounded-xl"
         >
-          <span class="d-flex align-center ga-2">
+          <router-link
+            :to="`/teams/team-management/32`"
+            class="d-flex align-center ga-2"
+          >
             <span class="font-weight-bold">عرض</span>
 
             <svg
@@ -110,7 +113,7 @@ const avatars = computed(() =>
                 fill="#B69265"
               />
             </svg>
-          </span>
+          </router-link>
         </v-btn>
       </div>
     </v-card-text>

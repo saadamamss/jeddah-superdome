@@ -1,15 +1,27 @@
 <script setup>
 defineProps({
   user: {},
+  noShadow: {
+    type: Boolean,
+    default: false,
+  },
+  noPadding: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
 
 <template>
   <VCard
     class="rounded-lg"
-    style="box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)"
+    :style="
+      noShadow
+        ? 'box-shadow: none'
+        : 'box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)'
+    "
   >
-    <v-card-text class="px-3 py-4">
+    <v-card-text :class="noPadding ? 'pa-0' : 'px-3 py-4'">
       <div class="d-flex ga-3">
         <div>
           <span
