@@ -261,4 +261,21 @@ body {
     --v-input-control-height: 48px;
     --v-input-padding-top: 8px;
   }
+
+  p {
+    white-space: normal;
+  }
+
+  .Toastify {
+    --toastify-font-family: "IBMPlexArabic", Tahoma, sans-serif !important;
+  }
+
+  .Toastify__toast {
+    border-radius: 14px;
+  }
+
+  .auth-wrapper {
+    background: url(/imgs/bg.webp) no-repeat center;
+    background-size: cover;
+  }
 }

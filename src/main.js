@@ -14,7 +14,7 @@ import App from "./App.vue";
 import { createApp } from "vue";
 // import router from "@/router";
 // import { createPinia } from "pinia";
-import VueDraggable from "vue-draggable";
+// import VueDraggable from "vue-draggable";
 
 import "@core/scss/template/index.scss";
 import "@styles/styles.scss";
@@ -23,7 +23,7 @@ const app = createApp(App);
 // const pinia = createPinia();
 app.component("apexchart", VueApexCharts);
 registerPlugins(app);
-app.use(VueDraggable);
+// app.use(VueDraggable);
 
 app.directive("can", {
   mounted(el, binding) {

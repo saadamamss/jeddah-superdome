@@ -1,8 +1,9 @@
 <script setup>
-import { useAuthStore } from "@/store/Auth";
+import { useAuthStore } from "@/stores/Auth";
 import { useThemeConfig } from "@core/composable/useThemeConfig";
 import { hexToRgb } from "@layouts/utils";
 import { useTheme } from "vuetify";
+import "vue3-toastify/dist/index.css";
 
 const authStore = useAuthStore();
 
