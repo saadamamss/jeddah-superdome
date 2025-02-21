@@ -3,10 +3,58 @@
     <v-card-text class="pa-4">
       <div class="d-flex justify-space-between align-center mb-4">
         <div class="d-flex align-center justify-space-between w-100">
-          <h2 class="text-h6 font-weight-medium">رقم المخيم</h2>
+          <h2 class="text-h6 font-weight-medium d-flex align-center ga-1">
+            <span v-if="status == 'active'">
+              <svg
+                width="15"
+                height="16"
+                viewBox="0 0 15 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  opacity="0.4"
+                  d="M0.147461 8.00004C0.147461 11.958 3.35613 15.1667 7.31413 15.1667C11.2721 15.1667 14.4808 11.958 14.4808 8.00004C14.4808 4.04204 11.2721 0.833374 7.31413 0.833374C3.35613 0.833374 0.147461 4.04204 0.147461 8.00004Z"
+                  fill="#65B669"
+                />
+                <path
+                  d="M7.31411 9.33331C7.13744 9.33331 6.96812 9.2633 6.84279 9.13797L4.50945 6.80463C4.24945 6.54397 4.24945 6.12199 4.50945 5.86199C4.77012 5.60132 5.1921 5.60132 5.4521 5.86199L7.28878 7.69864L12.8188 1.55398C13.0648 1.28065 13.4868 1.25797 13.7601 1.50463C14.0341 1.75063 14.0561 2.17264 13.8095 2.44598L7.80945 9.11264C7.68679 9.24864 7.51409 9.32798 7.33143 9.33331C7.32543 9.33331 7.31944 9.33331 7.31411 9.33331Z"
+                  fill="#65B669"
+                />
+              </svg>
+            </span>
+            <span v-else>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  opacity="0.4"
+                  d="M0.833008 8.00008C0.833008 11.9581 4.04163 15.1667 7.99967 15.1667C11.9577 15.1667 15.1663 11.9581 15.1663 8.00008C15.1663 4.04204 11.9577 0.833414 7.99967 0.833414C4.04163 0.833414 0.833008 4.04204 0.833008 8.00008Z"
+                  fill="#F53D6B"
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M10.4711 5.52865C10.7314 5.78901 10.7314 6.21112 10.4711 6.47146L8.94238 8.00004L10.4711 9.52862C10.7314 9.78896 10.7314 10.2111 10.4711 10.4714C10.2108 10.7318 9.78864 10.7318 9.52829 10.4715L7.99954 8.94282L6.47106 10.4712C6.21071 10.7315 5.7886 10.7315 5.52825 10.4712C5.26791 10.2108 5.26793 9.7887 5.52829 9.52836L7.0567 8.00004L5.52829 6.47172C5.26793 6.21138 5.26791 5.78927 5.52825 5.52891C5.7886 5.26856 6.21071 5.26854 6.47106 5.52888L7.99954 7.05726L9.52829 5.52862C9.78864 5.26828 10.2108 5.26829 10.4711 5.52865Z"
+                  fill="#F53D6B"
+                />
+              </svg>
+            </span>
+            <span class="mt-n2"> رقم المخيم </span>
+          </h2>
 
           <div class="d-flex align-center ga-2">
-            <v-btn @click="dialog = true" icon variant="text" size="small">
+            <v-btn
+              v-if="status == 'active'"
+              @click="dialog = true"
+              icon
+              variant="text"
+              size="small"
+            >
               <svg
                 width="17"
                 height="16"
@@ -91,7 +139,7 @@
           />
         </svg>
 
-        <span class="card-gray-text">شركة رواف منى</span>
+        <span class="card-gray-text">12 شركه</span>
       </div>
 
       <div class="site-info mt-6 d-flex align-center justify-space-between">
@@ -225,6 +273,10 @@ defineProps({
     required: true,
   },
   authorizationNumber: {
+    type: String,
+    required: true,
+  },
+  status: {
     type: String,
     required: true,
   },

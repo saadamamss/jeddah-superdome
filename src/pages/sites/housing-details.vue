@@ -1,8 +1,6 @@
 <script setup>
 // pagination added
 import { useAppStore } from "@/stores/app";
-import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
-import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import Pagination from "@/@core/components/Pagination";
 import companyCard from "@/@core/components/widgets/companyCard.vue";
 import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";

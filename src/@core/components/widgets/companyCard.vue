@@ -2,13 +2,28 @@
   <v-card elevation="0" class="site-card rounded-lg">
     <v-card-text
       class="pa-4"
-      @click="$router.push('/sites/company-details')"
+      @click="$router.push(link)"
       style="cursor: pointer"
     >
       <div class="d-flex justify-space-between align-center mb-4">
         <div class="d-flex align-center justify-space-between w-100">
           <h2 class="text-h6 font-weight-medium">رقم المخيم</h2>
         </div>
+        <avatar-group
+          class="flex-shrink-0"
+          :avatars="avatars"
+          size="small"
+          max-avatars="2"
+        >
+          <template #additionData>
+            <span
+              class="text-body-2 text-medium-emphasis flex-shrink-0"
+              style="font-size: 12px"
+            >
+              112 تقييم
+            </span>
+          </template>
+        </avatar-group>
       </div>
 
       <div class="d-flex align-center mb-2 mt-n4 card-gray-text">
@@ -137,8 +152,9 @@
   </v-card>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
+import AvatarGroup from "@/@core/components/shared/AvatarGroup";
 
 defineProps({
   siteId: {
@@ -149,8 +165,30 @@ defineProps({
     type: String,
     required: true,
   },
+  link: {
+    type: String,
+    required: true,
+    default: "/sites/company-details",
+  },
 });
 
+const avatars = ref([
+  {
+    id: 1,
+    name: "عبدالله قحطاني",
+    avatar: "/imgs/person.svg",
+  },
+  {
+    id: 2,
+    name: "أحمد علي",
+    avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
+  },
+  {
+    id: 3,
+    name: "عبدالله قحطاني",
+    avatar: "/imgs/person.svg",
+  },
+]);
 const dialog = ref(false);
 const loading = ref(false);
 const siteType = ref(null);

@@ -1,15 +1,36 @@
 <template>
   <v-card elevation="0" class="rate-card rounded-lg">
-    <v-card-text class="pa-4">
+    <v-card-text class="pa-4" @click="router.push('/rating_details')">
       <div class="d-flex justify-space-between align-center mb-4">
-        <div class="d-flex align-center justify-space-between w-100">
+        <div class=" ">
           <h2 class="text-h6 font-weight-bold">#23423432432423</h2>
+          <div class="d-flex align-center mb-2 card-gray-text">
+            12 مارس 2024 - 12:24 مساءً
+          </div>
+        </div>
+        <div class="d-flex align-center justify-space-between">
+          <div class="text-body-2 text-medium-emphasis">
+            <div
+              class="text-body-2 font-weight-medium py-1 text-center px-2 rounded-pill"
+              key=""
+              :style="{
+                backgroundColor:
+                  status === 'مرفوض'
+                    ? 'rgba(250, 238, 235, 1)'
+                    : 'rgba(237, 244, 238, 1)',
+                color:
+                  status === 'مرفوض'
+                    ? 'rgba(198, 40, 0, 1)'
+                    : 'rgba(78, 145, 88, 1)',
+              }"
+            >
+              {{ status }}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="d-flex align-center mb-2 mt-n4 card-gray-text">
-        12 مارس 2024 - 12:24 مساءً
-      </div>
+      <user-widget noPadding noShadow :user="user" />
 
       <div class="company-info mt-6 d-flex align-center justify-space-between">
         <div class="d-flex justify-space-between align-center">
@@ -140,6 +161,10 @@
 
 <script setup>
 import { ref } from "vue";
+import UserWidget from "@/@core/components/widgets/UserWidget.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 defineProps({
   siteId: {
@@ -150,6 +175,14 @@ defineProps({
     type: String,
     required: true,
   },
+  status: {
+    type: String,
+    required: true,
+  },
+});
+
+const user = ref({
+  name: "محمد أحمد",
 });
 
 const dialog = ref(false);

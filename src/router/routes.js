@@ -12,6 +12,7 @@ import MainSectorsPage from "@/pages/main-sectors";
 import RolesPage from "@/pages/roles";
 import NotesPage from "@/pages/notes";
 import RatingPage from "@/pages/rating";
+import CompanyRatingPage from "@/pages/rating/company-rating";
 import ContractsPage from "@/pages/contracts";
 
 import NotFoundPage from "@/pages/NotFound";
@@ -43,7 +44,7 @@ export default [
         component: CompanyDetailsPage,
       },
       {
-        path: "/sites/add-rate",
+        path: "/rating_details",
         name: "add-rate",
         component: AddRatePage,
       },
@@ -81,6 +82,11 @@ export default [
         path: "/rating",
         name: "rating",
         component: RatingPage,
+      },
+      {
+        path: "/rating/company-rating/:id",
+        name: "company-rating",
+        component: CompanyRatingPage,
       },
       {
         path: "/contracts",

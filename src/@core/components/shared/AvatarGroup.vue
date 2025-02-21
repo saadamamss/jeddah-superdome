@@ -5,11 +5,15 @@ const props = defineProps({
     type: String,
     default: "45",
   },
+  maxAvatars: {
+    type: Number,
+    default: 4,
+  },
 });
 
 const visibleItems = computed(() => {
-  if (props.avatars?.length > 4) {
-    return props.avatars.slice(0, 4);
+  if (props.avatars?.length > props.maxAvatars) {
+    return props.avatars.slice(0, props.maxAvatars);
   }
 
   return props.avatars;
@@ -17,7 +21,7 @@ const visibleItems = computed(() => {
 </script>
 
 <template>
-  <div class="d-flex pa-2 rounded-pill bg-background">
+  <div class="d-flex pa-2 rounded-pill bg-background align-center gap-2">
     <template v-for="(item, index) in visibleItems" :key="index">
       <v-avatar
         :size="size"
@@ -29,16 +33,18 @@ const visibleItems = computed(() => {
       </v-avatar>
     </template>
     <v-avatar
-      v-if="avatars?.length > 4"
+      v-if="avatars?.length > maxAvatars"
       :size="size"
       color="gray"
       style="border: 4px solid #fff"
       class="ms-n3"
     >
       <span class="text-primary">
-        <span>{{ avatars?.length - 4 }}</span>
+        <span>{{ avatars?.length - maxAvatars }}</span>
         <span>+</span>
       </span>
     </v-avatar>
+
+    <slot name="additionData"></slot>
   </div>
 </template>
