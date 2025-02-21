@@ -9,6 +9,8 @@ import UsersPage from "@/pages/users/users.vue";
 import SitesPage from "@/pages/sites";
 import CompanyDetailsPage from "@/pages/sites/company-details";
 import HousingDetailsPage from "@/pages/sites/housing-details";
+import TeamManagementPage from "@/pages/teams/team-management";
+import AddRatePage from "@/pages/sites/addRate";
 import TeamsPage from "@/pages/teams";
 import MainSectorsPage from "@/pages/main-sectors";
 import RolesPage from "@/pages/roles";
@@ -54,12 +56,22 @@ export default [
         component: CompanyDetailsPage,
       },
       {
+        path: "/sites/add-rate",
+        name: "add-rate",
+        component: AddRatePage,
+      },
+      {
         path: "/teams",
         name: "teams",
         component: TeamsPage,
         meta: {
           requiresAuth: true,
         },
+      },
+      {
+        path: "/teams/team-management/:id",
+        name: "team-management",
+        component: TeamManagementPage,
       },
       {
         path: "/main-sectors",

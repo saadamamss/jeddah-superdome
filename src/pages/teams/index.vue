@@ -1,12 +1,111 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
-import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
-import StatsWidget from "@/@core/components/widgets/StatsWidget";
+import Pagination from "@/@core/components/Pagination";
+import TeamWidget from "@/@core/components/widgets/TeamWidget.vue";
+import { ref } from "vue";
 
 const appStore = useAppStore();
 const filterToggle = ref(0);
 const dateRange = ref();
 const isLoading = ref(true);
+const perPage = ref(6);
+const currentPage = ref(1);
+const search = ref("");
+const dialog = ref(false);
+const dialogStep = ref(1);
+const loading = ref(false);
+const siteType = ref("السكن");
+const housingPermitNumber = ref("");
+const authorizedContactNumber = ref("");
+const selectedCompany = ref(null);
+
+const formModel = ref({
+  location: null,
+  fieldSupervisor: null,
+  fieldTeam: [],
+});
+
+const locations = [
+  { title: "موقع 1", value: "location1" },
+  { title: "موقع 2", value: "location2" },
+  { title: "موقع 3", value: "location3" },
+];
+
+const supervisors = [
+  { title: "أحمد محمد", value: "ahmed" },
+  { title: "محمد علي", value: "mohammed" },
+  { title: "عبدالله خالد", value: "abdullah" },
+];
+
+const fieldTeamMembers = [
+  {
+    title: "علي الحسين",
+    value: "ali",
+    avatar: "https://i.pravatar.cc/150?img=1",
+  },
+  {
+    title: "سارة نصر",
+    value: "sara",
+    avatar: "https://i.pravatar.cc/150?img=2",
+  },
+  {
+    title: "أحمد حسين",
+    value: "ahmed",
+    avatar: "https://i.pravatar.cc/150?img=3",
+  },
+  {
+    title: "عبدالرحمن صالح",
+    value: "abdulrahman",
+    avatar: "https://i.pravatar.cc/150?img=4",
+  },
+];
+
+const siteTypes = [
+  { title: "موقع سكني", value: "residential" },
+  { title: "موقع تجاري", value: "commercial" },
+  { title: "موقع صناعي", value: "industrial" },
+];
+
+const companies = [
+  { title: "شركة رواف منى", value: "rawaf" },
+  { title: "شركة الخليج", value: "gulf" },
+];
+
+const teams = ref([
+  {
+    teamId: "team-01",
+    location: "موقع 1",
+    teamAvatars: [
+      { name: "محمد أحمد", avatar: "https://i.pravatar.cc/150?img=1" },
+      { name: "فاطمة علي", avatar: "https://i.pravatar.cc/150?img=2" },
+      { name: "عبدالله محمد", avatar: "https://i.pravatar.cc/150?img=3" },
+      { name: "سارة خالد", avatar: "https://i.pravatar.cc/150?img=4" },
+      { name: "عمر يوسف", avatar: "https://i.pravatar.cc/150?img=5" },
+    ],
+    supervisor: "أحمد محمد",
+  },
+  {
+    teamId: "team-02",
+    location: "موقع 2",
+    teamAvatars: [
+      { name: "ليلى حسن", avatar: "https://i.pravatar.cc/150?img=6" },
+      { name: "أحمد علي", avatar: "https://i.pravatar.cc/150?img=7" },
+      { name: "نورة سعد", avatar: "https://i.pravatar.cc/150?img=8" },
+    ],
+    supervisor: "محمد علي",
+  },
+  {
+    teamId: "team-03",
+    location: "موقع 3",
+    teamAvatars: [
+      { name: "خالد عمر", avatar: "https://i.pravatar.cc/150?img=9" },
+      { name: "ريم ناصر", avatar: "https://i.pravatar.cc/150?img=10" },
+      { name: "طارق سعيد", avatar: "https://i.pravatar.cc/150?img=11" },
+      { name: "منى فهد", avatar: "https://i.pravatar.cc/150?img=12" },
+    ],
+    supervisor: "عبدالله خالد",
+  },
+]);
 
 const violationOptions = ref([
   {
@@ -30,210 +129,360 @@ const complaintOptions = ref([
   },
 ]);
 
+const handleSubmit = async () => {
+  loading.value = true;
+  // Add your submit logic here
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  loading.value = false;
+  dialog.value = false;
+  dialogStep.value = 1;
+};
+
+const nextStep = () => {
+  if (siteType.value) {
+    dialogStep.value = 2;
+  }
+};
+
+const prevStep = () => {
+  dialogStep.value = 1;
+};
+
+const closeDialog = () => {
+  dialog.value = false;
+  dialogStep.value = 1;
+};
+
+const addNewTeam = () => {
+  dialog.value = true;
+};
+
 onMounted(() => {
   setTimeout(() => {
     isLoading.value = false;
-  }, 3000);
+  }, 100);
 });
 </script>
 
 <template>
-  <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
-    <v-row v-if="isLoading">
-      <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
-        <VCard elevation="0">
-          <v-card-text class="px-1 py-2">
-            <v-skeleton-loader
-              class="mx-auto"
-              elevation="0"
-              max-width="400"
-              type="list-item-two-line, table-heading"
-            ></v-skeleton-loader>
+  <div>
+    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+      <v-row v-if="isLoading">
+        <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
+          <VCard elevation="0">
+            <v-card-text class="px-1 py-2">
+              <v-skeleton-loader
+                class="mx-auto"
+                elevation="0"
+                max-width="400"
+                type="list-item-two-line, table-heading"
+              ></v-skeleton-loader>
+            </v-card-text>
+          </VCard>
+        </v-col>
+      </v-row>
+
+      <div v-else>
+        <v-container fluid class="mt-٠ px-0 rounded-lg">
+          <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
+            <v-card-title class="pt-4 pb-6">
+              <div
+                class="d-flex align-center justify-space-between ga-4 border-b pb-4"
+              >
+                <h2 class="text-h5 font-weight-bold">إدارة الفرق الميدانية</h2>
+                <div class="d-flex align-center ga-2">
+                  <v-text-field
+                    v-model="search"
+                    label="البحث عن الفريق..."
+                    rounded="lg"
+                    clearable
+                    height="48"
+                    class="bg-white"
+                    style="
+                      width: 320px;
+                      max-width: 100%;
+                      color: #929a9f !important;
+                      border-radius: 1rem;
+                    "
+                  >
+                    <template v-slot:prepend-inner>
+                      <svg
+                        width="1.3rem"
+                        height="1.3rem"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          opacity="0.4"
+                          d="M16.6666 9.16669C16.6666 5.02455 13.3088 1.66669 9.16663 1.66669C5.02449 1.66669 1.66663 5.02455 1.66663 9.16669C1.66663 13.3088 5.02449 16.6667 9.16663 16.6667C13.3088 16.6667 16.6666 13.3088 16.6666 9.16669Z"
+                          fill="#B69265"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M9.16663 1.04169C4.67931 1.04169 1.04163 4.67937 1.04163 9.16669C1.04163 13.654 4.67931 17.2917 9.16663 17.2917C11.1853 17.2917 13.032 16.5555 14.453 15.337L17.8914 18.7753C18.1354 19.0194 18.5312 19.0194 18.7752 18.7753C19.0193 18.5312 19.0193 18.1355 18.7752 17.8914L15.3369 14.4531C16.5554 13.0321 17.2916 11.1854 17.2916 9.16669C17.2916 4.67937 13.6539 1.04169 9.16663 1.04169ZM2.29163 9.16669C2.29163 5.36973 5.36967 2.29169 9.16663 2.29169C12.9636 2.29169 16.0416 5.36973 16.0416 9.16669C16.0416 12.9636 12.9636 16.0417 9.16663 16.0417C5.36967 16.0417 2.29163 12.9636 2.29163 9.16669Z"
+                          fill="#B69265"
+                        />
+                      </svg>
+                    </template>
+                  </v-text-field>
+
+                  <VBtn color="default" class="btn-icon border" elevation="0">
+                    <svg
+                      width="1.3rem"
+                      height="1.3rem"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        opacity="0.4"
+                        d="M8.85746 12.5061C6.36901 10.6456 4.59564 8.59915 3.62734 7.44867C3.3276 7.09253 3.22938 6.8319 3.17033 6.3728C2.96811 4.8008 2.86701 4.0148 3.32795 3.5074C3.7889 3 4.60404 3 6.23433 3H17.7657C19.396 3 20.2111 3 20.672 3.5074C21.133 4.0148 21.0319 4.8008 20.8297 6.37281C20.7706 6.83191 20.6724 7.09254 20.3726 7.44867C19.403 8.60062 17.6261 10.6507 15.1326 12.5135C14.907 12.6821 14.7583 12.9567 14.7307 13.2614C14.4837 15.992 14.2559 17.4876 14.1141 18.2442C13.8853 19.4657 12.1532 20.2006 11.226 20.8563C10.6741 21.2466 10.0043 20.782 9.93278 20.1778C9.79643 19.0261 9.53961 16.6864 9.25927 13.2614C9.23409 12.9539 9.08486 12.6761 8.85746 12.5061Z"
+                        fill="#B69265"
+                      />
+                    </svg>
+                  </VBtn>
+
+                  <VBtn
+                    height="48"
+                    elevation="0"
+                    class="rounded-lg"
+                    append-icon="mdi-plus"
+                    @click="addNewTeam"
+                  >
+                    إضافة فريق جديد
+                  </VBtn>
+                </div>
+              </div>
+
+              <v-row class="mt-3">
+                <v-col
+                  v-for="team in teams"
+                  :key="team.teamId"
+                  cols="12"
+                  sm="6"
+                  md="4"
+                  lg="4"
+                  class="pa-3"
+                >
+                  <TeamWidget
+                    :title="team.location"
+                    :team-members="team.teamAvatars"
+                    :supervisor="team.supervisor"
+                  />
+                </v-col>
+              </v-row>
+
+              <Pagination
+                :total-items="2300"
+                v-model:per-page="perPage"
+                v-model:page="currentPage"
+              />
+            </v-card-title>
+          </VCard>
+        </v-container>
+      </div>
+
+      <!-- Add Team Modal -->
+      <v-dialog v-model="dialog" width="500" class="add-team-dialog">
+        <v-card class="rounded-lg">
+          <v-card-text class="pa-4">
+            <div class="border-b mb-4">
+              <div class="d-flex justify-space-between align-center">
+                <h2 class="text-h6 font-weight-bold">إدارة الفرق الميدانية</h2>
+              </div>
+              <p class="text-subtitle-1 text-medium-emphasis mb-2">
+                حدد تفاصيل الفرق الميدانية
+              </p>
+            </div>
+
+            <v-form @submit.prevent="handleSubmit">
+              <div class="mb-4">
+                <label class="text-subtitle-2 mb-2 d-block">المواقع</label>
+                <v-select
+                  v-model="formModel.location"
+                  :items="locations"
+                  variant="outlined"
+                  density="comfortable"
+                  placeholder="اختر الموقع"
+                  hide-details
+                  class="rounded-lg bg-grey-lighten-4 px-2"
+                />
+              </div>
+
+              <div class="mb-4">
+                <label class="text-subtitle-2 mb-2 d-block"
+                  >المشرف الميداني</label
+                >
+                <v-select
+                  v-model="formModel.fieldSupervisor"
+                  :items="supervisors"
+                  variant="outlined"
+                  density="comfortable"
+                  placeholder="اختر المشرف"
+                  hide-details
+                  class="rounded-lg bg-grey-lighten-4 px-2"
+                />
+              </div>
+
+              <div class="mb-4">
+                <label class="text-subtitle-2 mb-2 d-block"
+                  >فريق المراقبين الميدانيون</label
+                >
+                <v-select
+                  v-model="formModel.fieldTeam"
+                  :items="fieldTeamMembers"
+                  item-title="title"
+                  item-value="value"
+                  variant="outlined"
+                  density="comfortable"
+                  placeholder="اختر الفريق"
+                  multiple
+                  hide-details
+                  class="rounded-lg bg-grey-lighten-4"
+                >
+                  <template v-slot:selection="{ item }">
+                    <div class="d-flex align-center ga-2 ms-n2">
+                      <v-avatar size="32" class="">
+                        <v-img :src="item.raw.avatar" :alt="item.title"></v-img>
+                      </v-avatar>
+                      <span class="text-subtitle-2">{{ item.title }}</span>
+                    </div>
+                  </template>
+
+                  <template v-slot:item="{ item, props }">
+                    <v-list-item
+                      v-bind="props"
+                      :title="item.title"
+                      class="field-team-item"
+                    >
+                      <template v-slot:prepend>
+                        <v-avatar size="32" class="me-3">
+                          <v-img
+                            :src="item.raw.avatar"
+                            :alt="item.title"
+                          ></v-img>
+                        </v-avatar>
+                      </template>
+                    </v-list-item>
+                  </template>
+                </v-select>
+              </div>
+
+              <div class="d-flex justify-end mt-6">
+                <v-btn
+                  variant="text"
+                  color="grey-darken-1"
+                  class="me-4"
+                  @click="dialog = false"
+                >
+                  إلغاء
+                </v-btn>
+                <v-btn
+                  color="#B69265"
+                  class="text-white"
+                  type="submit"
+                  :loading="loading"
+                >
+                  إضافة
+                </v-btn>
+              </div>
+            </v-form>
           </v-card-text>
-        </VCard>
-      </v-col>
-    </v-row>
-    <v-row v-else>
-      <v-col sm="6" md="3">
-        <StatsWidget title="المواقع" number="234">
-          <template #icon>
-            <svg
-              width="2.2rem"
-              height="2.2rem"
-              viewBox="0 0 33 33"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                opacity="0.4"
-                d="M18.9168 11.5C18.0678 11.5 17.3181 11.543 16.6811 11.6829C16.0328 11.8253 15.4391 12.0815 14.9687 12.5519C14.4983 13.0223 14.2421 13.616 14.0997 14.2643C13.9598 14.9013 13.9168 15.651 13.9168 16.5L13.9168 28.1667H20.2496V25.8333C20.2496 25.097 20.8465 24.5 21.5829 24.5C22.3193 24.5 22.9162 25.097 22.9162 25.8333V28.1667H29.2501L29.2501 16.5C29.2501 15.651 29.2072 14.9013 29.0672 14.2643C28.9248 13.616 28.6687 13.0223 28.1982 12.5519C27.7278 12.0815 27.1342 11.8253 26.4858 11.6829C25.8488 11.543 25.0991 11.5 24.2501 11.5H18.9168Z"
-                fill="#B69265"
-              />
-              <path
-                d="M1.91693 29.5001C1.91693 28.7637 2.51388 28.1667 3.25026 28.1667L3.25026 20.1667H6.91634C7.46863 20.1667 7.91634 19.719 7.91634 19.1667C7.91634 18.6145 7.46863 18.1667 6.91634 18.1667H3.25026L3.25026 14.8334L6.91634 14.8334C7.46863 14.8334 7.91634 14.3857 7.91634 13.8334C7.91634 13.2811 7.46863 12.8334 6.91634 12.8334L3.25026 12.8334L3.25026 9.50008H6.91634C7.46863 9.50008 7.91634 9.05237 7.91634 8.50008C7.91634 7.9478 7.46863 7.50008 6.91634 7.50008L3.25026 7.50008V7.16675C3.25026 6.31777 3.29324 5.56806 3.43318 4.93106C3.5756 4.28273 3.83175 3.68905 4.30216 3.21864C4.77256 2.74824 5.36625 2.49209 6.01458 2.34966C6.65158 2.20973 7.40129 2.16675 8.25026 2.16675L16.2503 2.16675C17.0992 2.16675 17.849 2.20973 18.486 2.34966C19.1343 2.49209 19.728 2.74824 20.1984 3.21864C20.6688 3.68905 20.9249 4.28273 21.0674 4.93106C21.2073 5.56806 21.2503 6.31777 21.2503 7.16675V8.70008C21.2503 9.0772 21.2503 9.26577 21.1331 9.38292C21.016 9.50008 20.8274 9.50008 20.4503 9.50008H18.9169C18.0242 9.50008 17.1026 9.54274 16.2521 9.72958C15.3681 9.92377 14.3799 10.3125 13.5546 11.1378C12.7293 11.963 12.3406 12.9513 12.1464 13.8353C11.9596 14.6858 11.9169 15.6074 11.9169 16.5001L11.9169 28.1667H20.2503V25.8334C20.2503 25.097 20.8472 24.5001 21.5836 24.5001C22.32 24.5001 22.9169 25.097 22.9169 25.8334V28.1667L29.2503 28.1667C29.9866 28.1667 30.5836 28.7637 30.5836 29.5001C30.5836 30.2365 29.9866 30.8334 29.2503 30.8334L3.25026 30.8334C2.51388 30.8334 1.91693 30.2365 1.91693 29.5001Z"
-                fill="#B69265"
-              />
-              <path
-                d="M19.2503 16.5001C19.2503 15.9478 19.698 15.5001 20.2503 15.5001H22.9169C23.4692 15.5001 23.9169 15.9478 23.9169 16.5001C23.9169 17.0524 23.4692 17.5001 22.9169 17.5001H20.2503C19.698 17.5001 19.2503 17.0524 19.2503 16.5001Z"
-                fill="#B69265"
-              />
-              <path
-                d="M19.2503 20.5001C19.2503 19.9478 19.698 19.5001 20.2503 19.5001H22.9169C23.4692 19.5001 23.9169 19.9478 23.9169 20.5001C23.9169 21.0524 23.4692 21.5001 22.9169 21.5001H20.2503C19.698 21.5001 19.2503 21.0524 19.2503 20.5001Z"
-                fill="#B69265"
-              />
-            </svg>
-          </template>
-        </StatsWidget>
-      </v-col>
-      <v-col sm="6" md="3">
-        <StatsWidget title="الشركات" number="23">
-          <template #icon>
-            <svg
-              width="2.2rem"
-              height="2.2rem"
-              viewBox="0 0 33 33"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g opacity="0.4">
-                <path
-                  d="M27.767 15.5822C26.9404 15.2151 25.8795 14.8836 24.5748 14.4759L23.2053 14.048C22.7303 13.8995 22.4928 13.8253 22.3297 13.9452C22.1667 14.0651 22.1667 14.3139 22.1667 14.8115L22.1667 29.8336C22.1667 30.3205 22.1667 30.5639 22.2435 30.6692C22.2732 30.7101 22.2902 30.727 22.331 30.7568C22.4363 30.8336 22.6293 30.8336 23.0153 30.8336L27.2263 30.8336C27.8034 30.8337 28.3325 30.8337 28.7629 30.7758C29.2369 30.7121 29.7379 30.5622 30.1499 30.1502C30.5619 29.7381 30.7119 29.2372 30.7756 28.7632C30.8335 28.3328 30.8334 27.8037 30.8333 27.2266L30.8333 22.9887C30.8333 21.6219 30.8334 20.5103 30.7296 19.6118C30.6213 18.6744 30.391 17.8658 29.8618 17.146C29.3325 16.4261 28.6294 15.9652 27.767 15.5822Z"
-                  fill="#B69265"
-                />
-                <path
-                  d="M3.85786 23.3852C3.93761 23.4972 4.10822 23.4972 4.44944 23.4972H9.83403C10.9155 23.4972 11.7143 23.4394 12.3143 23.3076C12.9029 23.1783 13.2346 22.9917 13.4483 22.7781C13.6619 22.5644 13.8485 22.2327 13.9778 21.6441C14.1096 21.0441 14.1674 20.2453 14.1674 19.1638V18.0305C14.1674 17.7791 14.1674 17.6534 14.0893 17.5753C14.0112 17.4972 13.8855 17.4972 13.634 17.4972L6.15539 17.4972C5.97192 17.4972 5.88018 17.4972 5.81074 17.5466C5.74129 17.5961 5.71131 17.6828 5.65135 17.8562L3.94539 22.7895C3.83388 23.112 3.77812 23.2733 3.85786 23.3852Z"
-                  fill="#B69265"
-                />
-                <path
-                  d="M6.62428 15.3852C6.70403 15.4972 6.87463 15.4972 7.21585 15.4972L13.634 15.4972C13.8854 15.4972 14.0112 15.4972 14.0893 15.4191C14.1674 15.341 14.1674 15.2152 14.1674 14.9638L14.1674 2.69828C14.1674 2.44479 14.1674 2.31805 14.0873 2.23962C14.0072 2.16119 13.8825 2.16378 13.6331 2.16896C13.3442 2.17495 13.0781 2.18794 12.8386 2.21605C12.3523 2.2731 11.8789 2.40089 11.443 2.72052C11.0105 3.03761 10.7418 3.45059 10.5312 3.89626C10.3354 4.31051 10.1547 4.83319 9.94804 5.43089L6.71181 14.7895C6.60029 15.112 6.54453 15.2733 6.62428 15.3852Z"
-                  fill="#B69265"
-                />
-              </g>
-              <path
-                d="M17.5766 2.25079C18.2172 2.34072 18.8326 2.54485 19.3278 3.06201C19.8172 3.57308 20.0048 4.19777 20.0882 4.84562C20.1666 5.45448 20.1666 6.21581 20.1665 7.10418L20.1665 29.8345C20.1665 30.3868 19.7188 30.8345 19.1665 30.8345L6.13132 30.8345C5.36752 30.8346 4.68191 30.8347 4.14397 30.752C3.55901 30.6621 2.92753 30.4437 2.51176 29.8253C2.10381 29.2185 2.12397 28.5523 2.23714 27.9706C2.34362 27.4232 2.57397 26.7573 2.83541 26.0014L2.88425 25.8602C2.94421 25.6868 2.97419 25.6001 3.04364 25.5507C3.11309 25.5012 3.20483 25.5012 3.3883 25.5012L9.83335 25.5012C10.9581 25.5012 11.929 25.4438 12.7428 25.2651C13.5678 25.0838 14.2937 24.7644 14.8618 24.1963C15.4299 23.6282 15.7493 22.9023 15.9306 22.0772C16.1093 21.2635 16.1667 20.2926 16.1667 19.1679L16.1667 2.70936C16.1667 2.45366 16.1667 2.32581 16.2482 2.24717C16.3297 2.16853 16.455 2.17302 16.7056 2.18202C17.0224 2.1934 17.3138 2.2139 17.5766 2.25079Z"
-                fill="#B69265"
-              />
-              <path
-                d="M24.7474 21.8335C24.7474 21.2812 25.1951 20.8335 25.7474 20.8335H27.0807C27.633 20.8335 28.0807 21.2812 28.0807 21.8335C28.0807 22.3858 27.633 22.8335 27.0807 22.8335H25.7474C25.1951 22.8335 24.7474 22.3858 24.7474 21.8335Z"
-                fill="#B69265"
-              />
-              <path
-                d="M24.7474 25.8335C24.7474 25.2812 25.1951 24.8335 25.7474 24.8335H27.0807C27.633 24.8335 28.0807 25.2812 28.0807 25.8335C28.0807 26.3858 27.633 26.8335 27.0807 26.8335H25.7474C25.1951 26.8335 24.7474 26.3858 24.7474 25.8335Z"
-                fill="#B69265"
-              />
-            </svg>
-          </template>
-        </StatsWidget>
-      </v-col>
-      <v-col sm="6" md="3">
-        <StatsWidget title="الملاحظات" number="23">
-          <template #icon>
-            <svg
-              width="2.2rem"
-              height="2.2rem"
-              viewBox="0 0 32 33"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                opacity="0.4"
-                d="M19.4065 3.66663L12.5935 3.66663C10.7701 3.6666 9.30027 3.66658 8.14433 3.82199C6.94418 3.98335 5.93368 4.32854 5.13113 5.13109C4.32857 5.93365 3.98338 6.94415 3.82202 8.14429C3.66661 9.30024 3.66663 10.77 3.66666 12.5934L3.66666 22.0863C3.66663 22.8462 3.66661 23.4915 3.72175 24.0247C3.7378 24.18 3.74582 24.2576 3.78571 24.3144C3.83836 24.3894 3.93768 24.4352 4.02889 24.4266C4.09799 24.4202 4.16988 24.3707 4.31367 24.2717C4.83058 23.9158 5.41457 23.5556 6.02088 23.2458C7.11095 22.6889 8.4922 22.1791 9.72441 22.4016C10.5943 22.5586 11.2279 23.0767 11.78 23.7346C12.304 24.3588 12.8495 25.2274 13.5032 26.2683L13.5609 26.3602L15.8009 30.5754C15.9108 30.7822 15.9658 30.8856 16.0609 30.9428C16.156 31 16.2731 31 16.5073 31H19.4065C21.2299 31 22.6997 31 23.8557 30.8446C25.0558 30.6832 26.0663 30.3381 26.8689 29.5355C27.6714 28.7329 28.0166 27.7224 28.178 26.5223C28.3334 25.3663 28.3334 23.8966 28.3333 22.0731V12.5935C28.3334 10.77 28.3334 9.30025 28.178 8.14429C28.0166 6.94415 27.6714 5.93365 26.8689 5.13109C26.0663 4.32854 25.0558 3.98335 23.8557 3.82199C22.6997 3.66658 21.2299 3.6666 19.4065 3.66663Z"
-                fill="#B69265"
-              />
-              <path
-                d="M9.33331 2C10.0697 2 10.6666 2.59695 10.6666 3.33333V6C10.6666 6.73638 10.0697 7.33333 9.33331 7.33333C8.59693 7.33333 7.99998 6.73638 7.99998 6L7.99998 3.33333C7.99998 2.59695 8.59693 2 9.33331 2Z"
-                fill="#B69265"
-              />
-              <path
-                d="M16 2C16.7364 2 17.3333 2.59695 17.3333 3.33333V6C17.3333 6.73638 16.7364 7.33333 16 7.33333C15.2636 7.33333 14.6666 6.73638 14.6666 6L14.6666 3.33333C14.6666 2.59695 15.2636 2 16 2Z"
-                fill="#B69265"
-              />
-              <path
-                d="M22.6666 2C23.403 2 24 2.59695 24 3.33333V6C24 6.73638 23.403 7.33333 22.6666 7.33333C21.9303 7.33333 21.3333 6.73638 21.3333 6V3.33333C21.3333 2.59695 21.9303 2 22.6666 2Z"
-                fill="#B69265"
-              />
-              <path
-                d="M13.1196 30.6691C13.3475 30.7704 13.4614 30.8211 13.5263 30.7515C13.5911 30.682 13.53 30.5671 13.4079 30.3373L11.8278 27.3639C11.1361 26.2628 10.6677 25.5227 10.2472 25.0216C9.84068 24.5373 9.58675 24.4105 9.36809 24.371C8.82828 24.2735 7.96282 24.5003 6.92988 25.0281C6.38249 25.3077 5.84896 25.6401 5.38129 25.9657C5.13412 26.1377 5.01054 26.2238 5.01304 26.366C5.01554 26.5083 5.13657 26.5864 5.37862 26.7425L5.41354 26.7649C5.86583 27.0527 6.44295 27.3412 7.1227 27.6811L12.5 30.3697C12.7237 30.4817 12.9259 30.5829 13.1196 30.6691Z"
-                fill="#B69265"
-              />
-              <path
-                d="M10.6666 11.6667C10.1144 11.6667 9.66665 12.1144 9.66665 12.6667C9.66665 13.219 10.1144 13.6667 10.6666 13.6667L16 13.6667C16.5523 13.6667 17 13.219 17 12.6667C17 12.1144 16.5523 11.6667 16 11.6667L10.6666 11.6667Z"
-                fill="#B69265"
-              />
-              <path
-                d="M10.6666 18.3333C10.1144 18.3333 9.66665 18.781 9.66665 19.3333C9.66665 19.8856 10.1144 20.3333 10.6666 20.3333L21.3333 20.3333C21.8856 20.3333 22.3333 19.8856 22.3333 19.3333C22.3333 18.781 21.8856 18.3333 21.3333 18.3333L10.6666 18.3333Z"
-                fill="#B69265"
-              />
-            </svg>
-          </template>
-        </StatsWidget>
-      </v-col>
-      <v-col sm="6" md="3">
-        <StatsWidget title="الفرق الميدانية" number="23">
-          <template #icon>
-            <svg
-              width="2.2rem"
-              height="2.2rem"
-              viewBox="0 0 32 33"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                opacity="0.4"
-                d="M19.4065 3.66663L12.5935 3.66663C10.7701 3.6666 9.30027 3.66658 8.14433 3.82199C6.94418 3.98335 5.93368 4.32854 5.13113 5.13109C4.32857 5.93365 3.98338 6.94415 3.82202 8.14429C3.66661 9.30024 3.66663 10.77 3.66666 12.5934L3.66666 22.0863C3.66663 22.8462 3.66661 23.4915 3.72175 24.0247C3.7378 24.18 3.74582 24.2576 3.78571 24.3144C3.83836 24.3894 3.93768 24.4352 4.02889 24.4266C4.09799 24.4202 4.16988 24.3707 4.31367 24.2717C4.83058 23.9158 5.41457 23.5556 6.02088 23.2458C7.11095 22.6889 8.4922 22.1791 9.72441 22.4016C10.5943 22.5586 11.2279 23.0767 11.78 23.7346C12.304 24.3588 12.8495 25.2274 13.5032 26.2683L13.5609 26.3602L15.8009 30.5754C15.9108 30.7822 15.9658 30.8856 16.0609 30.9428C16.156 31 16.2731 31 16.5073 31H19.4065C21.2299 31 22.6997 31 23.8557 30.8446C25.0558 30.6832 26.0663 30.3381 26.8689 29.5355C27.6714 28.7329 28.0166 27.7224 28.178 26.5223C28.3334 25.3663 28.3334 23.8966 28.3333 22.0731V12.5935C28.3334 10.77 28.3334 9.30025 28.178 8.14429C28.0166 6.94415 27.6714 5.93365 26.8689 5.13109C26.0663 4.32854 25.0558 3.98335 23.8557 3.82199C22.6997 3.66658 21.2299 3.6666 19.4065 3.66663Z"
-                fill="#B69265"
-              />
-              <path
-                d="M9.33331 2C10.0697 2 10.6666 2.59695 10.6666 3.33333V6C10.6666 6.73638 10.0697 7.33333 9.33331 7.33333C8.59693 7.33333 7.99998 6.73638 7.99998 6L7.99998 3.33333C7.99998 2.59695 8.59693 2 9.33331 2Z"
-                fill="#B69265"
-              />
-              <path
-                d="M16 2C16.7364 2 17.3333 2.59695 17.3333 3.33333V6C17.3333 6.73638 16.7364 7.33333 16 7.33333C15.2636 7.33333 14.6666 6.73638 14.6666 6L14.6666 3.33333C14.6666 2.59695 15.2636 2 16 2Z"
-                fill="#B69265"
-              />
-              <path
-                d="M22.6666 2C23.403 2 24 2.59695 24 3.33333V6C24 6.73638 23.403 7.33333 22.6666 7.33333C21.9303 7.33333 21.3333 6.73638 21.3333 6V3.33333C21.3333 2.59695 21.9303 2 22.6666 2Z"
-                fill="#B69265"
-              />
-              <path
-                d="M13.1196 30.6691C13.3475 30.7704 13.4614 30.8211 13.5263 30.7515C13.5911 30.682 13.53 30.5671 13.4079 30.3373L11.8278 27.3639C11.1361 26.2628 10.6677 25.5227 10.2472 25.0216C9.84068 24.5373 9.58675 24.4105 9.36809 24.371C8.82828 24.2735 7.96282 24.5003 6.92988 25.0281C6.38249 25.3077 5.84896 25.6401 5.38129 25.9657C5.13412 26.1377 5.01054 26.2238 5.01304 26.366C5.01554 26.5083 5.13657 26.5864 5.37862 26.7425L5.41354 26.7649C5.86583 27.0527 6.44295 27.3412 7.1227 27.6811L12.5 30.3697C12.7237 30.4817 12.9259 30.5829 13.1196 30.6691Z"
-                fill="#B69265"
-              />
-              <path
-                d="M10.6666 11.6667C10.1144 11.6667 9.66665 12.1144 9.66665 12.6667C9.66665 13.219 10.1144 13.6667 10.6666 13.6667L16 13.6667C16.5523 13.6667 17 13.219 17 12.6667C17 12.1144 16.5523 11.6667 16 11.6667L10.6666 11.6667Z"
-                fill="#B69265"
-              />
-              <path
-                d="M10.6666 18.3333C10.1144 18.3333 9.66665 18.781 9.66665 19.3333C9.66665 19.8856 10.1144 20.3333 10.6666 20.3333L21.3333 20.3333C21.8856 20.3333 22.3333 19.8856 22.3333 19.3333C22.3333 18.781 21.8856 18.3333 21.3333 18.3333L10.6666 18.3333Z"
-                fill="#B69265"
-              />
-            </svg>
-          </template>
-        </StatsWidget>
-      </v-col>
-    </v-row>
-  </v-container>
+        </v-card>
+      </v-dialog>
+    </v-container>
+  </div>
 </template>
 
 <style lang="scss" scoped>
-// @use "@core/scss/template/libs/apex-chart.scss";
-.grid {
-  flex-wrap: wrap;
+.bg-light-white {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 16px;
+}
 
-  &__item {
-    // width: 100%;/
+.search-field {
+  :deep(.v-field) {
+    border-radius: 8px;
+    background-color: white;
 
-    @media (min-width: 960px) {
-      width: calc((100% - 4px) / 5);
+    .v-field__input {
+      min-height: 44px;
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
-    @media (min-width: 600px) and (max-width: 959px) {
-      width: calc((100% - 4px) / 2);
+    .v-field__prepend-inner {
+      padding-inline-start: 12px;
+      color: rgba(0, 0, 0, 0.38);
     }
+  }
+}
 
-    @media (max-width: 599px) {
-      width: 100%;
+.add-team-dialog {
+  :deep(.v-card) {
+    background-color: white;
+  }
+
+  :deep(.v-field) {
+    border-radius: 8px;
+    background-color: rgb(250, 250, 250);
+
+    &.v-field--focused {
+      background-color: white;
     }
+  }
+
+  :deep(.v-btn) {
+    text-transform: none;
+    letter-spacing: 0;
+    border-radius: 8px;
+  }
+
+  .country-code-select {
+    :deep(.v-field__input) {
+      padding-top: 0;
+      padding-bottom: 0;
+    }
+  }
+}
+
+.min-width-300px {
+  min-width: 300px;
+}
+
+.field-team-item {
+  padding: 8px;
+  border-radius: 8px;
+  margin: 4px 0;
+
+  &:hover {
+    background-color: rgba(182, 146, 101, 0.05);
+  }
+
+  &.v-list-item--active {
+    background-color: rgba(182, 146, 101, 0.1);
+  }
+}
+
+:deep(.v-select) {
+  .v-field__input {
+    padding-top: 0;
+    padding-bottom: 0;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  .v-field__placeholder {
+    transform: translateY(0) !important;
+    padding: 0 6px;
+    margin-top: 6px;
+  }
+
+  .v-field__field {
+    padding-top: 0 !important;
   }
 }
 </style>

@@ -1,6 +1,10 @@
 <script setup>
 const props = defineProps({
   avatars: [],
+  size: {
+    type: String,
+    default: "45",
+  },
 });
 
 const visibleItems = computed(() => {
@@ -16,7 +20,7 @@ const visibleItems = computed(() => {
   <div class="d-flex pa-2 rounded-pill bg-background">
     <template v-for="(item, index) in visibleItems" :key="index">
       <v-avatar
-        size="45"
+        :size="size"
         style="border: 4px solid #fff"
         :class="{ 'ms-n3': index > 0 }"
       >
@@ -26,12 +30,12 @@ const visibleItems = computed(() => {
     </template>
     <v-avatar
       v-if="avatars?.length > 4"
-      size="45"
+      :size="size"
       color="gray"
       style="border: 4px solid #fff"
       class="ms-n3"
     >
-      <span class="text-h6 text-primary">
+      <span class="text-primary">
         <span>{{ avatars?.length - 4 }}</span>
         <span>+</span>
       </span>

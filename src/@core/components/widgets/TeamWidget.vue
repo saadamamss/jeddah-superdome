@@ -1,58 +1,39 @@
 <script setup>
 import AvatarGroup from "@/@core/components/shared/AvatarGroup";
+import { computed } from "vue";
 
-defineProps({
+const props = defineProps({
   title: "",
   companiesCount: 0,
+  teamMembers: {
+    type: Array,
+    default: () => [
+      {
+        id: 1,
+        name: "عبدالله قحطاني",
+        avatar: "/imgs/person.svg",
+      },
+      {
+        id: 2,
+        name: "أحمد علي",
+        avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
+      },
+      {
+        id: 3,
+        name: "عبدالله قحطاني",
+        avatar: "/imgs/person.svg",
+      },
+    ],
+  },
 });
 
-const teamMembers = [
-  {
-    id: 1,
-    name: "عبدالله قحطاني",
-    avatar: "/imgs/person.svg",
-  },
-  {
-    id: 2,
-    name: "أحمد علي",
-    avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
-  },
-  {
-    id: 3,
-    name: "عبدالله قحطاني",
-    avatar: "/imgs/person.svg",
-  },
-  {
-    id: 4,
-    name: "أحمد علي",
-    avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
-  },
-  {
-    id: 5,
-    name: "عبدالله قحطاني",
-    avatar: "/imgs/person.svg",
-  },
-  {
-    id: 6,
-    name: "أحمد علي",
-    avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
-  },
-  {
-    id: 7,
-    name: "عبدالله قحطاني",
-    avatar: "/imgs/person.svg",
-  },
-  {
-    id: 8,
-    name: "أحمد علي",
-    avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
-  },
-  {
-    id: 9,
-    name: "عبدالله قحطاني",
-    avatar: "/imgs/person.svg",
-  },
-];
+// Map teamMembers to the format expected by AvatarGroup
+const avatars = computed(() =>
+  props.teamMembers.map((member) => ({
+    name: member.name,
+    avatar: member.avatar,
+  }))
+);
 </script>
 
 <template>
@@ -101,13 +82,16 @@ const teamMembers = [
       </div>
       <VDivider class="my-5" />
       <div class="d-flex align-center justify-space-between ga-4">
-        <AvatarGroup :avatars="teamMembers" />
+        <AvatarGroup :avatars="avatars" :size="32" />
         <v-btn
           size="small"
           elevation="0"
           class="btn-card-link px-3 text-primary rounded-xl"
         >
-          <span class="d-flex align-center ga-2">
+          <router-link
+            :to="`/teams/team-management/32`"
+            class="d-flex align-center ga-2"
+          >
             <span class="font-weight-bold">عرض</span>
 
             <svg
@@ -129,7 +113,7 @@ const teamMembers = [
                 fill="#B69265"
               />
             </svg>
-          </span>
+          </router-link>
         </v-btn>
       </div>
     </v-card-text>

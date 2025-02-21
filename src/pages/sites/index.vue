@@ -558,10 +558,10 @@ onMounted(() => {
                 >
                 <v-text-field
                   v-model="housingPermitNumber"
-                  variant="outlined"
-                  density="comfortable"
                   placeholder="رقم تصريح السكن"
                   hide-details
+                  variant="outlined"
+                  density="comfortable"
                   class="rounded-lg bg-grey-lighten-4"
                   required
                 />
