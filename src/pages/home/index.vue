@@ -589,7 +589,7 @@ onMounted(() => {
             <v-card-text class="mt-2">
               <v-row>
                 <v-col v-for="item in 4" :key="item" cols="12" md="6">
-                  <SiteWidget />
+                  <SiteWidget :type="`${item % 2 != 0 ? 'camp' : 'company'}`" />
                 </v-col>
               </v-row>
 
@@ -697,7 +697,7 @@ onMounted(() => {
                   </span>
                 </v-btn>
               </v-card-title>
-              <v-card-text>
+              <v-card-text class="px-2">
                 <NotificationWidget
                   v-for="index in 10"
                   :notification="{
@@ -757,7 +757,7 @@ onMounted(() => {
                   </span>
                 </v-btn>
               </v-card-title>
-              <v-card-text>
+              <v-card-text class="px-2">
                 <UserWidget
                   v-for="index in 10"
                   :user="{
