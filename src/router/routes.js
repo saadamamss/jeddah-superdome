@@ -31,7 +31,7 @@ export default [
         name: "home",
         component: DashboardHome,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -39,7 +39,7 @@ export default [
         name: "sites",
         component: SitesPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -47,7 +47,7 @@ export default [
         name: "housing-details",
         component: HousingDetailsPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -65,7 +65,7 @@ export default [
         name: "teams",
         component: TeamsPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -78,7 +78,7 @@ export default [
         name: "main-sectors",
         component: MainSectorsPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -86,7 +86,7 @@ export default [
         name: "roles",
         component: RolesPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -94,7 +94,7 @@ export default [
         name: "users",
         component: UsersPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -102,7 +102,7 @@ export default [
         name: "notes",
         component: NotesPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -110,7 +110,7 @@ export default [
         name: "rating",
         component: RatingPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
       {
@@ -118,7 +118,7 @@ export default [
         name: "contracts",
         component: ContractsPage,
         meta: {
-          requiresAuth: true,
+          // requiresAuth: true,
         },
       },
 
