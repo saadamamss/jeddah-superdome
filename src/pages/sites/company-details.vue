@@ -46,18 +46,22 @@ const sites = ref([
   {
     siteId: "6127782187",
     authorizationNumber: "231 3456 567",
+    status: "معتمد",
   },
   {
     siteId: "6127782188",
     authorizationNumber: "231 3456 568",
+    status: "مرفوض",
   },
   {
     siteId: "6127782189",
     authorizationNumber: "231 3456 569",
+    status: "مرفوض",
   },
   {
     siteId: "6127782190",
     authorizationNumber: "231 3456 570",
+    status: "معتمد",
   },
 ]);
 
@@ -182,7 +186,7 @@ onMounted(() => {
         </template>
       </v-breadcrumbs>
       <StatisticsBar title="شركة رواف منى" />
-      <v-container fluid class="mt-6 px-0 rounded-lg">
+      <v-container fluid class="mt-n4 px-0 rounded-lg">
         <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
           <!-- Header Section -->
           <v-card-title
@@ -222,7 +226,7 @@ onMounted(() => {
 
           <!-- Tabs Section -->
 
-          <v-row class="mt-6">
+          <v-row class="mt-0">
             <v-col
               v-for="site in sites"
               :key="site.siteId"
@@ -232,7 +236,7 @@ onMounted(() => {
               lg="4"
               class="pa-3"
             >
-              <ratingCard />
+              <ratingCard :status="site.status" />
             </v-col>
           </v-row>
 

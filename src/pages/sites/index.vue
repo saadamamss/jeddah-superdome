@@ -37,18 +37,22 @@ const sites = ref([
   {
     siteId: "6127782187",
     authorizationNumber: "231 3456 567",
+    status: "active",
   },
   {
     siteId: "6127782188",
     authorizationNumber: "231 3456 568",
+    status: "inActive",
   },
   {
     siteId: "6127782189",
     authorizationNumber: "231 3456 569",
+    status: "active",
   },
   {
     siteId: "6127782190",
     authorizationNumber: "231 3456 570",
+    status: "inActive",
   },
 ]);
 
@@ -493,6 +497,7 @@ onMounted(() => {
                   <SiteCard
                     :site-id="site.siteId"
                     :authorization-number="site.authorizationNumber"
+                    :status="site.status"
                   />
                 </v-col>
               </v-row>

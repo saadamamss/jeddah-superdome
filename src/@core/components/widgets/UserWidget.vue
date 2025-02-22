@@ -22,7 +22,7 @@ defineProps({
     "
   >
     <v-card-text :class="noPadding ? 'pa-0' : 'px-3 py-4'">
-      <div class="d-flex ga-3">
+      <div class="d-flex ga-3 align-center">
         <div>
           <span
             class="d-flex justify-center align-center"
