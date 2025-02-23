@@ -13,8 +13,11 @@ import TeamManagementPage from "@/pages/teams/team-management";
 import AddRatePage from "@/pages/sites/addRate";
 import TeamsPage from "@/pages/teams";
 import MainSectorsPage from "@/pages/main-sectors";
+import AddSectorsPage from "@/pages/main-sectors/addSectors";
 import RolesPage from "@/pages/roles";
 import NotesPage from "@/pages/notes";
+import AddNotePage from "@/pages/notes/addNote";
+import EditNotePage from "@/pages/notes/editNote";
 import RatingPage from "@/pages/rating";
 import CompanyRatingPage from "@/pages/rating/company-rating";
 import ContractsPage from "@/pages/contracts";
@@ -83,6 +86,11 @@ export default [
         },
       },
       {
+        path: "/main-sectors/add-sectors",
+        name: "add-sectors",
+        component: AddSectorsPage,
+      },
+      {
         path: "/roles",
         name: "roles",
         component: RolesPage,
@@ -105,6 +113,16 @@ export default [
         meta: {
           // requiresAuth: true,
         },
+      },
+      {
+        path: "/notes/add",
+        name: "add-note",
+        component: AddNotePage,
+      },
+      {
+        path: "/notes/edit/:id",
+        name: "edit-note",
+        component: EditNotePage,
       },
       {
         path: "/rating",

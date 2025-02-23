@@ -329,7 +329,7 @@ onMounted(() => {
             <v-card-title
               class="d-flex flex-column flex-lg-row align-lg-center justify-space-between ga-4"
             >
-              <h2 class="text-h5 font-weight-bold">إدارة المواقع</h2>
+              <h2 class="text-h5 font-weight-bold mb-4">إدارة المواقع</h2>
               <div class="d-flex flex-column flex-sm-row align-sm-center ga-2">
                 <v-text-field
                   v-model="search"
@@ -607,7 +607,7 @@ onMounted(() => {
             <v-card-title
               class="d-flex flex-column flex-lg-row align-lg-center justify-space-between ga-4"
             >
-              <h2 class="text-h5 font-weight-bold">الفرق الميدانية</h2>
+              <h2 class="text-h5 font-weight-bold mb-4">الفرق الميدانية</h2>
               <div class="d-flex ga-2">
                 <v-select
                   v-model="teamLocation"
@@ -760,6 +760,7 @@ onMounted(() => {
               <v-card-text class="px-2">
                 <UserWidget
                   v-for="index in 10"
+                  :key="index"
                   :user="{
                     id: index,
                     name: 'عبدالله قحطاني',
