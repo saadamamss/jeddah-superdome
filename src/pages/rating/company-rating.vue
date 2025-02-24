@@ -192,7 +192,7 @@ onMounted(() => {
           <v-card-title
             class="d-flex align-center justify-space-between ga-4 pt-4"
           >
-            <h2 class="text-h5 font-weight-bold">التقييمات</h2>
+            <h2 class="text-h5 font-weight-bold mb-4">التقييمات</h2>
             <div class="d-flex align-center gap-3">
               <v-select
                 v-model="timeFilter"

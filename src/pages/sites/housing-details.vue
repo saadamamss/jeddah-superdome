@@ -188,7 +188,7 @@ onMounted(() => {
             <!-- Header Section -->
             <v-card-title class="pt-4 pb-6">
               <div class="d-flex align-center justify-space-between ga-4">
-                <h2 class="text-h5 font-weight-bold">الشركات</h2>
+                <h2 class="text-h5 font-weight-bold mb-4">الشركات</h2>
                 <div class="d-flex align-center ga-2">
                   <v-text-field
                     v-model="search"

@@ -135,7 +135,7 @@ defineExpose({
             class="d-flex align-center justify-space-between ga-4 pt-4"
           >
             <div>
-              <h2 class="text-h5 font-weight-bold">#434343434</h2>
+              <h2 class="text-h5 font-weight-bold mb-4">#434343434</h2>
               <p class="text-subtitle-2">12 مارس 2024 - 12:24 مساءً</p>
             </div>
             <v-btn

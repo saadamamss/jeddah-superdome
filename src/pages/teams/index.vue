@@ -189,7 +189,9 @@ onMounted(() => {
               <div
                 class="d-flex align-center justify-space-between ga-4 border-b pb-4"
               >
-                <h2 class="text-h5 font-weight-bold">إدارة الفرق الميدانية</h2>
+                <h2 class="text-h5 font-weight-bold mb-4">
+                  إدارة الفرق الميدانية
+                </h2>
                 <div class="d-flex align-center ga-2">
                   <v-text-field
                     v-model="search"

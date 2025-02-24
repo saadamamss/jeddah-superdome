@@ -40,7 +40,7 @@ export default [
     permission: true,
   },
   {
-    title: "⁠⁠إدارة المحاور",
+    title: "⁠⁠إدارة المراحل",
     to: { name: "main-sectors" },
     icon: PointIcon,
     permission: true,
