@@ -34,7 +34,7 @@ export default [
     permission: true,
   },
   {
-    title: "إدارة التعاقدات",
+    title: "إدارة الباقات (التعاقدات)",
     to: { name: "contracts" },
     icon: ContractsIcon,
     permission: true,
