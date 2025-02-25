@@ -95,7 +95,7 @@ const statistics = computed(() => [
 ]);
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .statistics-bar {
   background-color: white;
   border-radius: 16px;

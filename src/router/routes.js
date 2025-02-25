@@ -21,7 +21,7 @@ import EditNotePage from "@/pages/notes/editNote";
 import RatingPage from "@/pages/rating";
 import CompanyRatingPage from "@/pages/rating/company-rating";
 import ContractsPage from "@/pages/contracts";
-
+import UserDetailsPage from "@/pages/users/user-details";
 import NotFoundPage from "@/pages/NotFound";
 // import TempPage from "@/pages/temp";
 
@@ -105,6 +105,11 @@ export default [
         meta: {
           // requiresAuth: true,
         },
+      },
+      {
+        path: "/users/user-details/:id",
+        name: "user-details",
+        component: UserDetailsPage,
       },
       {
         path: "/notes",

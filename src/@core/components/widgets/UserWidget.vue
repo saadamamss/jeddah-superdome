@@ -1,6 +1,9 @@
 <script setup>
 defineProps({
-  user: {},
+  user: {
+    type: Object,
+    required: true,
+  },
   noShadow: {
     type: Boolean,
     default: false,
@@ -9,43 +12,83 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  transparent: {
+    type: Boolean,
+    default: false,
+  },
+  size: {
+    type: String,
+    default: "medium",
+  },
 });
 </script>
 
 <template>
-  <VCard
-    class="rounded-lg"
-    :style="
-      noShadow
-        ? 'box-shadow: none'
-        : 'box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)'
-    "
+  <div
+    class="user-widget"
+    :class="{
+      'no-shadow': noShadow,
+      'no-padding': noPadding,
+      transparent: transparent,
+    }"
   >
-    <v-card-text :class="noPadding ? 'pa-0' : 'px-3 py-4'">
-      <div class="d-flex ga-3 align-center">
-        <div>
-          <span
-            class="d-flex justify-center align-center"
-            style="width: 2.5rem; height: 2.5rem"
-          >
-            <img
-              src="/imgs/person.svg"
-              width="2.5rem"
-              height="2.5rem"
-              class="avatar-img"
-              style="width: 2.5rem; height: 2.5rem"
-            />
-          </span>
-        </div>
-        <div>
-          <h2 class="text-subtitle-1 text-black mb-1">
-            {{ user?.name }}
-          </h2>
-          <p class="mb-0 text-body-2" style="color: #75797c">
-            {{ user?.job }}
-          </p>
-        </div>
+    <div class="d-flex gap-3 align-center">
+      <div>
+        <span class="avatar-wrapper d-flex justify-center align-center">
+          <img
+            src="/imgs/person.svg"
+            class="avatar-img"
+            alt="User avatar"
+            :style="{ width: size === 'small' ? '2rem' : '2.5rem' }"
+          />
+        </span>
       </div>
-    </v-card-text>
-  </VCard>
+      <div>
+        <h2 class="user-name text-subtitle-1 text-black mb-1">
+          {{ user?.name }}
+        </h2>
+        <p class="user-job mb-0 text-body-2">
+          {{ user?.job }}
+        </p>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style lang="scss" scoped>
+.user-widget {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+
+  &.transparent {
+    background-color: transparent;
+  }
+
+  &.no-shadow {
+    box-shadow: none;
+  }
+
+  &.no-padding {
+    padding: 0;
+  }
+
+  .avatar-wrapper {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .avatar-img {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .user-name {
+    color: #000;
+  }
+
+  .user-job {
+    color: #75797c;
+  }
+}
+</style>
