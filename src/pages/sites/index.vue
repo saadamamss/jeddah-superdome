@@ -4,11 +4,11 @@ import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import Pagination from "@/@core/components/Pagination";
 import SiteCard from "@/@core/components/widgets/SiteCard.vue";
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
+import axios from "@/plugins/axios";
+import { useAuthStore } from "@/stores/Auth";
+import LocationPicker from "@/components/maps/LocationPicker.vue";
 
-const appStore = useAppStore();
-const filterToggle = ref(0);
-const dateRange = ref();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
@@ -21,40 +21,268 @@ const housingPermitNumber = ref("");
 const authorizedContactNumber = ref("");
 const selectedCompany = ref(null);
 const activeTab = ref("all");
+const sites = ref([]);
+const totalItems = ref(0);
+const selectedLocation = ref({ lat: 24.7136, lng: 46.6753 }); // Default to Riyadh coordinates
 
-const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
-];
+// Add new filter refs
+const filters = ref({
+  type: null,
+  status: null,
+  dateRange: null,
+});
 
-const companies = [
-  { title: "شركة رواف منى", value: "rawaf" },
-  { title: "شركة الخليج", value: "gulf" },
-];
+const formData = ref({
+  name: "",
+  location_type_id: null,
+  location_sub_type_id: 1,
+  contract_id: 3,
+  delegate_name: "",
+  delegate_phone: "",
+  license_no: "",
+  camp_number: "",
+  square_number: "",
+  latitude: "24.7136",
+  longitude: "46.6753",
+  companies: [],
+});
 
-const sites = ref([
-  {
-    siteId: "6127782187",
-    authorizationNumber: "231 3456 567",
-    status: "active",
+// Add form validation rules
+const rules = {
+  name: [
+    (v) => !!v || "اسم الموقع مطلوب",
+    (v) => (v && v.length >= 3) || "يجب أن يكون اسم الموقع 3 أحرف على الأقل",
+  ],
+  location_type_id: [(v) => !!v || "نوع الموقع مطلوب"],
+  license_no: [
+    (v) => !!v || "رقم الترخيص مطلوب",
+    (v) => /^\d+$/.test(v) || "يجب أن يكون رقم الترخيص رقمًا",
+  ],
+  camp_number: [
+    (v) => !!v || "رقم المخيم مطلوب",
+    (v) => /^\d+$/.test(v) || "يجب أن يكون رقم المخيم رقمًا",
+  ],
+  square_number: [
+    (v) => !!v || "رقم المربع مطلوب",
+    (v) => /^\d+$/.test(v) || "يجب أن يكون رقم المربع رقمًا",
+  ],
+  delegate_name: [
+    (v) => !!v || "اسم المفوض مطلوب",
+    (v) => (v && v.length >= 3) || "يجب أن يكون اسم المفوض 3 أحرف على الأقل",
+  ],
+  delegate_phone: [
+    (v) => !!v || "رقم هاتف المفوض مطلوب",
+    (v) => /^[0-9]{9}$/.test(v) || "يجب أن يكون رقم الهاتف 9 أرقام",
+  ],
+  contract_id: [(v) => !!v || "رقم العقد مطلوب"],
+  companies: [(v) => (v && v.length > 0) || "يجب اختيار شركة واحدة على الأقل"],
+};
+
+// Add form ref
+const form = ref(null);
+
+// Update companies to be reactive
+const companies = ref([]);
+const companiesLoading = ref(false);
+const companiesTotal = ref(0);
+const companiesPage = ref(1);
+const companiesPerPage = ref(10);
+const companiesSearch = ref("");
+
+const housing_count = ref(0);
+const camp_count = ref(0);
+const siteTypes = ref([]);
+
+// Add contracts state
+const contracts = ref([]);
+const contractsLoading = ref(false);
+
+// Add function to fetch contracts
+const fetchContracts = async () => {
+  try {
+    contractsLoading.value = true;
+    const response = await axios.get("contracts");
+    if (response.data && response.data.data) {
+      contracts.value = response.data.data.map((contract) => ({
+        title: contract.name || `Contract #${contract.id}`,
+        value: contract.id,
+        raw: contract,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching contracts:", error);
+    useAppStore().showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات العقود",
+      color: "error",
+    });
+  } finally {
+    contractsLoading.value = false;
+  }
+};
+
+// Add function to fetch companies
+const fetchCompanies = async (page = 1, search = "") => {
+  try {
+    companiesLoading.value = true;
+
+    // Build query parameters
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      per_page: companiesPerPage.value.toString(),
+      search: search,
+    });
+
+    const response = await axios.get(`companies?${queryParams.toString()}`);
+    if (response.data && response.data.data) {
+      // Transform the data to match select requirements
+      const newCompanies = response.data.data.map((company) => ({
+        title: company.name,
+        value: company.id,
+        raw: company, // Store the raw company data if needed
+      }));
+
+      // If it's the first page, replace the companies array
+      // If it's a subsequent page, append to the existing array
+      if (page === 1) {
+        companies.value = newCompanies;
+      } else {
+        companies.value = [...companies.value, ...newCompanies];
+      }
+
+      companiesTotal.value = response.data.meta?.total || 0;
+      companiesPage.value = page;
+    }
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    useAppStore().showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات الشركات",
+      color: "error",
+    });
+  } finally {
+    companiesLoading.value = false;
+  }
+};
+
+// Add debounced search for companies
+const debouncedCompanySearch = ref(null);
+watch(companiesSearch, (newValue) => {
+  if (debouncedCompanySearch.value) clearTimeout(debouncedCompanySearch.value);
+  debouncedCompanySearch.value = setTimeout(() => {
+    companiesPage.value = 1; // Reset to first page when searching
+    fetchCompanies(1, newValue);
+  }, 500); // 500ms debounce
+});
+
+// Function to fetch locations data with search and filters
+const fetchLocations = async (page = 1) => {
+  try {
+    isLoading.value = true;
+    console.log("Fetching page:", page);
+
+    // Build query parameters
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      search: search.value,
+      ...(filters.value.type && { type: filters.value.type }),
+      ...(filters.value.status && { status: filters.value.status }),
+      ...(filters.value.dateRange && {
+        start_date: filters.value.dateRange[0],
+        end_date: filters.value.dateRange[1],
+      }),
+    });
+
+    // Choose endpoint based on active tab
+    const endpoint =
+      activeTab.value === "correction" ? "location-corrections" : "locations";
+    const response = await axios.get(`${endpoint}?${queryParams.toString()}`);
+    const responseLocations = await axios.get(`locations-types`);
+
+    siteTypes.value = responseLocations.data.data.sub_types;
+
+    if (activeTab.value === "correction") {
+      // Handle correction response structure
+      sites.value = response.data.data || [];
+      totalItems.value = response.data.pagination?.i_total_objects || 0;
+      perPage.value = response.data.pagination?.i_per_page || perPage.value;
+      currentPage.value = response.data.pagination?.i_current_page || 1;
+    } else {
+      // Handle regular locations response structure
+      if (response.data?.data?.locations) {
+        sites.value = response.data.data.locations;
+        if (response.data.data.statistics) {
+          housing_count.value =
+            response.data.data.statistics.housing_count || 0;
+          camp_count.value = response.data.data.statistics.camp_count || 0;
+          // For pagination, we'll use the total count of locations
+          totalItems.value =
+            (housing_count.value || 0) + (camp_count.value || 0);
+        }
+      } else {
+        sites.value = [];
+        housing_count.value = 0;
+        camp_count.value = 0;
+        totalItems.value = 0;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    sites.value = [];
+    totalItems.value = 0;
+    housing_count.value = 0;
+    camp_count.value = 0;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Watch for search changes with debounce
+const debouncedSearch = ref(null);
+watch(search, (newValue) => {
+  if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+  debouncedSearch.value = setTimeout(() => {
+    currentPage.value = 1; // Reset to first page when searching
+    fetchLocations(1);
+  }, 500); // 500ms debounce
+});
+
+// Watch for filter changes
+watch(
+  filters,
+  () => {
+    currentPage.value = 1; // Reset to first page when filters change
+    fetchLocations(1);
   },
-  {
-    siteId: "6127782188",
-    authorizationNumber: "231 3456 568",
-    status: "inActive",
+  { deep: true }
+);
+
+// Watch for page changes
+watch(
+  [currentPage],
+  async (newPage) => {
+    await fetchLocations(newPage[0]);
   },
-  {
-    siteId: "6127782189",
-    authorizationNumber: "231 3456 569",
-    status: "active",
-  },
-  {
-    siteId: "6127782190",
-    authorizationNumber: "231 3456 570",
-    status: "inActive",
-  },
-]);
+  { immediate: true }
+);
+
+// Watch for tab changes
+watch(activeTab, () => {
+  currentPage.value = 1; // Reset to first page when changing tabs
+  fetchLocations(1);
+});
+
+// Function to apply filters
+const applyFilters = () => {
+  fetchLocations(1);
+};
+
+// Function to reset filters
+const resetFilters = () => {
+  filters.value = {
+    type: null,
+    status: null,
+    dateRange: null,
+  };
+};
 
 const violationOptions = ref([
   {
@@ -78,13 +306,116 @@ const complaintOptions = ref([
   },
 ]);
 
+// Add function to fetch correction details
+const fetchCorrectionDetails = async (id) => {
+  try {
+    loading.value = true;
+    const response = await axios.get(`location-corrections/${id}`);
+    console.log("Correction details response:", response);
+
+    if (response.data?.data) {
+      const correctionData = response.data.data;
+
+      // Map API response fields to form fields
+      formData.value = {
+        id: correctionData.id,
+        location_id: correctionData.location_id,
+        camp_number: correctionData.camp_number || "",
+        delegate_phone: correctionData.contact_number
+          ? correctionData.contact_number.replace("+1.", "")
+          : "",
+        square_number: correctionData.square_number || "",
+        latitude: correctionData.latitude?.toString() || "",
+        longitude: correctionData.longitude?.toString() || "",
+      };
+
+      // Set map location if coordinates exist
+      if (correctionData.latitude && correctionData.longitude) {
+        selectedLocation.value = {
+          lat: parseFloat(correctionData.latitude),
+          lng: parseFloat(correctionData.longitude),
+        };
+      }
+
+      dialog.value = true;
+    } else {
+      throw new Error("No data received");
+    }
+  } catch (error) {
+    console.error("Error fetching correction details:", error);
+    useAppStore().showSnackbar({
+      message: "خطأ في جلب بيانات التصحيح",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Add function to handle reCorrection
+const handleReCorrection = async (id) => {
+  await fetchCorrectionDetails(id);
+};
+
+// Update handleSubmit function to handle both new and correction updates
 const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
-  dialogStep.value = 1;
+  const { valid } = await form.value.validate();
+
+  if (!valid) {
+    useAppStore().showSnackbar({
+      message: "يرجى التحقق من صحة جميع الحقول",
+      color: "error",
+    });
+    return;
+  }
+
+  try {
+    loading.value = true;
+
+    // Format phone number if needed
+    const formattedPhone = formData.value.delegate_phone.startsWith("966")
+      ? formData.value.delegate_phone
+      : `966${formData.value.delegate_phone}`;
+
+    // Prepare request payload with correct field mapping
+    const payload = {
+      ...formData.value,
+      contact_number: formattedPhone, // Map delegate_phone to contact_number
+      delegate_phone: undefined, // Remove delegate_phone from payload
+    };
+
+    // Choose endpoint based on whether we're in correction mode
+    const endpoint =
+      activeTab.value === "correction"
+        ? `location-corrections/${formData.value.id}`
+        : "locations";
+
+    // Make API call
+    const response = await axios.post(endpoint, payload);
+
+    if (response.data) {
+      useAppStore().showSnackbar({
+        message: "تم حفظ البيانات بنجاح",
+        color: "success",
+      });
+
+      // Reset form and close dialog
+      dialog.value = false;
+      dialogStep.value = 1;
+      form.value.reset();
+
+      // Refresh locations list
+      await fetchLocations(currentPage.value);
+    }
+  } catch (error) {
+    console.error("Error submitting location:", error);
+    useAppStore().showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء حفظ البيانات",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
 const nextStep = () => {
@@ -103,14 +434,135 @@ const closeDialog = () => {
 };
 
 const addNewLocation = () => {
+  formData.value = {
+    name: "",
+    location_type_id: null,
+    location_sub_type_id: 1,
+    contract_id: 3,
+    delegate_name: "",
+    delegate_phone: "",
+    license_no: "",
+    camp_number: "",
+    square_number: "",
+    latitude: "24.7136",
+    longitude: "46.6753",
+    companies: [],
+  };
+  selectedLocation.value = { lat: 24.7136, lng: 46.6753 };
   dialog.value = true;
 };
 
-onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 100);
+// Add this function to handle location changes
+const handleLocationChange = (newLocation) => {
+  if (newLocation) {
+    formData.value.latitude = newLocation.lat.toString();
+    formData.value.longitude = newLocation.lng.toString();
+    console.log("Location updated:", {
+      lat: formData.value.latitude,
+      lng: formData.value.longitude,
+    });
+  }
+};
+
+// Update the watch to use the handler function
+watch(selectedLocation, handleLocationChange, { deep: true });
+
+const openDialog = () => {
+  formData.value = {
+    name: "",
+    location_type_id: null,
+    location_sub_type_id: 1,
+    contract_id: 3,
+    delegate_name: "",
+    delegate_phone: "",
+    license_no: "",
+    camp_number: "",
+    square_number: "",
+    latitude: "24.7136",
+    longitude: "46.6753",
+    companies: [],
+  };
+  selectedLocation.value = { lat: 24.7136, lng: 46.6753 };
+  dialog.value = true;
+};
+
+// Add onMounted hook to fetch companies when component mounts
+onMounted(async () => {
+  await Promise.all([fetchCompanies(), fetchContracts()]);
 });
+
+// Add function to handle site approval
+const handleApprove = async (siteId) => {
+  try {
+    loading.value = true;
+    await axios.put(`location-corrections/${siteId}`, {
+      status: "approved",
+    });
+    useAppStore().showSnackbar({
+      message: "تم اعتماد التصحيح بنجاح",
+      color: "success",
+    });
+    await fetchLocations(currentPage.value);
+  } catch (error) {
+    console.error("Error approving correction:", error);
+    useAppStore().showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء اعتماد التصحيح",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Add function to handle site edit
+const handleEdit = (site) => {
+  formData.value = {
+    name: site.name,
+    location_type_id: site.location_type_id,
+    location_sub_type_id: site.location_sub_type_id,
+    contract_id: site.contract_id,
+    delegate_name: site.delegate_name,
+    delegate_phone: site.delegate_phone.replace("966", ""),
+    license_no: site.license_no,
+    camp_number: site.camp_number,
+    square_number: site.square_number,
+    latitude: site.latitude,
+    longitude: site.longitude,
+    companies: site.companies.map((company) => ({
+      title: company.name,
+      value: company.id,
+      raw: company,
+    })),
+  };
+  selectedLocation.value = {
+    lat: parseFloat(site.latitude),
+    lng: parseFloat(site.longitude),
+  };
+  dialog.value = true;
+  dialogStep.value = 2;
+};
+
+const handleReject = async (siteId) => {
+  try {
+    loading.value = true;
+    await axios.put(`location-corrections/${siteId}`, {
+      status: "rejected",
+    });
+    useAppStore().showSnackbar({
+      message: "تم رفض التصحيح بنجاح",
+      color: "success",
+    });
+    await fetchLocations(currentPage.value);
+  } catch (error) {
+    console.error("Error rejecting correction:", error);
+    useAppStore().showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء رفض التصحيح",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
 </script>
 
 <template>
@@ -134,7 +586,7 @@ onMounted(() => {
       <div v-else>
         <v-row>
           <v-col cols="12" md="6">
-            <StatsWidget title="المساكن" number="234">
+            <StatsWidget title="المساكن" :number="housing_count">
               <template #icon>
                 <svg
                   width="2.2rem"
@@ -165,7 +617,7 @@ onMounted(() => {
             </StatsWidget>
           </v-col>
           <v-col cols="12" md="6">
-            <StatsWidget title="المخيمات" number="23">
+            <StatsWidget title="المخيمات" :number="camp_count">
               <template #icon>
                 <svg
                   width="2.2rem"
@@ -272,6 +724,8 @@ onMounted(() => {
                       width="380px"
                       location="bottom end"
                       offset="14px"
+                      :close-on-content-click="false"
+                      persistent
                     >
                       <VList class="py-0 text-dark">
                         <VListItem
@@ -279,172 +733,119 @@ onMounted(() => {
                           class="notification-section"
                           height="48px"
                         >
+                          <template #append>
+                            <v-btn
+                              icon="mdi-close"
+                              variant="text"
+                              size="small"
+                              @click="
+                                $event.target
+                                  .closest('.v-menu')
+                                  .querySelector('.v-overlay__content')
+                                  .__vue__?.close()
+                              "
+                            ></v-btn>
+                          </template>
                         </VListItem>
 
                         <VDivider />
 
-                        <template>
-                          <VListItem
-                            title="notification.title"
-                            subtitle="notification.subtitle"
-                            link
-                            lines="one"
-                            min-height="60px"
-                            class="text-dark"
-                          >
-                            <!-- Slot: Prepend -->
-                            <!-- Handles Avatar: Image, Icon, Text -->
-                            <template #prepend>
-                              <VListItemAction start>
-                                <div>
-                                  <svg
-                                    width="3.5rem"
-                                    height="3.2rem"
-                                    viewBox="0 0 28 29"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <rect
-                                      y="0.5"
-                                      width="28"
-                                      height="28"
-                                      rx="4"
-                                      fill="#e8e4df"
-                                    />
-                                    <mask
-                                      id="mask0_20_50273"
-                                      style="mask-type: luminance"
-                                      maskUnits="userSpaceOnUse"
-                                      x="4"
-                                      y="4"
-                                      width="20"
-                                      height="21"
-                                    >
-                                      <path
-                                        d="M23.65 24.15V4.85H4.35V24.15H23.65Z"
-                                        fill="white"
-                                        stroke="white"
-                                        stroke-width="0.7"
-                                      />
-                                    </mask>
-                                    <g mask="url(#mask0_20_50273)">
-                                      <path
-                                        d="M9.25344 10.2832H4.29297"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M23.7066 10.2832H18.7461"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M22.7447 12.2831C22.7447 11.9519 22.4763 11.6835 22.1451 11.6835H19.1916C18.448 11.6835 17.7658 11.2708 17.4206 10.6122C17.0754 9.95352 16.3932 9.54086 15.6496 9.54086H12.3509C11.6073 9.54086 10.9251 9.95352 10.5799 10.6122C10.2347 11.2708 9.55254 11.6835 8.80891 11.6835H5.85543C5.52426 11.6835 5.25586 11.9519 5.25586 12.2831C5.25586 12.9533 5.7791 13.5069 6.44824 13.5447L10.5011 13.7735C10.903 13.7962 11.2866 13.9487 11.5944 14.208C11.9296 14.4905 12.3539 14.6455 12.7924 14.6455H15.2081C15.6466 14.6455 16.0709 14.4905 16.4062 14.208C16.7139 13.9487 17.0976 13.7962 17.4994 13.7735L21.5523 13.5447C22.2214 13.5069 22.7447 12.9533 22.7447 12.2831Z"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M16.9428 13.8916L16.2184 13.4361C16.0002 13.299 15.7478 13.2262 15.4901 13.2262H12.5054C12.2477 13.2262 11.9953 13.299 11.7771 13.4361L11.0527 13.8916"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M7.74011 13.6176L6.73058 19.2731C6.68933 19.5044 6.86714 19.7168 7.1021 19.7168C7.26027 19.7168 7.40167 19.6182 7.45628 19.4697L9.57179 13.721"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M20.3997 14.4014L20.2598 13.6176"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M18.4277 13.721L20.5432 19.4698C20.5979 19.6182 20.7393 19.7168 20.8974 19.7168C21.1323 19.7168 21.3102 19.5044 21.2689 19.2731L20.6411 15.7562"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M7.42473 11.6836V9.93547C7.42473 9.57547 7.13289 9.28367 6.77289 9.28367C6.41293 9.28367 6.12109 9.57547 6.12109 9.93547V11.6836"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M21.8779 11.6836V9.93547C21.8779 9.57547 21.586 9.28367 21.226 9.28367C20.8661 9.28367 20.5742 9.57547 20.5742 9.93547V11.6836"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M11.6035 17.1964V16.8266C11.6035 16.44 11.9169 16.1266 12.3035 16.1266H15.6993C16.0858 16.1266 16.3992 16.44 16.3992 16.8266V18.9387C16.3992 19.3253 16.0858 19.6387 15.6993 19.6387H12.3035C11.9169 19.6387 11.6035 19.3253 11.6035 18.9387V18.5662"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M14.7066 17.883C14.7066 18.2729 14.3906 18.5889 14.0008 18.5889C13.6109 18.5889 13.2949 18.2729 13.2949 17.883C13.2949 17.4932 13.6109 17.1773 14.0008 17.1773C14.3906 17.1773 14.7066 17.4932 14.7066 17.883Z"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M14.9316 16.127V14.6458"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M13.0684 14.6458V16.127"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                    </g>
-                                  </svg>
-                                </div>
-                              </VListItemAction>
-                            </template>
-                          </VListItem>
-                          <VDivider />
-                        </template>
+                        <!-- Filter Options -->
+                        <VListItem>
+                          <v-container>
+                            <!-- Site Type Filter -->
+                            <v-row class="mb-4">
+                              <v-col cols="12">
+                                <label class="text-subtitle-2 mb-2 d-block"
+                                  >نوع الموقع</label
+                                >
+                                <v-select
+                                  v-model="filters.type"
+                                  :items="siteTypes"
+                                  item-title="name"
+                                  item-value="id"
+                                  variant="outlined"
+                                  density="comfortable"
+                                  placeholder="اختر نوع الموقع"
+                                  hide-details
+                                  class="rounded-lg"
+                                  :menu-props="{
+                                    contentClass: 'filter-select-menu',
+                                  }"
+                                />
+                              </v-col>
+                            </v-row>
 
-                        <VListItem class="notification-section">
-                          <VBtn color="dark" variant="outlined" block>
-                            تطبيق التصفية
-                          </VBtn>
+                            <!-- Status Filter -->
+                            <v-row class="mb-4">
+                              <v-col cols="12">
+                                <label class="text-subtitle-2 mb-2 d-block"
+                                  >الحالة</label
+                                >
+                                <v-select
+                                  v-model="filters.status"
+                                  :items="[
+                                    { title: 'نشط', value: 'active' },
+                                    { title: 'غير نشط', value: 'inactive' },
+                                    { title: 'معلق', value: 'pending' },
+                                  ]"
+                                  item-title="title"
+                                  item-value="value"
+                                  variant="outlined"
+                                  density="comfortable"
+                                  placeholder="اختر الحالة"
+                                  hide-details
+                                  class="rounded-lg"
+                                  :menu-props="{
+                                    contentClass: 'filter-select-menu',
+                                  }"
+                                />
+                              </v-col>
+                            </v-row>
+
+                            <!-- Date Range Filter -->
+                            <v-row class="mb-4">
+                              <v-col cols="12">
+                                <label class="text-subtitle-2 mb-2 d-block"
+                                  >التاريخ</label
+                                >
+                                <AppDateTimePicker
+                                  v-model="filters.dateRange"
+                                  range
+                                  no-title
+                                  class="rounded-lg"
+                                />
+                              </v-col>
+                            </v-row>
+                          </v-container>
+                        </VListItem>
+
+                        <VDivider />
+
+                        <VListItem class="notification-section pa-4">
+                          <div class="d-flex gap-3">
+                            <VBtn
+                              color="error"
+                              variant="outlined"
+                              block
+                              @click="resetFilters"
+                            >
+                              إعادة تعيين
+                            </VBtn>
+                            <VBtn
+                              color="primary"
+                              block
+                              @click="
+                                applyFilters();
+                                $event.target
+                                  .closest('.v-menu')
+                                  .querySelector('.v-overlay__content')
+                                  .__vue__?.close();
+                              "
+                            >
+                              تطبيق التصفية
+                            </VBtn>
+                          </div>
                         </VListItem>
                       </VList>
                     </VMenu>
@@ -487,7 +888,7 @@ onMounted(() => {
               <v-row class="mt-6">
                 <v-col
                   v-for="site in sites"
-                  :key="site.siteId"
+                  :key="site.id"
                   cols="12"
                   sm="6"
                   md="4"
@@ -495,18 +896,63 @@ onMounted(() => {
                   class="pa-3"
                 >
                   <SiteCard
-                    :site-id="site.siteId"
-                    :authorization-number="site.authorizationNumber"
+                    :site-id="site.id"
+                    :name="site.name"
+                    :license-no="site.license_no"
+                    :delegate-phone="site.delegate_phone"
+                    :companies-count="site.companies_count"
+                    :location-type="site.location_type"
                     :status="site.status"
-                  />
+                    :is-correction="activeTab === 'correction'"
+                    @approve="handleApprove"
+                    @reject="handleReject"
+                    @update="handleReCorrection"
+                  >
+                    <template v-if="activeTab === 'correction'" #actions>
+                      <v-btn
+                        v-if="
+                          site.status !== 'approved' &&
+                          site.status !== 'rejected'
+                        "
+                        color="success"
+                        variant="outlined"
+                        class="me-2"
+                        :loading="loading"
+                        @click="handleApprove(site.id)"
+                      >
+                        اعتماد
+                      </v-btn>
+                      <v-btn
+                        v-if="
+                          site.status !== 'approved' &&
+                          site.status !== 'rejected'
+                        "
+                        color="warning"
+                        variant="outlined"
+                        :loading="loading"
+                        @click="handleReCorrection(site.id)"
+                      >
+                        تصحيح
+                      </v-btn>
+                    </template>
+                  </SiteCard>
+                </v-col>
+                <v-col
+                  v-if="!isLoading && sites.length === 0"
+                  cols="12"
+                  class="text-center"
+                >
+                  <p class="text-medium-emphasis">لا توجد مواقع متاحة</p>
                 </v-col>
               </v-row>
 
               <!-- pagination -->
               <Pagination
-                :total-items="2300"
+                v-if="totalItems > 0"
+                :total-items="totalItems"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
+                @update:page="fetchLocations"
               />
             </v-card-title>
           </VCard>
@@ -517,115 +963,100 @@ onMounted(() => {
       <v-dialog v-model="dialog" width="500" class="add-site-dialog">
         <v-card class="rounded-lg">
           <v-card-text class="pa-4">
-            <h2 class="text-h6 font-weight-bold">
-              {{ dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد" }}
-            </h2>
-            <p class="card-gray-text border-b pb-3">حدد تفاصيل الموقع الجديد</p>
+            <div class="d-flex justify-space-between align-center mb-6">
+              <h2 class="text-h6">تصحيح الموقع</h2>
+              <v-btn icon variant="text" @click="dialog = false">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
+            </div>
 
-            <!-- Step 1: Select Site Type -->
-            <v-form v-if="dialogStep === 1" @submit.prevent="nextStep">
+            <v-form ref="form" @submit.prevent="handleSubmit">
+              <!-- Camp Number -->
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">نوع الموقع</label>
-                <v-select
-                  v-model="siteType"
-                  :items="siteTypes"
-                  variant="outlined"
-                  density="comfortable"
-                  placeholder="اختر نوع الموقع"
-                  hide-details
-                  class="rounded-lg bg-grey-lighten-4"
-                  required
-                />
-              </div>
-
-              <!-- Action Buttons -->
-              <div class="d-flex justify-end mt-6">
-                <v-btn
-                  variant="text"
-                  color="grey-darken-1"
-                  class="me-4"
-                  @click="closeDialog"
-                >
-                  إلغاء
-                </v-btn>
-                <v-btn color="#B69265" class="text-white px-6" type="submit">
-                  التالي
-                </v-btn>
-              </div>
-            </v-form>
-
-            <!-- Step 2: Fill Details -->
-            <v-form v-else @submit.prevent="handleSubmit">
-              <!-- Housing Permit Number -->
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block"
-                  >رقم تصريح السكن</label
-                >
+                <label class="text-subtitle-2 mb-2 d-block">رقم المخيم</label>
                 <v-text-field
-                  v-model="housingPermitNumber"
-                  placeholder="رقم تصريح السكن"
-                  hide-details
+                  v-model="formData.camp_number"
+                  placeholder="أدخل رقم المخيم"
                   variant="outlined"
                   density="comfortable"
                   class="rounded-lg bg-grey-lighten-4"
+                  type="text"
                   required
                 />
               </div>
 
-              <!-- Authorized Contact Number -->
+              <!-- Contact Number -->
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block"
-                  >رقم تواصل المفوض</label
-                >
+                <label class="text-subtitle-2 mb-2 d-block">رقم الاتصال</label>
                 <div class="d-flex">
                   <v-text-field
-                    v-model="authorizedContactNumber"
+                    v-model="formData.delegate_phone"
                     variant="outlined"
                     density="comfortable"
-                    placeholder="00"
-                    hide-details
+                    placeholder="5xxxxxxxx"
                     class="rounded-lg bg-grey-lighten-4 flex-grow-1"
+                    type="text"
                     required
-                  />
-                  <v-select
-                    value="+966"
-                    :items="[
-                      { title: '+966', value: '+966' },
-                      { title: '+964', value: '+964' },
-                      { title: '+965', value: '+965' },
-                    ]"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    class="country-code-select ms-2 rounded-lg bg-grey-lighten-4"
-                    style="max-width: 110px"
                   />
                 </div>
               </div>
 
-              <!-- Companies -->
+              <!-- Location ID -->
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">الشركات</label>
-                <v-select
-                  v-model="selectedCompany"
-                  :items="companies"
+                <label class="text-subtitle-2 mb-2 d-block">معرف الموقع</label>
+                <v-text-field
+                  v-model="formData.location_id"
+                  placeholder="معرف الموقع"
                   variant="outlined"
                   density="comfortable"
-                  placeholder="اختر الشركات"
-                  hide-details
                   class="rounded-lg bg-grey-lighten-4"
+                  type="number"
+                  readonly
+                />
+              </div>
+
+              <!-- Square Number -->
+              <div class="mb-4">
+                <label class="text-subtitle-2 mb-2 d-block">رقم المربع</label>
+                <v-text-field
+                  v-model="formData.square_number"
+                  placeholder="أدخل رقم المربع"
+                  variant="outlined"
+                  density="comfortable"
+                  class="rounded-lg bg-grey-lighten-4"
+                  type="text"
                   required
                 />
               </div>
 
-              <!-- Map -->
+              <!-- Map Location -->
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">الاحداثيات</label>
-                <div
-                  class="map-container rounded-lg overflow-hidden"
-                  style="height: 100px"
+                <label class="text-subtitle-2 mb-2 d-block"
+                  >الموقع على الخريطة</label
                 >
-                  map
+                <LocationPicker
+                  v-model="selectedLocation"
+                  class="rounded-lg overflow-hidden"
+                  @update:model-value="handleLocationChange"
+                />
+                <!-- Coordinates display -->
+                <div class="d-flex gap-4 mt-2">
+                  <v-text-field
+                    v-model="formData.latitude"
+                    label="خط العرض"
+                    variant="outlined"
+                    density="comfortable"
+                    class="rounded-lg"
+                    hide-details
+                  />
+                  <v-text-field
+                    v-model="formData.longitude"
+                    label="خط الطول"
+                    variant="outlined"
+                    density="comfortable"
+                    class="rounded-lg"
+                    hide-details
+                  />
                 </div>
               </div>
 
@@ -635,9 +1066,9 @@ onMounted(() => {
                   variant="text"
                   color="grey-darken-1"
                   class="me-4"
-                  @click="prevStep"
+                  @click="dialog = false"
                 >
-                  رجوع
+                  إلغاء
                 </v-btn>
                 <v-btn
                   color="#B69265"
@@ -645,7 +1076,7 @@ onMounted(() => {
                   type="submit"
                   :loading="loading"
                 >
-                  إضافة
+                  حفظ التصحيح
                 </v-btn>
               </div>
             </v-form>
@@ -661,8 +1092,36 @@ onMounted(() => {
 .bg-light-white {
   background-color: rgba(255, 255, 255, 1);
   border-radius: 16px;
-  // background-color: #f00 !important;
 }
+
+// Add filter styles
+.notification-section {
+  :deep(.v-select),
+  :deep(.v-text-field) {
+    .v-field {
+      border-radius: 8px;
+      background-color: rgb(250, 250, 250);
+
+      &.v-field--focused {
+        background-color: white;
+      }
+    }
+  }
+
+  :deep(.v-btn) {
+    text-transform: none;
+    letter-spacing: 0;
+    border-radius: 8px;
+    height: 40px;
+  }
+}
+
+// Date picker styles
+:deep(.v-date-picker) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
 .search-field {
   :deep(.v-field) {
     border-radius: 8px;
@@ -728,6 +1187,26 @@ onMounted(() => {
 
     &.v-field--focused {
       background-color: white;
+    }
+
+    // Remove number input spinners
+    input[type="number"] {
+      -moz-appearance: textfield;
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+  }
+
+  :deep(.companies-search) {
+    .v-field__input {
+      min-height: 32px !important;
+      padding: 0 !important;
+    }
+    .v-field {
+      background: transparent !important;
     }
   }
 

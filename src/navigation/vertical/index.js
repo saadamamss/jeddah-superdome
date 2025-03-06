@@ -7,6 +7,7 @@ import UsersIcon from "./icons/Users";
 import NotesIcon from "./icons/Notes";
 import RatingIcon from "./icons/Rating";
 import ContractsIcon from "./icons/Contracts";
+import CompanyIcon from "./icons/Company";
 
 export default [
   {
@@ -19,6 +20,12 @@ export default [
     title: "إدارة المواقع",
     to: { name: "sites" },
     icon: SiteIcon,
+    permission: true,
+  },
+  {
+    title: "إدارة الشركات",
+    to: { name: "companies" },
+    icon: CompanyIcon,
     permission: true,
   },
   {

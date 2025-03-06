@@ -3,9 +3,11 @@ import { useAuthStore } from "@/stores/Auth";
 import { useThemeConfig } from "@core/composable/useThemeConfig";
 import { hexToRgb } from "@layouts/utils";
 import { useTheme } from "vuetify";
+import { useAppStore } from "@/stores/app";
 import "vue3-toastify/dist/index.css";
 
 const authStore = useAuthStore();
+const appStore = useAppStore();
 
 const {
   syncInitialLoaderTheme,
@@ -34,6 +36,15 @@ onMounted(() => {
       )}`"
     >
       <RouterView />
+
+      <!-- Add Snackbar -->
+      <VSnackbar
+        v-model="appStore.snackbar.show"
+        :color="appStore.snackbar.color"
+        :timeout="appStore.snackbar.timeout"
+      >
+        {{ appStore.snackbar.message }}
+      </VSnackbar>
     </VApp>
   </VLocaleProvider>
 </template>

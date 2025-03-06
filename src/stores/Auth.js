@@ -1,45 +1,78 @@
-import axios from "@/plugins/axios";
 import { defineStore } from "pinia";
-import { LOCAL_STORAGE_TOKEN_KEY, LOCAL_STORAGE_USER_KEY } from "@/config";
-import { saveToStorage, getFromStorage } from "@/@core/utils/helpers";
+import { LOCAL_STORAGE_USER_KEY } from "@/config";
+import {
+  getFromStorage,
+  saveToStorage,
+  removeFromStorage,
+} from "@/@core/utils/helpers";
+import { authService } from "@/services/auth.service";
+import axiosIns from "@/plugins/axios";
 
-export const useAuthStore = defineStore("AuthStore", {
-  state: () => {
-    return {
-      token: getFromStorage(LOCAL_STORAGE_TOKEN_KEY),
-      user: getFromStorage(LOCAL_STORAGE_USER_KEY),
-    };
-  },
+export const useAuthStore = defineStore("auth", {
+  state: () => ({
+    token: authService.getToken(),
+    user: getFromStorage(LOCAL_STORAGE_USER_KEY),
+  }),
+
   getters: {
-    currentUser: (state) => {
-      if (state.user) return state.user;
-
-      return getFromStorage(LOCAL_STORAGE_USER_KEY);
-    },
+    isAuthenticated: (state) => !!state.token,
   },
+
   actions: {
-    login(data) {
-      return axios.post("auth/web/login", data);
-    },
-    logOut() {
-      return axios.post("auth/web/logout");
-    },
-    resetPassword({ phone }) {
-      return axios.post("auth/app/reset-password", { phone });
-    },
-    verifyOTP(data) {
-      return axios.post("auth/app/verify-otp", data);
-    },
-    updatePassword(data) {
-      return axios.post("auth/app/update-password", data);
-    },
-    updateUser(user) {
-      this.user = user;
-      saveToStorage(LOCAL_STORAGE_USER_KEY, user);
-    },
-    saveToken(token) {
+    setToken(token) {
       this.token = token;
-      saveToStorage(LOCAL_STORAGE_TOKEN_KEY, token);
+      const currentUser = authService.getStoredUser() || {};
+      authService.setUser({ ...currentUser, token });
+    },
+
+    setUser(user) {
+      this.user = user;
+      authService.setUser(user);
+    },
+
+    logout() {
+      this.token = null;
+      this.user = null;
+      authService.logout();
+    },
+
+    async login(credentials) {
+      try {
+        const response = await axiosIns.post("/login", credentials);
+        const data = response?.data;
+
+        if (!data) {
+          throw new Error("No data received from server");
+        }
+
+        // Handle both possible response structures
+        const token = data.token || data.data?.token;
+        const user = data.user || data.data;
+
+        if (!token) {
+          throw new Error("No token received from server");
+        }
+
+        this.setToken(token);
+        this.setUser(user);
+
+        return { token, user };
+      } catch (error) {
+        console.error("Login error:", error);
+        throw error;
+      }
+    },
+
+    resetPassword({ phone }) {
+      return axiosIns.post("auth/app/reset-password", { phone });
+    },
+
+    verifyOTP(data) {
+      return axiosIns.post("auth/app/verify-otp", data);
+    },
+
+    updatePassword(data) {
+      return axiosIns.post("auth/app/update-password", data);
     },
   },
 });

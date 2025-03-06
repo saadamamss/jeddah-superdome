@@ -21,6 +21,7 @@ import EditNotePage from "@/pages/notes/editNote";
 import RatingPage from "@/pages/rating";
 import CompanyRatingPage from "@/pages/rating/company-rating";
 import ContractsPage from "@/pages/contracts";
+import ContractDetailsPage from "@/pages/contracts/contract_details";
 import UserDetailsPage from "@/pages/users/user-details";
 import NotFoundPage from "@/pages/NotFound";
 // import TempPage from "@/pages/temp";
@@ -35,7 +36,7 @@ export default [
         name: "home",
         component: DashboardHome,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
         },
       },
       {
@@ -43,7 +44,7 @@ export default [
         name: "sites",
         component: SitesPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: false,
         },
       },
       {
@@ -51,7 +52,7 @@ export default [
         name: "housing-details",
         component: HousingDetailsPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
         },
       },
       {
@@ -150,7 +151,32 @@ export default [
           // requiresAuth: true,
         },
       },
-
+      {
+        path: "/contracts/:id",
+        name: "contract-details",
+        component: ContractDetailsPage,
+        meta: {
+          // requiresAuth: true,
+        },
+      },
+      {
+        path: "/company",
+        name: "companies",
+        component: () => import("@/pages/company/index.vue"),
+        meta: {
+          layout: "default",
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/company/company_details/:id",
+        name: "company-details",
+        component: () => import("@/pages/company/company_details.vue"),
+        meta: {
+          layout: "default",
+          requiresAuth: true,
+        },
+      },
       // {
       //   path: "/temp",
       //   name: "temp",

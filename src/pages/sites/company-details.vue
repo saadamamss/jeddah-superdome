@@ -9,6 +9,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import LocationPicker from "@/components/maps/LocationPicker.vue";
 
 const appStore = useAppStore();
 const route = useRoute();
@@ -28,6 +29,11 @@ const selectedCompany = ref(null);
 const activeTab = ref("all");
 const timeFilter = ref("today");
 const statusFilter = ref("all");
+const selectedLocation = ref({ lat: 21.4225, lng: 39.8262 }); // Default Makkah coordinates
+const formData = ref({
+  latitude: "21.4225",
+  longitude: "39.8262",
+});
 
 const { generateBreadcrumbItems } = useBreadcrumbs();
 
@@ -135,6 +141,13 @@ const closeDialog = () => {
 
 const addNewLocation = () => {
   dialog.value = true;
+};
+
+const handleLocationChange = (newLocation) => {
+  if (newLocation) {
+    formData.value.latitude = newLocation.lat.toString();
+    formData.value.longitude = newLocation.lng.toString();
+  }
 };
 
 onMounted(() => {
@@ -334,12 +347,35 @@ onMounted(() => {
 
             <!-- Map -->
             <div class="mb-4">
-              <label class="text-subtitle-2 mb-2 d-block">الاحداثيات</label>
-              <div
-                class="map-container rounded-lg overflow-hidden"
-                style="height: 100px"
+              <label class="text-subtitle-2 mb-2 d-block"
+                >الموقع على الخريطة</label
               >
-                map
+              <LocationPicker
+                v-model="selectedLocation"
+                class="rounded-lg overflow-hidden"
+                style="height: 300px"
+                @update:model-value="handleLocationChange"
+              />
+              <!-- Coordinates display -->
+              <div class="d-flex gap-4 mt-2">
+                <VTextField
+                  v-model="formData.latitude"
+                  label="خط العرض"
+                  readonly
+                  variant="outlined"
+                  density="comfortable"
+                  class="rounded-lg"
+                  hide-details
+                />
+                <VTextField
+                  v-model="formData.longitude"
+                  label="خط الطول"
+                  readonly
+                  variant="outlined"
+                  density="comfortable"
+                  class="rounded-lg"
+                  hide-details
+                />
               </div>
             </div>
 

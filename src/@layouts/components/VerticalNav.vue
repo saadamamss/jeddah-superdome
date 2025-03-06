@@ -8,9 +8,10 @@ import {
 import { config } from "@layouts/config";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 import { useAuthStore } from "@/stores/Auth";
-import { LOCAL_STORAGE_TOKEN_KEY, LOCAL_STORAGE_USER_KEY } from "@/config";
-import { removeFromStorage } from "@/@core/utils/helpers";
+import { LOCAL_STORAGE_USER_KEY } from "@/config";
 import { toast } from "vue3-toastify";
+import { authService } from "@/services/auth.service";
+import { useRouter, useRoute } from "vue-router";
 
 const props = defineProps({
   tag: {
@@ -37,6 +38,7 @@ const { width: windowWidth } = useWindowSize();
 const isHovered = useElementHover(refNav);
 
 const auth = useAuthStore();
+const router = useRouter();
 const isLoggingOut = ref(false);
 
 provide(injectionKeyIsVerticalNavHovered, isHovered);
@@ -83,15 +85,17 @@ const handleNavScroll = (evt) => {
   isVerticalNavScrolled.value = evt.target.scrollTop > 0;
 };
 
-const logOutUser = async () => {
+const handleLogout = async () => {
   try {
     isLoggingOut.value = true;
-
-    await auth.logOut();
-    removeFromStorage(LOCAL_STORAGE_TOKEN_KEY);
-    removeFromStorage(LOCAL_STORAGE_USER_KEY);
-    location.reload();
+    // First clear the auth store
+    auth.logout();
+    // Then clear any remaining session data
+    authService.logout();
+    // Finally redirect to login
+    await router.push("/auth/login");
   } catch (error) {
+    console.error("Logout error:", error);
     toast("حدث خطأ غير متوقع!", { rtl: true, hideProgressBar: true });
   } finally {
     isLoggingOut.value = false;
@@ -215,7 +219,7 @@ const logOutUser = async () => {
       </PerfectScrollbar>
       <div class="nav-link py-3 px-2 pe-6">
         <v-btn
-          @click="logOutUser"
+          @click="handleLogout"
           :loading="isLoggingOut"
           block
           variant="link"
