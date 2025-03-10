@@ -14,6 +14,7 @@ import AddRatePage from "@/pages/sites/addRate";
 import TeamsPage from "@/pages/teams";
 import MainSectorsPage from "@/pages/main-sectors";
 import AddSectorsPage from "@/pages/main-sectors/addSectors";
+import PhaseDetailsPage from "@/pages/main-sectors/details";
 import RolesPage from "@/pages/roles";
 import NotesPage from "@/pages/notes";
 import AddNotePage from "@/pages/notes/addNote";
@@ -85,6 +86,11 @@ export default [
         meta: {
           // requiresAuth: true,
         },
+      },
+      {
+        path: "/main-sectors/details/:id",
+        name: "phase-details",
+        component: PhaseDetailsPage,
       },
       {
         path: "/main-sectors/add-sectors",
