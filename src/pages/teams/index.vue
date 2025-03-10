@@ -2,23 +2,74 @@
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import TeamWidget from "@/@core/components/widgets/TeamWidget.vue";
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
+import axios from "@/plugins/axios";
 
 const appStore = useAppStore();
-const filterToggle = ref(0);
-const dateRange = ref();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
 const search = ref("");
 const dialog = ref(false);
-const dialogStep = ref(1);
 const loading = ref(false);
-const siteType = ref("السكن");
-const housingPermitNumber = ref("");
-const authorizedContactNumber = ref("");
-const selectedCompany = ref(null);
+const totalItems = ref(0);
+const teams = ref([]);
 
+// Fetch teams with pagination and search
+const fetchTeams = async () => {
+  try {
+    isLoading.value = true;
+    const queryParams = new URLSearchParams({
+      page: currentPage.value.toString(),
+      per_page: perPage.value.toString(),
+      search: search.value,
+    });
+
+    const response = await axios.get(
+      `/data-operations/teams?${queryParams.toString()}`
+    );
+    if (response.data?.data) {
+      teams.value = response.data.data.map((team) => ({
+        teamId: team.id,
+        location: team.location,
+        teamAvatars: team.members.map((member) => ({
+          name: member.name,
+          avatar: member.avatar || "https://i.pravatar.cc/150",
+        })),
+        supervisor: team.supervisor,
+      }));
+      totalItems.value = response.data.pagination?.i_total_objects || 0;
+      perPage.value = response.data.pagination?.i_per_page || perPage.value;
+    }
+  } catch (error) {
+    console.error("Error fetching teams:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات الفرق",
+      color: "error",
+    });
+    teams.value = [];
+    totalItems.value = 0;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Watch for changes in search with debounce
+const debouncedSearch = ref(null);
+watch(search, (newValue) => {
+  if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+  debouncedSearch.value = setTimeout(() => {
+    currentPage.value = 1; // Reset to first page when searching
+    fetchTeams();
+  }, 500); // 500ms debounce
+});
+
+// Watch for page changes
+watch([currentPage, perPage], () => {
+  fetchTeams();
+});
+
+// Form data and options
 const formModel = ref({
   location: null,
   fieldSupervisor: null,
@@ -60,97 +111,51 @@ const fieldTeamMembers = [
   },
 ];
 
-const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
-];
-
-const companies = [
-  { title: "شركة رواف منى", value: "rawaf" },
-  { title: "شركة الخليج", value: "gulf" },
-];
-
-const teams = ref([
-  {
-    teamId: "team-01",
-    location: "موقع 1",
-    teamAvatars: [
-      { name: "محمد أحمد", avatar: "https://i.pravatar.cc/150?img=1" },
-      { name: "فاطمة علي", avatar: "https://i.pravatar.cc/150?img=2" },
-      { name: "عبدالله محمد", avatar: "https://i.pravatar.cc/150?img=3" },
-      { name: "سارة خالد", avatar: "https://i.pravatar.cc/150?img=4" },
-      { name: "عمر يوسف", avatar: "https://i.pravatar.cc/150?img=5" },
-    ],
-    supervisor: "أحمد محمد",
-  },
-  {
-    teamId: "team-02",
-    location: "موقع 2",
-    teamAvatars: [
-      { name: "ليلى حسن", avatar: "https://i.pravatar.cc/150?img=6" },
-      { name: "أحمد علي", avatar: "https://i.pravatar.cc/150?img=7" },
-      { name: "نورة سعد", avatar: "https://i.pravatar.cc/150?img=8" },
-    ],
-    supervisor: "محمد علي",
-  },
-  {
-    teamId: "team-03",
-    location: "موقع 3",
-    teamAvatars: [
-      { name: "خالد عمر", avatar: "https://i.pravatar.cc/150?img=9" },
-      { name: "ريم ناصر", avatar: "https://i.pravatar.cc/150?img=10" },
-      { name: "طارق سعيد", avatar: "https://i.pravatar.cc/150?img=11" },
-      { name: "منى فهد", avatar: "https://i.pravatar.cc/150?img=12" },
-    ],
-    supervisor: "عبدالله خالد",
-  },
-]);
-
-const violationOptions = ref([
-  {
-    name: "series-1",
-    data: [30, 40, 35, 50, 49, 60, 70],
-  },
-]);
-
-const complaintOptions = ref([
-  {
-    name: "Gold medals",
-    data: [148, 113, 104, 71, 77],
-  },
-  {
-    name: "Silver medals",
-    data: [113, 122, 98, 88, 72],
-  },
-  {
-    name: "Bronze medals",
-    data: [124, 95, 65, 91, 76],
-  },
-]);
-
 const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
-  dialogStep.value = 1;
-};
-
-const nextStep = () => {
-  if (siteType.value) {
-    dialogStep.value = 2;
+  if (
+    !formModel.value.location ||
+    !formModel.value.fieldSupervisor ||
+    formModel.value.fieldTeam.length === 0
+  ) {
+    appStore.showSnackbar({
+      message: "يرجى ملء جميع الحقول المطلوبة",
+      color: "error",
+    });
+    return;
   }
-};
 
-const prevStep = () => {
-  dialogStep.value = 1;
+  loading.value = true;
+  try {
+    await axios.post("/data-operations/teams", {
+      location: formModel.value.location,
+      supervisor: formModel.value.fieldSupervisor,
+      members: formModel.value.fieldTeam,
+    });
+
+    appStore.showSnackbar({
+      message: "تم إضافة الفريق بنجاح",
+      color: "success",
+    });
+    dialog.value = false;
+    fetchTeams(); // Refresh teams list
+  } catch (error) {
+    console.error("Error creating team:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء إضافة الفريق",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
 const closeDialog = () => {
   dialog.value = false;
-  dialogStep.value = 1;
+  formModel.value = {
+    location: null,
+    fieldSupervisor: null,
+    fieldTeam: [],
+  };
 };
 
 const addNewTeam = () => {
@@ -158,9 +163,7 @@ const addNewTeam = () => {
 };
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 100);
+  fetchTeams();
 });
 </script>
 
@@ -277,7 +280,7 @@ onMounted(() => {
               </v-row>
 
               <Pagination
-                :total-items="2300"
+                :total-items="totalItems"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
               />

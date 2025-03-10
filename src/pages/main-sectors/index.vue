@@ -121,7 +121,6 @@ const fetchPhases = async (page = 1) => {
     if (response.data?.status?.success) {
       phases.value = response.data.data;
       totalItems.value = response.data.pagination?.i_total_objects || 0;
-      perPage.value = response.data.pagination?.i_per_page || perPage.value;
       currentPage.value = response.data.pagination?.i_current_page || 1;
     }
   } catch (error) {
@@ -145,6 +144,12 @@ watch(search, (newValue) => {
     currentPage.value = 1; // Reset to first page when searching
     fetchPhases(1);
   }, 500); // 500ms debounce
+});
+
+// Watch for per page changes
+watch(perPage, () => {
+  currentPage.value = 1; // Reset to first page when changing items per page
+  fetchPhases(1);
 });
 
 // Watch for page changes
@@ -509,9 +514,11 @@ onMounted(() => {
 
               <!-- pagination -->
               <Pagination
+                v-if="totalItems > 0"
                 :total-items="totalItems"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
+                class="mt-4"
               />
             </v-card-text>
           </v-card>
