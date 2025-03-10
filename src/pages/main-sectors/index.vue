@@ -3,8 +3,9 @@
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import sectorWidget from "@/@core/components/widgets/sectorWidget.vue";
-import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
+import axios from "@/plugins/axios";
+import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 
 const appStore = useAppStore();
 const filterToggle = ref(0);
@@ -21,6 +22,31 @@ const housingPermitNumber = ref("");
 const authorizedContactNumber = ref("");
 const selectedCompany = ref(null);
 const activeTab = ref("all");
+const phases = ref([]);
+const totalItems = ref(0);
+
+const newPhase = ref({
+  title: "",
+  description: "",
+  start_date: null,
+  end_date: null,
+});
+
+// Form validation rules
+const formRules = {
+  title: [(v) => !!v || "عنوان المرحلة مطلوب"],
+  description: [(v) => !!v || "وصف المرحلة مطلوب"],
+  start_date: [(v) => !!v || "تاريخ البداية مطلوب"],
+  end_date: [
+    (v) => !!v || "تاريخ النهاية مطلوب",
+    (v, form) =>
+      !form.start_date ||
+      v >= form.start_date ||
+      "تاريخ النهاية يجب أن يكون بعد تاريخ البداية",
+  ],
+};
+
+const form = ref(null);
 
 const siteTypes = [
   { title: "موقع سكني", value: "residential" },
@@ -81,6 +107,51 @@ const complaintOptions = ref([
   },
 ]);
 
+// Function to fetch phases with pagination and search
+const fetchPhases = async (page = 1) => {
+  try {
+    isLoading.value = true;
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      per_page: perPage.value.toString(),
+      ...(search.value && { search: search.value }),
+    });
+
+    const response = await axios.get(`/phases?${queryParams.toString()}`);
+    if (response.data?.status?.success) {
+      phases.value = response.data.data;
+      totalItems.value = response.data.pagination?.i_total_objects || 0;
+      perPage.value = response.data.pagination?.i_per_page || perPage.value;
+      currentPage.value = response.data.pagination?.i_current_page || 1;
+    }
+  } catch (error) {
+    console.error("Error fetching phases:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب البيانات",
+      color: "error",
+    });
+    phases.value = [];
+    totalItems.value = 0;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Watch for search changes with debounce
+const debouncedSearch = ref(null);
+watch(search, (newValue) => {
+  if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+  debouncedSearch.value = setTimeout(() => {
+    currentPage.value = 1; // Reset to first page when searching
+    fetchPhases(1);
+  }, 500); // 500ms debounce
+});
+
+// Watch for page changes
+watch(currentPage, () => {
+  fetchPhases(currentPage.value);
+});
+
 const handleSubmit = async () => {
   loading.value = true;
   // Add your submit logic here
@@ -109,10 +180,63 @@ const addNewLocation = () => {
   dialog.value = true;
 };
 
+// Function to submit new phase
+const submitNewPhase = async () => {
+  const { valid } = await form.value?.validate();
+
+  if (!valid) {
+    appStore.showSnackbar({
+      message: "يرجى التحقق من صحة جميع الحقول",
+      color: "error",
+    });
+    return;
+  }
+
+  try {
+    loading.value = true;
+
+    // Format dates to match API expectations
+    const formattedData = {
+      ...newPhase.value,
+      start_date: newPhase.value.start_date
+        ? new Date(newPhase.value.start_date).toISOString().split("T")[0]
+        : null,
+      end_date: newPhase.value.end_date
+        ? new Date(newPhase.value.end_date).toISOString().split("T")[0]
+        : null,
+    };
+
+    const response = await axios.post("/phases", formattedData);
+
+    if (response.data?.status?.success) {
+      appStore.showSnackbar({
+        message: "تمت إضافة المرحلة بنجاح",
+        color: "success",
+      });
+      dialog.value = false;
+      // Reset form
+      newPhase.value = {
+        title: "",
+        description: "",
+        start_date: null,
+        end_date: null,
+      };
+      // Refresh phases list
+      await fetchPhases(currentPage.value);
+    }
+  } catch (error) {
+    console.error("Error adding new phase:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء إضافة المرحلة",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 100);
+  fetchPhases(1);
 });
 </script>
 
@@ -356,7 +480,7 @@ onMounted(() => {
                     elevation="0"
                     class="rounded-lg"
                     append-icon="mdi-plus"
-                    to="/main-sectors/add-sectors"
+                    @click="dialog = true"
                   >
                     إضافة مرحلة جديدة
                   </v-btn>
@@ -371,25 +495,21 @@ onMounted(() => {
               <!-- Tabs Section -->
               <v-row class="mt-">
                 <v-col
-                  v-for="(site, index) in sites"
-                  :key="index"
+                  v-for="phase in phases"
+                  :key="phase.id"
                   cols="12"
                   sm="6"
                   md="4"
                   lg="4"
                   class="pa-3"
                 >
-                  <sectorWidget
-                    :site-id="site.siteId"
-                    :authorization-number="site.authorizationNumber"
-                    :link="`/rating/company-rating/${index}`"
-                  />
+                  <sectorWidget :data="phase" />
                 </v-col>
               </v-row>
 
               <!-- pagination -->
               <Pagination
-                :total-items="2300"
+                :total-items="totalItems"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
               />
@@ -398,10 +518,104 @@ onMounted(() => {
         </v-container>
       </div>
     </v-container>
+
+    <!-- Add Phase Dialog -->
+    <v-dialog v-model="dialog" max-width="600px">
+      <v-card class="rounded-lg">
+        <v-card-title class="d-flex justify-space-between align-center pa-6">
+          <span class="text-h6">إضافة مرحلة جديدة</span>
+          <v-btn icon variant="text" @click="closeDialog">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-divider></v-divider>
+
+        <v-card-text class="pa-6">
+          <v-form ref="form" @submit.prevent="submitNewPhase" v-model="valid">
+            <v-text-field
+              v-model="newPhase.title"
+              label="عنوان المرحلة"
+              required
+              class="mb-4"
+              variant="outlined"
+              density="comfortable"
+              bg-color="rgb(250, 250, 250)"
+              :rules="formRules.title"
+            ></v-text-field>
+
+            <v-textarea
+              v-model="newPhase.description"
+              label="وصف المرحلة"
+              required
+              class="mb-4"
+              variant="outlined"
+              density="comfortable"
+              bg-color="rgb(250, 250, 250)"
+              rows="3"
+              :rules="formRules.description"
+            ></v-textarea>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">تاريخ البداية</label>
+              <AppDateTimePicker
+                v-model="newPhase.start_date"
+                class="date-picker-field"
+                :enable-time-picker="false"
+                auto-apply
+                :clearable="false"
+                :error-messages="
+                  !newPhase.start_date ? ['تاريخ البداية مطلوب'] : []
+                "
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">تاريخ النهاية</label>
+              <AppDateTimePicker
+                v-model="newPhase.end_date"
+                class="date-picker-field"
+                :enable-time-picker="false"
+                auto-apply
+                :clearable="false"
+                :error-messages="
+                  !newPhase.end_date ? ['تاريخ النهاية مطلوب'] : []
+                "
+                :min-date="newPhase.start_date"
+              />
+            </div>
+
+            <v-card-actions class="pa-0 mt-4">
+              <v-spacer></v-spacer>
+              <v-btn
+                color="primary"
+                type="submit"
+                :loading="loading"
+                min-width="140"
+                height="48"
+                class="rounded-lg"
+              >
+                إضافة
+              </v-btn>
+              <v-btn
+                color="grey-darken-1"
+                variant="outlined"
+                @click="closeDialog"
+                min-width="140"
+                height="48"
+                class="rounded-lg"
+              >
+                إلغاء
+              </v-btn>
+            </v-card-actions>
+          </v-form>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .bg-light-white {
   background-color: rgba(255, 255, 255, 1);
   border-radius: 16px;
@@ -528,5 +742,59 @@ onMounted(() => {
 
 .text-13 {
   font-size: 13px;
+}
+
+.date-picker-field {
+  :deep(.dp__input) {
+    padding: 13px 16px;
+    background-color: rgb(250, 250, 250);
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    font-size: 14px;
+    height: 44px;
+    color: rgba(0, 0, 0, 0.87);
+    text-align: right;
+    padding-left: 40px;
+  }
+
+  :deep(.dp__input_icon) {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(0, 0, 0, 0.54);
+    opacity: 0;
+  }
+
+  :deep(.dp__input_wrap) {
+    position: relative;
+  }
+
+  :deep(.dp__main) {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    font-family: inherit;
+    direction: rtl;
+  }
+
+  :deep(.dp__calendar_header),
+  :deep(.dp__calendar) {
+    direction: rtl;
+    width: 100%;
+  }
+
+  :deep(.dp__calendar_header) {
+    padding: 8px;
+    background-color: rgb(250, 250, 250);
+  }
+
+  :deep(.dp__active_date) {
+    background-color: var(--v-primary-base) !important;
+    color: white !important;
+  }
+
+  :deep(.dp__today) {
+    border-color: var(--v-primary-base);
+  }
 }
 </style>
