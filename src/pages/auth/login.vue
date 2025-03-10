@@ -35,6 +35,15 @@ const loginUser = async () => {
   } catch (error) {
     console.error("Login error:", error);
 
+    if (error.response?.status == 422) {
+      toast.error("بيانات الدخول غير صحيحة", {
+        rtl: true,
+        hideProgressBar: true,
+        position: "top-center",
+      });
+      return;
+    }
+
     if (error?.response?.data?.message) {
       toast.error(error.response.data.message, {
         rtl: true,
