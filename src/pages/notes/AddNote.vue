@@ -150,20 +150,20 @@ const uploadedFiles = ref([]);
 
 const { generateBreadcrumbItems } = useBreadcrumbs();
 
-const breadcrumbItems = computed(() =>
-  generateBreadcrumbItems([
-    {
-      title: "الملاحظات",
-      href: "/notes",
-      disabled: false,
-    },
-    {
-      title: "إضافة ملاحظة",
-      href: route.path,
-      disabled: true,
-    },
-  ])
-);
+// const breadcrumbItems = computed(() =>
+//   generateBreadcrumbItems([
+//     {
+//       title: "الملاحظات",
+//       href: "/notes",
+//       disabled: false,
+//     },
+//     {
+//       title: "إضافة ملاحظة",
+//       href: route.path,
+//       disabled: true,
+//     },
+//   ])
+// );
 
 const triggerFileInput = () => {
   fileInput.value.click();

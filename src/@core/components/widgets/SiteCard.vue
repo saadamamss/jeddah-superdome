@@ -3,7 +3,10 @@
     <v-card-text class="pa-4">
       <div class="d-flex justify-space-between align-center mb-4">
         <div class="d-flex align-center justify-space-between w-100">
-          <h2 class="text-h6 font-weight-medium d-flex align-center ga-1">
+          <div
+            class="font-weight-medium d-flex align-center ga-1"
+            style="font-size: 0.9rem; max-width: 170px"
+          >
             <span v-if="status == 'active'">
               <svg
                 width="15"
@@ -23,7 +26,7 @@
                 />
               </svg>
             </span>
-            <span v-else>
+            <span class="flex-shrink-0" v-else>
               <svg
                 width="16"
                 height="16"
@@ -44,12 +47,12 @@
                 />
               </svg>
             </span>
-            <span class="mt-n2"> رقم المخيم </span>
-          </h2>
+            <span class="mt-n2 text-truncate">{{ name }}</span>
+          </div>
 
-          <div class="d-flex align-center ga-2">
+          <div class="d-flex align-center ga-2 flex-shrink-0">
             <v-btn
-              v-if="status == 'active'"
+              v-if="status == 'active' && !isCorrection"
               @click="dialog = true"
               icon
               variant="text"
@@ -75,33 +78,60 @@
                 />
               </svg>
             </v-btn>
-            <v-btn
-              :to="`/sites/housing-details?siteId=${siteId}`"
-              size="small"
-              variant="tonal"
-              class="text-none font-weight-medium px-2 me-2 bg-primary-100 rounded-pill"
-            >
-              <span class="me-2"> عرض </span>
-              <svg
-                width="17"
-                height="16"
-                viewBox="0 0 17 16"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+            <div class="d-flex gap-2">
+              <template v-if="isCorrection">
+                <v-btn
+                  v-if="status == 'rejected'"
+                  color="success"
+                  variant="outlined"
+                  size="small"
+                  class="text-none font-weight-medium px-4 rounded-pill"
+                  @click="handleApprove"
+                  :loading="loading"
+                >
+                  اعتماد
+                </v-btn>
+                <v-btn
+                  v-else
+                  color="error"
+                  variant="outlined"
+                  size="small"
+                  class="text-none font-weight-medium px-4 rounded-pill ms-2"
+                  @click="handleReject"
+                  :loading="loading"
+                >
+                  رفض
+                </v-btn>
+              </template>
+              <v-btn
+                v-else-if="!isCorrection"
+                :to="`/sites/housing-details?siteId=${siteId}`"
+                size="small"
+                variant="tonal"
+                class="text-none font-weight-medium px-2 me-2 bg-primary-100 rounded-pill"
               >
-                <path
-                  opacity="0.4"
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M2.66602 7.99992C2.66602 7.63173 2.96449 7.33325 3.33268 7.33325L13.9994 7.33325C14.3675 7.33325 14.666 7.63173 14.666 7.99992C14.666 8.36811 14.3675 8.66659 13.9994 8.66659L3.33268 8.66659C2.96449 8.66659 2.66602 8.36811 2.66602 7.99992Z"
-                  fill="#B69265"
-                />
-                <path
-                  d="M4.01792 7.99988C4.08012 8.10306 4.21052 8.28847 4.3531 8.44984C4.63693 8.77106 5.02808 9.13798 5.43642 9.49251C5.84144 9.84416 6.24841 10.1708 6.55533 10.4103C6.70844 10.5298 6.97265 10.7294 7.0614 10.7964C7.35783 11.0148 7.42114 11.4321 7.20282 11.7285C6.98448 12.025 6.56714 12.0883 6.27068 11.87L6.2682 11.8681C6.17195 11.7954 5.89287 11.5846 5.73503 11.4614C5.41695 11.2132 4.99059 10.8712 4.56228 10.4993C4.13728 10.1303 3.6951 9.71881 3.35393 9.33269C3.18401 9.14039 3.02506 8.93868 2.90497 8.73948C2.79591 8.55858 2.66603 8.29535 2.66602 7.9999C2.66603 7.70446 2.79591 7.44118 2.90497 7.26028C3.02506 7.06107 3.18401 6.85936 3.35393 6.66707C3.6951 6.28095 4.13728 5.86944 4.56228 5.50044C4.99059 5.12857 5.41695 4.78656 5.73503 4.53832C5.89287 4.41515 6.17177 4.2045 6.26802 4.1318L6.27068 4.12979C6.56714 3.91145 6.98448 3.97479 7.20281 4.27125C7.42114 4.5677 7.35783 4.985 7.0614 5.20335C6.97265 5.27039 6.70844 5.46998 6.55533 5.58946C6.24841 5.82898 5.84144 6.15559 5.43642 6.50725C5.02808 6.86177 4.63693 7.2287 4.3531 7.54992C4.21052 7.71129 4.08012 7.8967 4.01792 7.99988Z"
-                  fill="#B69265"
-                />
-              </svg>
-            </v-btn>
+                <span class="me-2"> عرض </span>
+                <svg
+                  width="17"
+                  height="16"
+                  viewBox="0 0 17 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    opacity="0.4"
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M2.66602 7.99992C2.66602 7.63173 2.96449 7.33325 3.33268 7.33325L13.9994 7.33325C14.3675 7.33325 14.666 7.63173 14.666 7.99992C14.666 8.36811 14.3675 8.66659 13.9994 8.66659L3.33268 8.66659C2.96449 8.66659 2.66602 8.36811 2.66602 7.99992Z"
+                    fill="#B69265"
+                  />
+                  <path
+                    d="M4.01792 7.99988C4.08012 8.10306 4.21052 8.28847 4.3531 8.44984C4.63693 8.77106 5.02808 9.13798 5.43642 9.49251C5.84144 9.84416 6.24841 10.1708 6.55533 10.4103C6.70844 10.5298 6.97265 10.7294 7.0614 10.7964C7.35783 11.0148 7.42114 11.4321 7.20282 11.7285C6.98448 12.025 6.56714 12.0883 6.27068 11.87L6.2682 11.8681C6.17195 11.7954 5.89287 11.5846 5.73503 11.4614C5.41695 11.2132 4.99059 10.8712 4.56228 10.4993C4.13728 10.1303 3.6951 9.71881 3.35393 9.33269C3.18401 9.14039 3.02506 8.93868 2.90497 8.73948C2.79591 8.55858 2.66603 8.29535 2.66602 7.9999C2.66603 7.70446 2.79591 7.44118 2.90497 7.26028C3.02506 7.06107 3.18401 6.85936 3.35393 6.66707C3.6951 6.28095 4.13728 5.86944 4.56228 5.50044C4.99059 5.12857 5.41695 4.78656 5.73503 4.53832C5.89287 4.41515 6.17177 4.2045 6.26802 4.1318L6.27068 4.12979C6.56714 3.91145 6.98448 3.97479 7.20281 4.27125C7.42114 4.5677 7.35783 4.985 7.0614 5.20335C6.97265 5.27039 6.70844 5.46998 6.55533 5.58946C6.24841 5.82898 5.84144 6.15559 5.43642 6.50725C5.02808 6.86177 4.63693 7.2287 4.3531 7.54992C4.21052 7.71129 4.08012 7.8967 4.01792 7.99988Z"
+                    fill="#B69265"
+                  />
+                </svg>
+              </v-btn>
+            </div>
           </div>
         </div>
       </div>
@@ -139,7 +169,7 @@
           />
         </svg>
 
-        <span class="card-gray-text">12 شركه</span>
+        <span class="card-gray-text">{{ companiesCount }} شركه</span>
       </div>
 
       <div class="site-info mt-6 d-flex align-center justify-space-between">
@@ -171,7 +201,7 @@
 
             <div>
               <div class="text-body-2 text-medium-emphasis">رقم البريد</div>
-              <div class="text-body-2 font-weight-medium">{{ siteId }}</div>
+              <div class="text-body-2 font-weight-medium">{{ licenseNo }}</div>
             </div>
           </div>
         </div>
@@ -205,7 +235,7 @@
             <div>
               <div class="text-body-2 text-medium-emphasis">رقم المفوض</div>
               <div class="text-body-2 font-weight-medium">
-                {{ authorizationNumber }}
+                {{ delegatePhone }}
               </div>
             </div>
           </div>
@@ -214,7 +244,7 @@
     </v-card-text>
 
     <!-- Location Correction Modal -->
-    <v-dialog v-model="dialog" width="500" class="location-dialog">
+    <v-dialog v-model="dialog" width="700" class="location-dialog">
       <v-card class="rounded-lg">
         <v-card-text class="pa-6">
           <div class="d-flex justify-space-between align-center mb-6">
@@ -226,19 +256,96 @@
           <p class="text-subtitle-1 text-medium-emphasis mb-6">
             حدد تفاصيل الموقع الجديد
           </p>
-          <v-form @submit.prevent="handleSubmit">
+          <v-form @submit.prevent="handleSubmit" ref="form">
             <div class="mb-4">
               <label class="text-subtitle-2 mb-2 d-block">نوع الموقع</label>
               <v-select
-                v-model="siteType"
+                v-model="formData.location_type_id"
                 :items="siteTypes"
                 variant="outlined"
                 density="comfortable"
                 placeholder="اختر نوع الموقع"
+                :rules="[(v) => !!v || 'نوع الموقع مطلوب']"
                 hide-details
-                class="rounded-lg"
+                class="rounded-lg mb-4"
               />
             </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">اسم المخيم</label>
+              <v-text-field
+                v-model="formData.name"
+                variant="outlined"
+                density="comfortable"
+                placeholder="ادخل اسم المخيم"
+                :rules="[(v) => !!v || 'اسم المخيم مطلوب']"
+                hide-details
+                class="rounded-lg mb-4"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">رقم المخيم</label>
+              <v-text-field
+                v-model="formData.camp_number"
+                variant="outlined"
+                density="comfortable"
+                placeholder="ادخل رقم المخيم"
+                :rules="[(v) => !!v || 'رقم المخيم مطلوب']"
+                hide-details
+                class="rounded-lg mb-4"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">رقم البريد</label>
+              <v-text-field
+                v-model="formData.license_no"
+                variant="outlined"
+                density="comfortable"
+                placeholder="ادخل رقم البريد"
+                :rules="[(v) => !!v || 'رقم البريد مطلوب']"
+                hide-details
+                class="rounded-lg mb-4"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">اسم المفوض</label>
+              <v-text-field
+                v-model="formData.delegate_name"
+                variant="outlined"
+                density="comfortable"
+                placeholder="ادخل اسم المفوض"
+                :rules="[(v) => !!v || 'اسم المفوض مطلوب']"
+                hide-details
+                class="rounded-lg mb-4"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">رقم المفوض</label>
+              <v-text-field
+                v-model="formData.delegate_phone"
+                variant="outlined"
+                density="comfortable"
+                placeholder="ادخل رقم المفوض"
+                :rules="[(v) => !!v || 'رقم المفوض مطلوب']"
+                hide-details
+                class="rounded-lg mb-4"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block"
+                >حدد الموقع على الخريطة</label
+              >
+              <LocationPicker
+                v-model="selectedLocation"
+                class="rounded-lg overflow-hidden"
+              />
+            </div>
+
             <div class="d-flex justify-end mt-6">
               <v-btn
                 variant="text"
@@ -254,7 +361,7 @@
                 type="submit"
                 :loading="loading"
               >
-                التالي
+                حفظ
               </v-btn>
             </div>
           </v-form>
@@ -265,38 +372,127 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import LocationPicker from "@/components/maps/LocationPicker.vue";
+import axiosIns from "@/plugins/axios";
+import { useAppStore } from "@/stores/app";
 
-defineProps({
+const props = defineProps({
   siteId: {
+    type: [String, Number],
+    required: true,
+  },
+  name: {
     type: String,
     required: true,
   },
-  authorizationNumber: {
+  licenseNo: {
     type: String,
     required: true,
+  },
+  delegatePhone: {
+    type: String,
+    required: true,
+  },
+  companiesCount: {
+    type: Number,
+    default: 0,
+  },
+  locationType: {
+    type: Object,
+    default: () => ({
+      title: "",
+      description: "",
+    }),
   },
   status: {
     type: String,
-    required: true,
+    default: "active",
+  },
+  isCorrection: {
+    type: Boolean,
+    default: false,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
   },
 });
 
+const emit = defineEmits(["location-created", "approve", "reject", "update"]);
+
 const dialog = ref(false);
-const loading = ref(false);
-const siteType = ref(null);
+const form = ref(null);
+const selectedLocation = ref({ lat: 24.7136, lng: 46.6753 }); // Default to Riyadh
+
+const formData = ref({
+  name: "",
+  location_type_id: null,
+  location_sub_type_id: 1,
+  contract_id: 3,
+  delegate_name: "",
+  delegate_phone: "",
+  license_no: "",
+  camp_number: "",
+  square_number: "",
+  latitude: "",
+  longitude: "",
+});
+
 const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
+  { title: "موقع سكني", value: 1 },
+  { title: "موقع تجاري", value: 2 },
+  { title: "موقع صناعي", value: 3 },
 ];
 
+watch(
+  selectedLocation,
+  (newLocation) => {
+    if (newLocation) {
+      formData.value.latitude = newLocation.lat.toString();
+      formData.value.longitude = newLocation.lng.toString();
+      formData.value.square_number = formData.value.camp_number;
+    }
+  },
+  { deep: true }
+);
+
+watch(
+  () => formData.value.camp_number,
+  (newValue) => {
+    if (newValue) {
+      formData.value.square_number = newValue;
+    }
+  }
+);
+
 const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
+  const { valid } = await form.value.validate();
+
+  if (!valid) return;
+
+  try {
+    const response = await axiosIns.post("locations", {
+      ...formData.value,
+    });
+    console.log("Location created:", response.data);
+    dialog.value = false;
+    emit("location-created");
+  } catch (error) {
+    console.error("Error creating location:", error);
+  }
+};
+
+const handleApprove = () => {
+  emit("approve", props.siteId);
+};
+
+const handleReject = () => {
+  emit("reject", props.siteId);
+};
+
+const handleUpdate = () => {
+  emit("update", props.siteId);
 };
 </script>
 

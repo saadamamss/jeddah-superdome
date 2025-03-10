@@ -2,7 +2,8 @@
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import contractWidget from "@/@core/components/widgets/contractWidget.vue";
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
+import axios from "@/plugins/axios";
 
 const appStore = useAppStore();
 const filterToggle = ref(0);
@@ -15,10 +16,11 @@ const dialog = ref(false);
 const dialogStep = ref(1);
 const loading = ref(false);
 const siteType = ref("السكن");
+const contracts = ref([]);
+const totalItems = ref(0);
 
 const quoteForm = ref({
-  packageName: "",
-  location: null,
+  name: "",
 });
 
 const formModel = ref({
@@ -131,20 +133,72 @@ const complaintOptions = ref([
   },
 ]);
 
+// Watch for changes in search, currentPage, or perPage
+watch([search, currentPage, perPage], () => {
+  fetchContracts();
+});
+
+// Function to fetch contracts
+const fetchContracts = async () => {
+  try {
+    isLoading.value = true;
+    const params = new URLSearchParams({
+      page: currentPage.value,
+      per_page: perPage.value,
+      search: search.value,
+    });
+
+    const response = await axios.get(`contracts?${params.toString()}`);
+    console.log("API Response:", response.data);
+
+    if (response.data?.status?.success) {
+      contracts.value = response.data.data;
+      console.log("Contracts data:", contracts.value);
+      totalItems.value = response.data.meta?.total || response.data.data.length;
+    }
+  } catch (error) {
+    console.error("Error fetching contracts:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء جلب البيانات",
+      color: "error",
+    });
+  } finally {
+    isLoading.value = false;
+  }
+};
+
 const addNewQuote = () => {
   dialog.value = true;
 };
 
+// Function to handle form submission
 const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
-  quoteForm.value = {
-    packageName: "",
-    location: null,
-  };
+  try {
+    loading.value = true;
+    const response = await axios.post("contracts", quoteForm.value);
+
+    if (response.data?.status?.success) {
+      appStore.showSnackbar({
+        message: "تمت إضافة الباقة بنجاح",
+        color: "success",
+      });
+      dialog.value = false;
+      // Reset form
+      quoteForm.value = {
+        name: "",
+      };
+      // Refresh contracts list
+      fetchContracts();
+    }
+  } catch (error) {
+    console.error("Error adding contract:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء إضافة الباقة",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
 const nextStep = () => {
@@ -167,9 +221,7 @@ const addNewQouta = () => {
 };
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 100);
+  fetchContracts();
 });
 </script>
 
@@ -269,24 +321,29 @@ onMounted(() => {
 
               <v-row class="mt-3">
                 <v-col
-                  v-for="team in teams"
-                  :key="team.teamId"
+                  v-for="contract in contracts"
+                  :key="contract.id"
                   cols="12"
                   sm="6"
                   md="4"
                   lg="4"
                   class="pa-3"
                 >
+                  <!-- Debug output -->
+                  <!-- <pre>{{ JSON.stringify(contract, null, 2) }}</pre> -->
+
                   <contractWidget
-                    :title="team.location"
-                    :team-members="team.teamAvatars"
-                    :supervisor="team.supervisor"
+                    v-bind="contract"
+                    :id="contract.id"
+                    :title="contract.name"
+                    :created_at="contract.created_at"
+                    :updated_at="contract.updated_at"
                   />
                 </v-col>
               </v-row>
 
               <Pagination
-                :total-items="2300"
+                :total-items="totalItems"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
               />
@@ -295,7 +352,7 @@ onMounted(() => {
         </v-container>
       </div>
 
-      <!-- Add Team Modal -->
+      <!-- Add Contract Modal -->
       <v-dialog v-model="dialog" width="500" class="add-team-dialog">
         <v-card class="rounded-lg">
           <v-card-text class="pa-4">
@@ -312,25 +369,13 @@ onMounted(() => {
               <div class="mb-4">
                 <label class="text-subtitle-2 mb-2 d-block">اسم الباقة</label>
                 <v-text-field
-                  v-model="quoteForm.packageName"
+                  v-model="quoteForm.name"
                   variant="outlined"
                   density="comfortable"
                   placeholder="اسم الباقة"
                   hide-details
                   class="rounded-lg bg-grey-lighten-4 px-2"
-                />
-              </div>
-
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">الواقع</label>
-                <v-select
-                  v-model="quoteForm.location"
-                  :items="locations"
-                  variant="outlined"
-                  density="comfortable"
-                  placeholder="اختر الواقع"
-                  hide-details
-                  class="rounded-lg bg-grey-lighten-4 px-2"
+                  required
                 />
               </div>
 

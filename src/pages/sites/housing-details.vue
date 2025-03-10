@@ -4,10 +4,11 @@ import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import companyCard from "@/@core/components/widgets/companyCard.vue";
 import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import MapDisplay from "@/components/maps/MapDisplay.vue";
 
 const appStore = useAppStore();
 const route = useRoute();
@@ -25,6 +26,7 @@ const housingPermitNumber = ref("");
 const authorizedContactNumber = ref("");
 const selectedCompany = ref(null);
 const activeTab = ref("all");
+const selectedLocation = ref({ lat: 24.7136, lng: 46.6753 }); // Default to Riyadh coordinates
 
 const { generateBreadcrumbItems } = useBreadcrumbs();
 
@@ -101,6 +103,32 @@ const complaintOptions = ref([
     data: [124, 95, 65, 91, 76],
   },
 ]);
+
+const formData = ref({
+  name: "",
+  location_type_id: null,
+  location_sub_type_id: 1,
+  contract_id: 3,
+  delegate_name: "",
+  delegate_phone: "",
+  license_no: "",
+  camp_number: "",
+  square_number: "",
+  latitude: "24.7136",
+  longitude: "46.6753",
+});
+
+// Watch for location changes
+watch(
+  selectedLocation,
+  (newLocation) => {
+    if (newLocation) {
+      formData.value.latitude = newLocation.lat.toString();
+      formData.value.longitude = newLocation.lng.toString();
+    }
+  },
+  { deep: true }
+);
 
 const handleSubmit = async () => {
   loading.value = true;
@@ -534,14 +562,16 @@ onMounted(() => {
 
                       <!-- Map -->
                       <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >الاحداثيات</label
-                        >
-                        <div
-                          class="map-container rounded-lg overflow-hidden"
-                          style="height: 100px"
-                        >
-                          map
+                        <label class="text-subtitle-2 mb-2 d-block">الاحداثيات</label>
+                        <MapDisplay
+                          v-model:latitude="selectedLocation.value.lat"
+                          v-model:longitude="selectedLocation.value.lng"
+                          height="200px"
+                          :zoom="13"
+                        />
+                        <div class="d-flex justify-space-between mt-2">
+                          <span class="text-body-2 text-medium-emphasis">خط العرض: {{ selectedLocation.value.lat }}</span>
+                          <span class="text-body-2 text-medium-emphasis">خط الطول: {{ selectedLocation.value.lng }}</span>
                         </div>
                       </div>
 

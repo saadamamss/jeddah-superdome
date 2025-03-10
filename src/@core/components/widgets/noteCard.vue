@@ -1,127 +1,91 @@
 <template>
-  <v-card elevation="0" class="rate-card rounded-lg">
-    <v-card-text class="pa-4 pb-0" @click="router.push('/rating_details')">
-      <div class="d-flex justify-space-between align-center mb-2">
-        <div class="d-flex align-center mb-2 card-gray-text">
-          <div class="d-flex align-center gap-2">
-            <svg
-              width="25"
-              height="24"
-              viewBox="0 0 25 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect
-                x="0.333984"
-                width="24"
-                height="24"
-                rx="12"
-                fill="#B69265"
-              />
-              <path
-                opacity="0.4"
-                d="M13.9033 6.84557C14.0862 6.66268 14.1776 6.57124 14.1472 6.47208C14.1169 6.37292 13.9958 6.34951 13.7536 6.30268C13.5434 6.26205 13.3287 6.23407 13.1103 6.21955C12.2707 6.16374 11.3948 6.16385 10.5569 6.21955C7.93107 6.3941 5.84768 8.51372 5.67638 11.1643C5.64433 11.6602 5.64433 12.1732 5.67638 12.6691C5.74016 13.656 6.17069 14.5463 6.64928 15.2687C6.79265 15.5456 6.71795 15.9608 6.44981 16.469L6.43746 16.4924C6.34737 16.663 6.25918 16.83 6.2083 16.9724C6.15439 17.1233 6.09868 17.3629 6.23764 17.5998C6.36532 17.8175 6.56933 17.8973 6.73422 17.9292C6.87112 17.9557 7.03899 17.9597 7.19647 17.9634L7.22277 17.9641C8.03912 17.9839 8.61438 17.7482 9.07003 17.4122C9.08957 17.3978 9.10778 17.3844 9.12481 17.3719C9.19353 17.3213 9.2279 17.2961 9.27257 17.2905C9.31724 17.285 9.35651 17.301 9.43505 17.333C9.47394 17.3488 9.51768 17.3668 9.56717 17.3872C9.87846 17.5154 10.2321 17.5922 10.5569 17.6138C11.3948 17.6695 12.2707 17.6697 13.1103 17.6138C15.7361 17.4393 17.8195 15.3197 17.9908 12.6691C18.0229 12.1732 18.0229 11.6602 17.9908 11.1643C17.953 10.5791 17.8219 10.0197 17.6124 9.50141C17.5339 9.30718 17.4946 9.21007 17.4038 9.1916C17.313 9.17314 17.2355 9.25065 17.0805 9.40567L15.8292 10.657C15.484 11.0021 15.0762 11.1533 14.75 11.2366C14.5873 11.2781 14.4272 11.3069 14.2941 11.3299L14.2211 11.3424C14.113 11.3609 14.0254 11.3759 13.9388 11.3945L13.9032 11.4021C13.7381 11.4375 13.5319 11.4818 13.3529 11.4932C13.1453 11.5064 12.7577 11.4924 12.4414 11.1761C12.1251 10.8598 12.1111 10.4722 12.1243 10.2646C12.1357 10.0856 12.1799 9.87941 12.2154 9.71428L12.223 9.6787C12.2415 9.59214 12.2566 9.50449 12.2751 9.39637L12.2876 9.32335C12.3106 9.19026 12.3394 9.03021 12.3809 8.86751C12.4642 8.5413 12.6154 8.13346 12.9605 7.78834L13.9033 6.84557Z"
-                fill="white"
-              />
-              <path
-                d="M15.4729 6.49641L13.5709 8.39842C13.2699 8.69942 13.1976 9.12184 13.1266 9.53662C13.108 9.64546 13.0895 9.75378 13.0669 9.85924C12.9821 10.256 12.9397 10.4543 13.0518 10.5664C13.1638 10.6785 13.3622 10.636 13.7589 10.5512C13.8644 10.5287 13.9727 10.5101 14.0815 10.4915C14.4963 10.4206 14.9187 10.3483 15.2197 10.0473L17.1218 8.14529C17.3134 7.95361 17.4093 7.85777 17.4668 7.75807C17.623 7.48752 17.623 7.15418 17.4668 6.88362C17.4093 6.78392 17.3134 6.68809 17.1218 6.49641C16.9301 6.30474 16.8342 6.20889 16.7345 6.15133C16.464 5.99513 16.1306 5.99513 15.8601 6.15133C15.7604 6.20889 15.6646 6.30473 15.4729 6.49641Z"
-                fill="white"
-              />
-              <path
-                d="M9.53398 11.4967C9.21642 11.4967 8.95898 11.7541 8.95898 12.0717C8.95898 12.3892 9.21642 12.6467 9.53398 12.6467H9.53914C9.85671 12.6467 10.1141 12.3892 10.1141 12.0717C10.1141 11.7541 9.85671 11.4967 9.53914 11.4967H9.53398Z"
-                fill="white"
-              />
-              <path
-                d="M11.8314 11.4967C11.5138 11.4967 11.2564 11.7541 11.2564 12.0717C11.2564 12.3892 11.5138 12.6467 11.8314 12.6467H11.8366C12.1541 12.6467 12.4116 12.3892 12.4116 12.0717C12.4116 11.7541 12.1541 11.4967 11.8366 11.4967H11.8314Z"
-                fill="white"
-              />
-            </svg>
-
-            <div class="font-weight-bold text-body-1">ملاحظة عامة</div>
-          </div>
+  <v-card
+    elevation="1"
+    class="rounded-lg h-100 cursor-pointer"
+    @click="navigateToDetails"
+  >
+    <v-card-text class="pa-4 h-100">
+      <!-- Header with Status -->
+      <div class="d-flex justify-space-between align-center mb-4">
+        <div class="d-flex align-center">
+          <v-chip
+            :color="getStatusColor(status)"
+            :text-color="status === 'PENDING' ? 'default' : 'white'"
+            size="small"
+            class="font-weight-medium"
+          >
+            {{ getStatusText(status) }}
+          </v-chip>
         </div>
-        <div class="d-flex align-center justify-space-between">
-          <!-- <v-divider class="mt-10" /> -->
+        <div class="text-caption text-medium-emphasis">
+          {{ formatDate(report_date) }}
+        </div>
+      </div>
 
-          <div class="text-body-2 text-medium-emphasis">
-            <div
-              class="text-body-2 font-weight-medium py-1 text-center px-2 rounded-pill"
-              key=""
-              :style="{
-                backgroundColor:
-                  status === 'مرفوض'
-                    ? 'rgba(250, 238, 235, 1)'
-                    : 'rgba(237, 244, 238, 1)',
-                color:
-                  status === 'مرفوض'
-                    ? 'rgba(198, 40, 0, 1)'
-                    : 'rgba(78, 145, 88, 1)',
-              }"
-            >
-              {{ status }}
-            </div>
+      <!-- Note Type -->
+      <div class="mb-2">
+        <div class="text-subtitle-1 font-weight-bold">{{ note_type }}</div>
+      </div>
+
+      <!-- Description -->
+      <p class="text-body-2 mb-4">{{ description }}</p>
+
+      <!-- Location -->
+      <div class="d-flex align-center mb-2">
+        <v-icon size="small" color="primary" class="me-2"
+          >mdi-map-marker</v-icon
+        >
+        <div class="d-flex flex-column flex-wrap">
+          <span class="text-body-2 text-truncate" style="max-width: 250px">{{
+            address
+          }}</span>
+          <div
+            v-if="latitude && longitude"
+            class="text-caption text-medium-emphasis"
+          >
+            {{ latitude }}, {{ longitude }}
           </div>
         </div>
       </div>
 
-      <!-- <user-widget noPadding noShadow :user="user" /> -->
-
-      <div class="company-info mt-2">
-        <p class="text-body-2 text-medium-emphasis text-bold text-sm">
-          تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما
-          تسبب في تعطل أجهزة
-        </p>
-        <div class="d-flex justify-space-between align-center">
-          <div class="d-flex align-center ga-2">
-            <svg
-              width="14"
-              height="16"
-              viewBox="0 0 14 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+      <!-- Reporter -->
+      <div class="d-flex align-center mb-2">
+        <v-icon size="small" color="primary" class="me-2">mdi-account</v-icon>
+        <div>
+          <div class="d-flex align-center">
+            <span class="text-body-2">
+              {{ reportBy.firstname }} {{ reportBy.lastname }}</span
             >
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M7.33398 4.49967C5.76918 4.49967 4.50065 5.7682 4.50065 7.33301C4.50065 8.89781 5.76918 10.1663 7.33398 10.1663C8.89879 10.1663 10.1673 8.89781 10.1673 7.33301C10.1673 5.7682 8.89879 4.49967 7.33398 4.49967ZM5.50065 7.33301C5.50065 6.32049 6.32146 5.49967 7.33398 5.49967C8.34651 5.49967 9.16732 6.32049 9.16732 7.33301C9.16732 8.34553 8.34651 9.16634 7.33398 9.16634C6.32146 9.16634 5.50065 8.34553 5.50065 7.33301Z"
-                fill="#B69265"
-              />
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M7.33398 0.833008C3.81699 0.833008 0.833984 3.73937 0.833984 7.28352C0.833984 9.09849 1.6019 10.6157 2.67858 11.868C3.75062 13.1148 5.14621 14.1204 6.45281 14.9293L6.4614 14.9346L6.4702 14.9396C6.73369 15.0883 7.03134 15.1663 7.33398 15.1663C7.63662 15.1663 7.93428 15.0883 8.19777 14.9396L8.20544 14.9352L8.21296 14.9306C9.5243 14.1282 10.9202 13.1194 11.9917 11.8688C13.0675 10.6134 13.834 9.09249 13.834 7.28352C13.834 3.73937 10.851 0.833008 7.33398 0.833008ZM1.83398 7.28352C1.83398 4.30395 4.3569 1.83301 7.33398 1.83301C10.3111 1.83301 12.834 4.30395 12.834 7.28352C12.834 8.78835 12.2016 10.0871 11.2324 11.2182C10.2612 12.3516 8.9696 13.2946 7.69944 14.0725C7.58794 14.1339 7.46215 14.1663 7.33398 14.1663C7.2062 14.1663 7.08078 14.1341 6.96951 14.073C5.69981 13.2863 4.40848 12.3461 3.43684 11.216C2.46737 10.0885 1.83398 8.7938 1.83398 7.28352Z"
-                fill="#B69265"
-              />
-            </svg>
-
-            <div class="text-body-2 text-medium-emphasis text-sm">
-              موقع الملاحظه
-            </div>
-            <div class="text-body-2 font-weight-bold text-sm">مخيم النور 3</div>
+          </div>
+          <div class="text-caption text-medium-emphasis">
+            <!-- {{ report_by.phone || report_by.email }} -->
           </div>
         </div>
-
-        <p class="text-body-2 text-medium-emphasis text-sm mt-6">
-          07/02 | 09:15 ص
-        </p>
       </div>
+
+      <!-- Time -->
+      <!-- <div class="d-flex align-center mt-2">
+        <v-icon size="small" color="primary" class="me-2"
+          >mdi-clock-outline</v-icon
+        >
+        <span class="text-body-2">{{ report_time }}</span>
+      </div> -->
     </v-card-text>
   </v-card>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import UserWidget from "@/@core/components/widgets/UserWidget.vue";
+import { defineProps } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-defineProps({
-  siteId: {
-    type: String,
+const props = defineProps({
+  noteId: {
+    type: [Number, String],
     required: true,
   },
-  authorizationNumber: {
+  note_type: {
     type: String,
     required: true,
   },
@@ -129,54 +93,100 @@ defineProps({
     type: String,
     required: true,
   },
+  description: {
+    type: String,
+    required: true,
+  },
+  report_date: {
+    type: String,
+    required: true,
+  },
+  report_time: {
+    type: String,
+    required: true,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  reportBy: {
+    default: null,
+  },
+  created_at: {
+    type: String,
+    required: true,
+  },
+  latitude: {
+    type: Number,
+    default: null,
+  },
+  longitude: {
+    type: Number,
+    default: null,
+  },
 });
 
-const user = ref({
-  name: "محمد أحمد",
-});
+const getStatusColor = (status) => {
+  switch (status) {
+    case "APPROVED":
+      return "success";
+    case "REJECTED":
+      return "error";
+    case "PENDING":
+      return "warning";
+    default:
+      return "default";
+  }
+};
 
-const dialog = ref(false);
-const loading = ref(false);
+const getStatusText = (status) => {
+  switch (status) {
+    case "APPROVED":
+      return "مقبولة";
+    case "REJECTED":
+      return "مرفوضة";
+    case "PENDING":
+      return "قيد المراجعة";
+    default:
+      return status;
+  }
+};
+
+const formatDate = (date) => {
+  if (!date) return "";
+  return new Date(date).toLocaleDateString("ar-SA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+const getReporterType = (type) => {
+  const types = {
+    ADMIN: "مدير",
+    USER: "مستخدم",
+    SUPERVISOR: "مشرف",
+    INSPECTOR: "مفتش",
+    RESIDENT: "مقيم",
+    VISITOR: "زائر",
+    OTHER: "آخر",
+  };
+  return types[type] || type;
+};
+
+// Function to navigate to details page
+const navigateToDetails = () => {
+  router.push(`/notes/details/${props.noteId}`);
+};
 </script>
 
-<style lang="scss" scoped>
-.rate-card {
-  // background-color: rgb(250, 250, 250) !important;
-  // border: 1px solid rgba(182, 146, 101, 0.12);
-  transition: all 0.3s ease;
-
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important;
-
-  :deep(.v-btn) {
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  .text-h6 {
-    font-size: 1.1rem !important;
-    line-height: 1.5;
-  }
-
-  .company-info {
-    padding-top: 10px;
-    border-top: 1px solid rgba(249, 249, 249, 1);
-  }
+<style scoped>
+.v-card {
+  transition: transform 0.2s ease-in-out;
+  cursor: pointer;
 }
 
-.location-dialog {
-  :deep(.v-card) {
-    background-color: white;
-  }
-
-  :deep(.v-field) {
-    border-radius: 8px;
-    background-color: rgb(250, 250, 250);
-  }
-
-  :deep(.v-btn) {
-    text-transform: none;
-    letter-spacing: 0;
-    border-radius: 8px;
-  }
+.v-card:hover {
+  transform: translateY(-2px);
 }
 </style>

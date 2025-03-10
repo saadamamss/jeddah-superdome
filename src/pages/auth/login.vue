@@ -2,12 +2,15 @@
 import { useAuthStore } from "@/stores/Auth";
 import { requiredValidator } from "@validators";
 import { toast } from "vue3-toastify";
+import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
 
 const isPasswordVisible = ref(false);
+const form = ref(null);
 
 const formState = reactive({
-  sa_id: null, // "05423533223"
-  password: null, // "1234po12"
+  email: "",
+  password: "",
 });
 
 const auth = useAuthStore();
@@ -16,22 +19,41 @@ const router = useRouter();
 const isSubmitting = ref(false);
 
 const loginUser = async () => {
+  const { valid } = await form.value.validate();
+
+  if (!valid) return;
+
   try {
     isSubmitting.value = true;
-    const { data } = await auth.login(formState);
+    const { token, user } = await auth.login(formState);
 
-    auth.updateUser(data?.data || null);
-    auth.saveToken(data?.token || null);
-
-    // router.push({ name: "home" });
-    location.href = "/";
-  } catch (error) {
-    if (error?.response?.message) {
-      toast(error.response.message, { rtl: true, hideProgressBar: true });
-      return;
+    if (token) {
+      location.href = "/";
+    } else {
+      throw new Error("بيانات تسجيل الدخول غير صحيحة");
     }
+  } catch (error) {
+    console.error("Login error:", error);
 
-    toast("بيانات تسجيل الدخول خاطئة", { rtl: true, hideProgressBar: true });
+    if (error?.response?.data?.message) {
+      toast.error(error.response.data.message, {
+        rtl: true,
+        hideProgressBar: true,
+        position: "top-center",
+      });
+    } else if (error?.message) {
+      toast.error(error.message, {
+        rtl: true,
+        hideProgressBar: true,
+        position: "top-center",
+      });
+    } else {
+      toast.error("حدث خطأ أثناء تسجيل الدخول", {
+        rtl: true,
+        hideProgressBar: true,
+        position: "top-center",
+      });
+    }
   } finally {
     isSubmitting.value = false;
   }
@@ -61,20 +83,20 @@ const loginUser = async () => {
         </VCardTitle>
         <v-divider class="my-4" />
         <VCardText style="flex: 0" class="px-4">
-          <VForm @submit.prevent="loginUser" class="mb-8">
+          <VForm ref="form" @submit.prevent="loginUser" class="mb-8">
             <VRow>
               <VCol cols="12" class="py-1">
                 <label class="d-block text-subtitle-1 mb-2 text-dark">
                   رقم الهوية الوطنية أو الإقامة*
                 </label>
                 <VTextField
-                  v-model="formState.sa_id"
-                  type="number"
+                  v-model="formState.email"
+                  type="text"
                   bg-color="white"
                   density="comfortable"
-                  placeholder="ادخل رقم الهوية الوطنية أو الإقامة"
+                  placeholder="ادخل البريد الإلكتروني"
                   rounded="lg"
-                  :rules="[requiredValidator]"
+                  :rules="[(v) => !!v || 'البريد الإلكتروني مطلوب']"
                 />
               </VCol>
 
@@ -89,7 +111,7 @@ const loginUser = async () => {
                   density="comfortable"
                   placeholder="أدخل كلمة المرور"
                   rounded="lg"
-                  :rules="[requiredValidator]"
+                  :rules="[(v) => !!v || 'كلمة المرور مطلوبة']"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   :append-inner-icon="
                     isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
@@ -112,6 +134,7 @@ const loginUser = async () => {
                     type="submit"
                     size="large"
                     height="50"
+                    color="primary"
                   >
                     تسجيل الدخول
                   </VBtn>
