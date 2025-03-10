@@ -121,6 +121,14 @@ export default [
         },
       },
       {
+        path: "/notes/details/:id",
+        name: "note-details",
+        component: () => import("@/pages/notes/details.vue"),
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
         path: "/notes/add",
         name: "add-note",
         component: AddNotePage,

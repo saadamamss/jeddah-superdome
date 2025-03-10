@@ -13,9 +13,8 @@ const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
 const search = ref("");
-const dialog = ref(false);
-const dialogStep = ref(1);
 const loading = ref(false);
+const filterMenu = ref(false);
 const siteType = ref("السكن");
 const housingPermitNumber = ref("");
 const authorizedContactNumber = ref("");
@@ -35,8 +34,8 @@ const filters = ref({
 const formData = ref({
   name: "",
   location_type_id: null,
-  location_sub_type_id: 1,
-  contract_id: 3,
+  location_sub_type_id: null,
+  contract_id: null,
   delegate_name: "",
   delegate_phone: "",
   license_no: "",
@@ -357,7 +356,7 @@ const handleReCorrection = async (id) => {
   await fetchCorrectionDetails(id);
 };
 
-// Update handleSubmit function to handle both new and correction updates
+// Add function to handle form submission and site creation
 const handleSubmit = async () => {
   const { valid } = await form.value.validate();
 
@@ -372,16 +371,14 @@ const handleSubmit = async () => {
   try {
     loading.value = true;
 
-    // Format phone number if needed
+    // Format phone number
     const formattedPhone = formData.value.delegate_phone.startsWith("966")
       ? formData.value.delegate_phone
       : `966${formData.value.delegate_phone}`;
 
-    // Prepare request payload with correct field mapping
     const payload = {
       ...formData.value,
-      contact_number: formattedPhone, // Map delegate_phone to contact_number
-      delegate_phone: undefined, // Remove delegate_phone from payload
+      delegate_phone: formattedPhone,
     };
 
     // Choose endpoint based on whether we're in correction mode
@@ -395,16 +392,14 @@ const handleSubmit = async () => {
 
     if (response.data) {
       useAppStore().showSnackbar({
-        message: "تم حفظ البيانات بنجاح",
+        message:
+          activeTab.value === "correction"
+            ? "تم تحديث الموقع بنجاح"
+            : "تم إنشاء الموقع بنجاح",
         color: "success",
       });
-
-      // Reset form and close dialog
       dialog.value = false;
-      dialogStep.value = 1;
-      form.value.reset();
-
-      // Refresh locations list
+      resetForm();
       await fetchLocations(currentPage.value);
     }
   } catch (error) {
@@ -418,77 +413,64 @@ const handleSubmit = async () => {
   }
 };
 
+// Add function to open dialog and reset form
+const addNewLocation = () => {
+  resetForm();
+  dialog.value = true;
+};
+
+// Add function to handle next step
 const nextStep = () => {
-  if (siteType.value) {
+  if (formData.value.location_type_id) {
     dialogStep.value = 2;
   }
 };
 
+// Add function to handle previous step
 const prevStep = () => {
   dialogStep.value = 1;
 };
 
+// Add function to close dialog
 const closeDialog = () => {
   dialog.value = false;
+  resetForm();
+};
+
+// Add function to reset form
+const resetForm = () => {
+  formData.value = {
+    name: "",
+    location_type_id: null,
+    location_sub_type_id: null,
+    contract_id: null,
+    delegate_name: "",
+    delegate_phone: "",
+    license_no: "",
+    camp_number: "",
+    square_number: "",
+    latitude: "24.7136",
+    longitude: "46.6753",
+    companies: [],
+  };
+  selectedLocation.value = { lat: 24.7136, lng: 46.6753 };
   dialogStep.value = 1;
 };
 
-const addNewLocation = () => {
-  formData.value = {
-    name: "",
-    location_type_id: null,
-    location_sub_type_id: 1,
-    contract_id: 3,
-    delegate_name: "",
-    delegate_phone: "",
-    license_no: "",
-    camp_number: "",
-    square_number: "",
-    latitude: "24.7136",
-    longitude: "46.6753",
-    companies: [],
-  };
-  selectedLocation.value = { lat: 24.7136, lng: 46.6753 };
-  dialog.value = true;
+// Add location change handler
+const handleLocationChange = (location) => {
+  formData.value.latitude = location.lat.toString();
+  formData.value.longitude = location.lng.toString();
 };
 
-// Add this function to handle location changes
-const handleLocationChange = (newLocation) => {
-  if (newLocation) {
-    formData.value.latitude = newLocation.lat.toString();
-    formData.value.longitude = newLocation.lng.toString();
-    console.log("Location updated:", {
-      lat: formData.value.latitude,
-      lng: formData.value.longitude,
-    });
-  }
-};
-
-// Update the watch to use the handler function
-watch(selectedLocation, handleLocationChange, { deep: true });
-
-const openDialog = () => {
-  formData.value = {
-    name: "",
-    location_type_id: null,
-    location_sub_type_id: 1,
-    contract_id: 3,
-    delegate_name: "",
-    delegate_phone: "",
-    license_no: "",
-    camp_number: "",
-    square_number: "",
-    latitude: "24.7136",
-    longitude: "46.6753",
-    companies: [],
-  };
-  selectedLocation.value = { lat: 24.7136, lng: 46.6753 };
-  dialog.value = true;
-};
-
-// Add onMounted hook to fetch companies when component mounts
+// Update onMounted to fetch all required data
 onMounted(async () => {
-  await Promise.all([fetchCompanies(), fetchContracts()]);
+  await Promise.all([
+    fetchCompanies(),
+    fetchContracts(),
+    fetchSiteTypes(),
+    fetchLocations(1),
+  ]);
 });
 
 // Add function to handle site approval
@@ -561,6 +543,26 @@ const handleReject = async (siteId) => {
     });
   } finally {
     loading.value = false;
+  }
+};
+
+// Add dialog control
+const dialog = ref(false);
+const dialogStep = ref(1);
+
+// Add function to fetch site types
+const fetchSiteTypes = async () => {
+  try {
+    const response = await axios.get("locations-types");
+    if (response.data?.data) {
+      siteTypes.value = response.data.data.sub_types;
+    }
+  } catch (error) {
+    console.error("Error fetching site types:", error);
+    useAppStore().showSnackbar({
+      message: "حدث خطأ أثناء جلب أنواع المواقع",
+      color: "error",
+    });
   }
 };
 </script>
@@ -661,13 +663,24 @@ const handleReject = async (siteId) => {
               <div class="d-flex align-center justify-space-between ga-4">
                 <h2 class="text-h5 font-weight-bold mb-4">إدارة المواقع</h2>
                 <div class="d-flex align-center ga-2">
+                  <!-- Add New Site Button -->
+                  <v-btn
+                    color="primary"
+                    class="me-4"
+                    prepend-icon="mdi-plus"
+                    @click="addNewLocation"
+                  >
+                    إضافة موقع جديد
+                  </v-btn>
+
+                  <!-- Search Field -->
                   <v-text-field
                     v-model="search"
                     label="البحث المخيم او المسكن... "
                     rounded="lg"
                     clearable
                     height="48"
-                    class="bg-white"
+                    class="bg-white me-4"
                     style="
                       width: 320px;
                       max-width: 100%;
@@ -698,36 +711,26 @@ const handleReject = async (siteId) => {
                     </template>
                   </v-text-field>
 
-                  <VBtn color="default" class="btn-icon border" elevation="0">
-                    <svg
-                      width="1.3rem"
-                      height="1.3rem"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        opacity="0.4"
-                        d="M8.85746 12.5061C6.36901 10.6456 4.59564 8.59915 3.62734 7.44867C3.3276 7.09253 3.22938 6.8319 3.17033 6.3728C2.96811 4.8008 2.86701 4.0148 3.32795 3.5074C3.7889 3 4.60404 3 6.23433 3H17.7657C19.396 3 20.2111 3 20.672 3.5074C21.133 4.0148 21.0319 4.8008 20.8297 6.37281C20.7706 6.83191 20.6724 7.09254 20.3726 7.44867C19.403 8.60062 17.6261 10.6507 15.1326 12.5135C14.907 12.6821 14.7583 12.9567 14.7307 13.2614C14.4837 15.992 14.2559 17.4876 14.1141 18.2442C13.8853 19.4657 12.1532 20.2006 11.226 20.8563C10.6741 21.2466 10.0043 20.782 9.93278 20.1778C9.79643 19.0261 9.53961 16.6864 9.25927 13.2614C9.23409 12.9539 9.08486 12.6761 8.85746 12.5061Z"
-                        fill="#B69265"
-                      />
-                      <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
-                        d="M6.18176 2.24732C6.1991 2.24732 6.21649 2.24732 6.23394 2.24732L17.8175 2.24732C18.588 2.24728 19.2422 2.24725 19.7583 2.31762C20.3046 2.3921 20.8269 2.56023 21.2268 3.00041C21.6302 3.44445 21.7406 3.97957 21.7491 4.52659C21.757 5.03745 21.6753 5.67204 21.5801 6.41193L21.5732 6.46581C21.5395 6.72764 21.489 6.98088 21.3836 7.23442C21.2767 7.49184 21.1294 7.71109 20.946 7.92897C19.9664 9.09285 18.1451 11.1962 15.5811 13.1117C15.5396 13.1427 15.4872 13.2161 15.4773 13.3263C15.2282 16.0792 15.009 17.5358 14.8509 18.3796C14.6799 19.2921 13.9839 19.9237 13.3838 20.3585C13.0697 20.5861 12.7364 20.791 12.4394 20.9717C12.4156 20.9862 12.3921 21.0005 12.3689 21.0146C12.0915 21.1833 11.8557 21.3267 11.6586 21.466C11.1181 21.8482 10.4945 21.8214 10.0179 21.5437C9.56811 21.2817 9.25159 20.8038 9.1876 20.2633C9.04713 19.0769 8.79249 16.7542 8.51139 13.3199C8.50238 13.2097 8.48517 13.1778 8.48373 13.1751C8.48275 13.1733 8.48022 13.1686 8.47182 13.1594C8.46243 13.149 8.44366 13.1308 8.40798 13.1041C5.84915 11.191 4.03146 9.09132 3.05314 7.92893C2.87044 7.71185 2.71884 7.49783 2.61076 7.23754C2.50494 6.98273 2.45983 6.7282 2.42607 6.46581C2.42375 6.44778 2.42144 6.42982 2.41914 6.41192C2.32392 5.67203 2.24226 5.03744 2.25016 4.52659C2.25863 3.97957 2.36905 3.44445 2.77244 3.00041C3.17232 2.56023 3.69466 2.3921 4.24094 2.31762C4.75704 2.24725 5.4112 2.24728 6.18176 2.24732ZM4.44357 3.80387C4.05947 3.85624 3.94377 3.94181 3.88271 4.00903C3.82515 4.07239 3.75565 4.18397 3.74998 4.5498C3.74395 4.93944 3.80975 5.46543 3.91382 6.27444C3.94273 6.49924 3.96807 6.59485 3.99606 6.66228C4.02179 6.72422 4.06736 6.80453 4.20077 6.96304C5.15905 8.10163 6.8881 10.0949 9.30617 11.9027C9.50044 12.048 9.67868 12.2278 9.80763 12.4699C9.93468 12.7085 9.98668 12.9567 10.0064 13.1975C10.286 16.6131 10.5388 18.9178 10.6772 20.0869C10.6814 20.1226 10.6944 20.1578 10.7144 20.1884C10.7348 20.2197 10.7575 20.2386 10.773 20.2476C10.7749 20.2488 10.7767 20.2497 10.7781 20.2504C10.7817 20.2485 10.7865 20.2456 10.7926 20.2413C11.0347 20.0701 11.3157 19.8993 11.581 19.7382C11.6074 19.7221 11.6336 19.7062 11.6597 19.6903C11.9585 19.5085 12.2442 19.3318 12.5036 19.1439C13.0505 18.7477 13.3187 18.4124 13.3766 18.1034C13.523 17.3216 13.7369 15.9154 13.9834 13.1911C14.0286 12.692 14.2736 12.2161 14.6833 11.91C17.1063 10.0998 18.8389 8.10302 19.7985 6.96301C19.9148 6.82476 19.9666 6.73562 19.9984 6.65892C20.0319 6.57834 20.06 6.47171 20.0854 6.27444C20.1895 5.46543 20.2553 4.93944 20.2493 4.5498C20.2436 4.18397 20.1741 4.07239 20.1165 4.00903C20.0555 3.94181 19.9398 3.85624 19.5557 3.80387C19.153 3.74897 18.6023 3.74732 17.7653 3.74732H6.23394C5.3969 3.74732 4.84624 3.74897 4.44357 3.80387ZM10.7703 20.2539C10.7703 20.2539 10.7708 20.2537 10.7717 20.2535L10.7703 20.2539Z"
-                        fill="#B69265"
-                      />
-                    </svg>
-
-                    <VMenu
-                      activator="parent"
-                      width="380px"
+                  <!-- Filter Button and Menu -->
+                  <v-menu
+                    v-model="filterMenu"
                       location="bottom end"
-                      offset="14px"
                       :close-on-content-click="false"
-                      persistent
-                    >
-                      <VList class="py-0 text-dark">
+                    offset="14"
+                  >
+                    <template v-slot:activator="{ props }">
+                      <v-btn
+                        v-bind="props"
+                        icon
+                        variant="text"
+                        size="small"
+                        color="primary"
+                      >
+                        <v-icon>mdi-filter-variant</v-icon>
+                      </v-btn>
+                    </template>
+
+                    <VList class="py-0 text-dark" width="380">
                         <VListItem
                           title="تصفية"
                           class="notification-section"
@@ -738,12 +741,7 @@ const handleReject = async (siteId) => {
                               icon="mdi-close"
                               variant="text"
                               size="small"
-                              @click="
-                                $event.target
-                                  .closest('.v-menu')
-                                  .querySelector('.v-overlay__content')
-                                  .__vue__?.close()
-                              "
+                            @click="filterMenu = false"
                             ></v-btn>
                           </template>
                         </VListItem>
@@ -848,18 +846,7 @@ const handleReject = async (siteId) => {
                           </div>
                         </VListItem>
                       </VList>
-                    </VMenu>
-                  </VBtn>
-
-                  <VBtn
-                    height="48"
-                    elevation="0"
-                    class="rounded-lg"
-                    append-icon="mdi-plus"
-                    @click="addNewLocation"
-                  >
-                    إضافة موقع جديد
-                  </VBtn>
+                  </v-menu>
                 </div>
               </div>
               <!-- Search and Add Section -->
@@ -958,73 +945,143 @@ const handleReject = async (siteId) => {
           </VCard>
         </v-container>
       </div>
+    </v-container>
 
-      <!-- Add Site Modal -->
+    <!-- Add New Site Dialog -->
       <v-dialog v-model="dialog" width="500" class="add-site-dialog">
         <v-card class="rounded-lg">
           <v-card-text class="pa-4">
             <div class="d-flex justify-space-between align-center mb-6">
-              <h2 class="text-h6">تصحيح الموقع</h2>
-              <v-btn icon variant="text" @click="dialog = false">
+            <h2 class="text-h6">
+              {{ dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد" }}
+            </h2>
+            <v-btn icon variant="text" @click="closeDialog">
                 <v-icon>mdi-close</v-icon>
               </v-btn>
             </div>
 
-            <v-form ref="form" @submit.prevent="handleSubmit">
-              <!-- Camp Number -->
+          <!-- Step 1: Select Site Type -->
+          <v-form v-if="dialogStep === 1" @submit.prevent="nextStep">
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">رقم المخيم</label>
+              <label class="text-subtitle-2 mb-2 d-block">نوع الموقع</label>
+              <v-select
+                v-model="formData.location_type_id"
+                :items="siteTypes"
+                item-title="name"
+                item-value="id"
+                variant="outlined"
+                density="comfortable"
+                placeholder="اختر نوع الموقع"
+                hide-details
+                class="rounded-lg bg-grey-lighten-4"
+                required
+              />
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-end mt-6">
+              <v-btn
+                variant="text"
+                color="grey-darken-1"
+                class="me-4"
+                @click="closeDialog"
+              >
+                إلغاء
+              </v-btn>
+              <v-btn color="#B69265" class="text-white px-6" type="submit">
+                التالي
+              </v-btn>
+            </div>
+          </v-form>
+
+          <!-- Step 2: Fill Details -->
+          <v-form v-else ref="form" @submit.prevent="handleSubmit">
+            <!-- Name -->
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">اسم الموقع</label>
                 <v-text-field
-                  v-model="formData.camp_number"
-                  placeholder="أدخل رقم المخيم"
+                v-model="formData.name"
+                placeholder="أدخل اسم الموقع"
                   variant="outlined"
                   density="comfortable"
                   class="rounded-lg bg-grey-lighten-4"
-                  type="text"
                   required
                 />
               </div>
 
-              <!-- Contact Number -->
+            <!-- License Number -->
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">رقم الاتصال</label>
-                <div class="d-flex">
+              <label class="text-subtitle-2 mb-2 d-block">رقم الترخيص</label>
                   <v-text-field
-                    v-model="formData.delegate_phone"
+                v-model="formData.license_no"
+                placeholder="أدخل رقم الترخيص"
                     variant="outlined"
                     density="comfortable"
-                    placeholder="5xxxxxxxx"
-                    class="rounded-lg bg-grey-lighten-4 flex-grow-1"
+                class="rounded-lg bg-grey-lighten-4"
                     type="text"
                     required
                   />
-                </div>
               </div>
 
-              <!-- Location ID -->
+            <!-- Delegate Name -->
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">معرف الموقع</label>
+              <label class="text-subtitle-2 mb-2 d-block">اسم المفوض</label>
                 <v-text-field
-                  v-model="formData.location_id"
-                  placeholder="معرف الموقع"
+                v-model="formData.delegate_name"
+                placeholder="أدخل اسم المفوض"
                   variant="outlined"
                   density="comfortable"
                   class="rounded-lg bg-grey-lighten-4"
-                  type="number"
-                  readonly
+                required
                 />
               </div>
 
-              <!-- Square Number -->
+            <!-- Delegate Phone -->
               <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">رقم المربع</label>
+              <label class="text-subtitle-2 mb-2 d-block"
+                >رقم هاتف المفوض</label
+              >
                 <v-text-field
-                  v-model="formData.square_number"
-                  placeholder="أدخل رقم المربع"
+                v-model="formData.delegate_phone"
+                placeholder="5xxxxxxxx"
                   variant="outlined"
                   density="comfortable"
                   class="rounded-lg bg-grey-lighten-4"
-                  type="text"
+                required
+              />
+            </div>
+
+            <!-- Contract -->
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">العقد</label>
+              <v-select
+                v-model="formData.contract_id"
+                :items="contracts"
+                item-title="title"
+                item-value="value"
+                variant="outlined"
+                density="comfortable"
+                placeholder="اختر العقد"
+                hide-details
+                class="rounded-lg bg-grey-lighten-4"
+                required
+              />
+            </div>
+
+            <!-- Companies -->
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">الشركات</label>
+              <v-select
+                v-model="formData.companies"
+                :items="companies"
+                item-title="title"
+                item-value="value"
+                variant="outlined"
+                density="comfortable"
+                placeholder="اختر الشركات"
+                multiple
+                hide-details
+                class="rounded-lg bg-grey-lighten-4"
                   required
                 />
               </div>
@@ -1037,6 +1094,7 @@ const handleReject = async (siteId) => {
                 <LocationPicker
                   v-model="selectedLocation"
                   class="rounded-lg overflow-hidden"
+                style="height: 300px"
                   @update:model-value="handleLocationChange"
                 />
                 <!-- Coordinates display -->
@@ -1048,6 +1106,7 @@ const handleReject = async (siteId) => {
                     density="comfortable"
                     class="rounded-lg"
                     hide-details
+                  readonly
                   />
                   <v-text-field
                     v-model="formData.longitude"
@@ -1056,6 +1115,7 @@ const handleReject = async (siteId) => {
                     density="comfortable"
                     class="rounded-lg"
                     hide-details
+                  readonly
                   />
                 </div>
               </div>
@@ -1066,9 +1126,9 @@ const handleReject = async (siteId) => {
                   variant="text"
                   color="grey-darken-1"
                   class="me-4"
-                  @click="dialog = false"
+                @click="prevStep"
                 >
-                  إلغاء
+                رجوع
                 </v-btn>
                 <v-btn
                   color="#B69265"
@@ -1076,15 +1136,13 @@ const handleReject = async (siteId) => {
                   type="submit"
                   :loading="loading"
                 >
-                  حفظ التصحيح
+                إنشاء
                 </v-btn>
               </div>
             </v-form>
           </v-card-text>
         </v-card>
       </v-dialog>
-      <!-- add new location -->
-    </v-container>
   </div>
 </template>
 
@@ -1176,54 +1234,6 @@ const handleReject = async (siteId) => {
   }
 }
 
-.add-site-dialog {
-  :deep(.v-card) {
-    background-color: white;
-  }
-
-  :deep(.v-field) {
-    border-radius: 8px;
-    background-color: rgb(250, 250, 250);
-
-    &.v-field--focused {
-      background-color: white;
-    }
-
-    // Remove number input spinners
-    input[type="number"] {
-      -moz-appearance: textfield;
-      &::-webkit-outer-spin-button,
-      &::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-    }
-  }
-
-  :deep(.companies-search) {
-    .v-field__input {
-      min-height: 32px !important;
-      padding: 0 !important;
-    }
-    .v-field {
-      background: transparent !important;
-    }
-  }
-
-  :deep(.v-btn) {
-    text-transform: none;
-    letter-spacing: 0;
-    border-radius: 8px;
-  }
-
-  .country-code-select {
-    :deep(.v-field__input) {
-      padding-top: 0;
-      padding-bottom: 0;
-    }
-  }
-}
-
 .min-width-300px {
   min-width: 300px;
 }
@@ -1242,6 +1252,34 @@ const handleReject = async (siteId) => {
   border-radius: 8px;
   &:after {
     display: none;
+  }
+}
+
+// Add styles for the dialog
+.add-site-dialog {
+  :deep(.v-card) {
+    .v-field {
+    border-radius: 8px;
+    background-color: rgb(250, 250, 250);
+
+    &.v-field--focused {
+      background-color: white;
+    }
+    }
+  }
+
+  :deep(.v-btn) {
+    text-transform: none;
+    letter-spacing: 0;
+    border-radius: 8px;
+  }
+
+  :deep(.v-select) {
+    .v-field__input {
+      min-height: 44px;
+      padding-top: 0;
+      padding-bottom: 0;
+    }
   }
 }
 </style>

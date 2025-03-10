@@ -504,14 +504,6 @@ const handleUpdate = () => {
 
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04) !important;
 
-  .text-truncate {
-    max-width: 130px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-  }
-
   :deep(.v-btn) {
     text-transform: none;
     letter-spacing: 0;

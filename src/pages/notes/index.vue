@@ -1,131 +1,233 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
-import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import noteCard from "@/@core/components/widgets/noteCard";
-import editNoteCard from "@/@core/components/widgets/editNoteCard";
 import Pagination from "@/@core/components/Pagination";
-import SiteCard from "@/@core/components/widgets/SiteCard.vue";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import noteTypeCard from "@/@core/components/widgets/noteTypeCard";
+import { ref, onMounted, watch } from "vue";
+import axios from "@/plugins/axios";
 
 const appStore = useAppStore();
-const filterToggle = ref(0);
-const dateRange = ref();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
 const search = ref("");
-const dialog = ref(false);
-const dialogStep = ref(1);
 const loading = ref(false);
-const siteType = ref("السكن");
-const housingPermitNumber = ref("");
-const authorizedContactNumber = ref("");
-const selectedCompany = ref(null);
 const activeTab = ref("all");
-const router = useRouter();
 
-const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
-];
+// Data for notes and note types
+const notes = ref([]);
+const noteTypes = ref([]);
+const totalNotes = ref(0);
+const totalNoteTypes = ref(0);
+const newNoteType = ref("");
+const addNoteTypeDialog = ref(false);
+const editNoteTypeDialog = ref(false);
+const selectedNoteType = ref(null);
+const editedNoteType = ref("");
 
-const companies = [
-  { title: "شركة رواف منى", value: "rawaf" },
-  { title: "شركة الخليج", value: "gulf" },
-];
+// Fetch notes with pagination and search
+const fetchNotes = async () => {
+  try {
+    isLoading.value = true;
+    const queryParams = new URLSearchParams({
+      page: currentPage.value.toString(),
+      per_page: perPage.value.toString(),
+      search: search.value,
+    });
 
-const notes = ref([
-  {
-    noteId: "6127782187",
-    noteType: "ملاحظة عامة",
-    status: "مقبولة",
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-  },
-  {
-    noteId: "6127782188",
-    noteType: "ملاحظة عامة",
-    status: "مرفوضة",
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-    date: "2024-01-01",
-  },
-  {
-    noteId: "6127782189",
-    noteType: "ملاحظة عامة",
-    status: "مرفوضة",
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-  },
-  {
-    noteId: "6127782190",
-    noteType: "ملاحظة عامة",
-    status: "مرفوضة",
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-  },
-]);
-
-const violationOptions = ref([
-  {
-    name: "series-1",
-    data: [30, 40, 35, 50, 49, 60, 70],
-  },
-]);
-
-const complaintOptions = ref([
-  {
-    name: "Gold medals",
-    data: [148, 113, 104, 71, 77],
-  },
-  {
-    name: "Silver medals",
-    data: [113, 122, 98, 88, 72],
-  },
-  {
-    name: "Bronze medals",
-    data: [124, 95, 65, 91, 76],
-  },
-]);
-
-const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
-  dialogStep.value = 1;
-};
-
-const nextStep = () => {
-  if (siteType.value) {
-    dialogStep.value = 2;
+    const response = await axios.get(`/reports?${queryParams.toString()}`);
+    if (response.data?.data) {
+      notes.value = response.data.data;
+      totalNotes.value = response.data.pagination?.i_total_objects || 0;
+      perPage.value = response.data.pagination?.i_per_page || perPage.value;
+    }
+  } catch (error) {
+    console.error("Error fetching notes:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب البيانات",
+      color: "error",
+    });
+    notes.value = [];
+    totalNotes.value = 0;
+  } finally {
+    isLoading.value = false;
   }
 };
 
-const prevStep = () => {
-  dialogStep.value = 1;
+// Fetch note types with pagination and search
+const fetchNoteTypes = async () => {
+  try {
+    isLoading.value = true;
+    const queryParams = new URLSearchParams({
+      page: currentPage.value.toString(),
+      per_page: perPage.value.toString(),
+      search: search.value,
+    });
+
+    const response = await axios.get(
+      `/reports-types?${queryParams.toString()}`
+    );
+    if (response.data?.data) {
+      noteTypes.value = response.data.data;
+      totalNoteTypes.value = response.data.meta?.total || 0;
+    }
+  } catch (error) {
+    console.error("Error fetching note types:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب أنواع الملاحظات",
+      color: "error",
+    });
+    noteTypes.value = [];
+    totalNoteTypes.value = 0;
+  } finally {
+    isLoading.value = false;
+  }
 };
 
-const closeDialog = () => {
-  dialog.value = false;
-  dialogStep.value = 1;
+// Add new note type
+const addNoteType = async () => {
+  if (!newNoteType.value.trim()) {
+    appStore.showSnackbar({
+      message: "يرجى إدخال عنوان نوع الملاحظة",
+      color: "error",
+    });
+    return;
+  }
+
+  try {
+    loading.value = true;
+    const response = await axios.post("/reports-types", {
+      title: newNoteType.value.trim(),
+    });
+
+    if (response.data) {
+      appStore.showSnackbar({
+        message: "تم إضافة نوع الملاحظة بنجاح",
+        color: "success",
+      });
+      newNoteType.value = "";
+      addNoteTypeDialog.value = false;
+      await fetchNoteTypes();
+    }
+  } catch (error) {
+    console.error("Error adding note type:", error);
+    appStore.showSnackbar({
+      message:
+        error.response?.data?.message || "حدث خطأ أثناء إضافة نوع الملاحظة",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
-const addNewLocation = () => {
-  dialog.value = true;
+// Edit note type
+const openEditDialog = (noteType) => {
+  selectedNoteType.value = noteType;
+  editedNoteType.value = noteType.title;
+  editNoteTypeDialog.value = true;
 };
+
+const editNoteType = async () => {
+  if (!editedNoteType.value.trim()) {
+    appStore.showSnackbar({
+      message: "يرجى إدخال عنوان نوع الملاحظة",
+      color: "error",
+    });
+    return;
+  }
+
+  try {
+    loading.value = true;
+    const response = await axios.put(
+      `/reports-types/${selectedNoteType.value.id}`,
+      {
+        title: editedNoteType.value.trim(),
+      }
+    );
+
+    if (response.data) {
+      appStore.showSnackbar({
+        message: "تم تعديل نوع الملاحظة بنجاح",
+        color: "success",
+      });
+      editedNoteType.value = "";
+      editNoteTypeDialog.value = false;
+      selectedNoteType.value = null;
+      await fetchNoteTypes();
+    }
+  } catch (error) {
+    console.error("Error editing note type:", error);
+    appStore.showSnackbar({
+      message:
+        error.response?.data?.message || "حدث خطأ أثناء تعديل نوع الملاحظة",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Delete note type
+const deleteNoteType = async (id) => {
+  try {
+    loading.value = true;
+    const response = await axios.delete(`/reports-types/${id}`);
+
+    if (response.data) {
+      appStore.showSnackbar({
+        message: "تم حذف نوع الملاحظة بنجاح",
+        color: "success",
+      });
+      await fetchNoteTypes();
+    }
+  } catch (error) {
+    console.error("Error deleting note type:", error);
+    appStore.showSnackbar({
+      message:
+        error.response?.data?.message || "حدث خطأ أثناء حذف نوع الملاحظة",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Watch for changes in search with debounce
+const debouncedSearch = ref(null);
+watch(search, (newValue) => {
+  if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+  debouncedSearch.value = setTimeout(() => {
+    currentPage.value = 1; // Reset to first page when searching
+    if (activeTab.value === "all") {
+      fetchNotes();
+    } else {
+      fetchNoteTypes();
+    }
+  }, 500); // 500ms debounce
+});
+
+// Watch for page changes
+watch(currentPage, () => {
+  if (activeTab.value === "all") {
+    fetchNotes();
+  } else {
+    fetchNoteTypes();
+  }
+});
+
+// Watch for tab changes
+watch(activeTab, () => {
+  currentPage.value = 1; // Reset to first page when changing tabs
+  if (activeTab.value === "all") {
+    fetchNotes();
+  } else {
+    fetchNoteTypes();
+  }
+});
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 100);
+  fetchNotes();
 });
 </script>
 
@@ -159,7 +261,7 @@ onMounted(() => {
                 <div class="d-flex align-center ga-2">
                   <v-text-field
                     v-model="search"
-                    label="البحث      ... "
+                    label="البحث... "
                     rounded="lg"
                     clearable
                     height="48"
@@ -214,188 +316,6 @@ onMounted(() => {
                         fill="#B69265"
                       />
                     </svg>
-
-                    <VMenu
-                      activator="parent"
-                      width="380px"
-                      location="bottom end"
-                      offset="14px"
-                    >
-                      <VList class="py-0 text-dark">
-                        <VListItem
-                          title="تصفية"
-                          class="notification-section"
-                          height="48px"
-                        >
-                        </VListItem>
-
-                        <VDivider />
-
-                        <template>
-                          <VListItem
-                            title="notification.title"
-                            subtitle="notification.subtitle"
-                            link
-                            lines="one"
-                            min-height="60px"
-                            class="text-dark"
-                          >
-                            <!-- Slot: Prepend -->
-                            <!-- Handles Avatar: Image, Icon, Text -->
-                            <template #prepend>
-                              <VListItemAction start>
-                                <div>
-                                  <svg
-                                    width="3.5rem"
-                                    height="3.2rem"
-                                    viewBox="0 0 28 29"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <rect
-                                      y="0.5"
-                                      width="28"
-                                      height="28"
-                                      rx="4"
-                                      fill="#e8e4df"
-                                    />
-                                    <mask
-                                      id="mask0_20_50273"
-                                      style="mask-type: luminance"
-                                      maskUnits="userSpaceOnUse"
-                                      x="4"
-                                      y="4"
-                                      width="20"
-                                      height="21"
-                                    >
-                                      <path
-                                        d="M23.65 24.15V4.85H4.35V24.15H23.65Z"
-                                        fill="white"
-                                        stroke="white"
-                                        stroke-width="0.7"
-                                      />
-                                    </mask>
-                                    <g mask="url(#mask0_20_50273)">
-                                      <path
-                                        d="M9.25344 10.2832H4.29297"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M23.7066 10.2832H18.7461"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M22.7447 12.2831C22.7447 11.9519 22.4763 11.6835 22.1451 11.6835H19.1916C18.448 11.6835 17.7658 11.2708 17.4206 10.6122C17.0754 9.95352 16.3932 9.54086 15.6496 9.54086H12.3509C11.6073 9.54086 10.9251 9.95352 10.5799 10.6122C10.2347 11.2708 9.55254 11.6835 8.80891 11.6835H5.85543C5.52426 11.6835 5.25586 11.9519 5.25586 12.2831C5.25586 12.9533 5.7791 13.5069 6.44824 13.5447L10.5011 13.7735C10.903 13.7962 11.2866 13.9487 11.5944 14.208C11.9296 14.4905 12.3539 14.6455 12.7924 14.6455H15.2081C15.6466 14.6455 16.0709 14.4905 16.4062 14.208C16.7139 13.9487 17.0976 13.7962 17.4994 13.7735L21.5523 13.5447C22.2214 13.5069 22.7447 12.9533 22.7447 12.2831Z"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M16.9428 13.8916L16.2184 13.4361C16.0002 13.299 15.7478 13.2262 15.4901 13.2262H12.5054C12.2477 13.2262 11.9953 13.299 11.7771 13.4361L11.0527 13.8916"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M7.74011 13.6176L6.73058 19.2731C6.68933 19.5044 6.86714 19.7168 7.1021 19.7168C7.26027 19.7168 7.40167 19.6182 7.45628 19.4697L9.57179 13.721"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M20.3997 14.4014L20.2598 13.6176"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M18.4277 13.721L20.5432 19.4698C20.5979 19.6182 20.7393 19.7168 20.8974 19.7168C21.1323 19.7168 21.3102 19.5044 21.2689 19.2731L20.6411 15.7562"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M7.42473 11.6836V9.93547C7.42473 9.57547 7.13289 9.28367 6.77289 9.28367C6.41293 9.28367 6.12109 9.57547 6.12109 9.93547V11.6836"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M21.8779 11.6836V9.93547C21.8779 9.57547 21.586 9.28367 21.226 9.28367C20.8661 9.28367 20.5742 9.57547 20.5742 9.93547V11.6836"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M11.6035 17.1964V16.8266C11.6035 16.44 11.9169 16.1266 12.3035 16.1266H15.6993C16.0858 16.1266 16.3992 16.44 16.3992 16.8266V18.9387C16.3992 19.3253 16.0858 19.6387 15.6993 19.6387H12.3035C11.9169 19.6387 11.6035 19.3253 11.6035 18.9387V18.5662"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M14.7066 17.883C14.7066 18.2729 14.3906 18.5889 14.0008 18.5889C13.6109 18.5889 13.2949 18.2729 13.2949 17.883C13.2949 17.4932 13.6109 17.1773 14.0008 17.1773C14.3906 17.1773 14.7066 17.4932 14.7066 17.883Z"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M14.9316 16.127V14.6458"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                      <path
-                                        d="M13.0684 14.6458V16.127"
-                                        stroke="#B69265"
-                                        stroke-width="0.7"
-                                        stroke-miterlimit="10"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                      />
-                                    </g>
-                                  </svg>
-                                </div>
-                              </VListItemAction>
-                            </template>
-                          </VListItem>
-                          <VDivider />
-                        </template>
-
-                        <VListItem class="notification-section">
-                          <VBtn color="dark" variant="outlined" block>
-                            تطبيق التصفية
-                          </VBtn>
-                        </VListItem>
-                      </VList>
-                    </VMenu>
                   </VBtn>
 
                   <VBtn
@@ -403,9 +323,9 @@ onMounted(() => {
                     elevation="0"
                     class="rounded-lg"
                     append-icon="mdi-plus"
-                    @click="router.push('/notes/add')"
+                    @click="addNoteTypeDialog = true"
                   >
-                    إضافة موقع جديد
+                    إضافة نوع ملاحظة
                   </VBtn>
                 </div>
               </div>
@@ -423,47 +343,84 @@ onMounted(() => {
                   </div>
                   <div
                     class="tab-item px-4 py-2"
-                    :class="{ active: activeTab === 'correction' }"
-                    @click="activeTab = 'correction'"
+                    :class="{ active: activeTab === 'types' }"
+                    @click="activeTab = 'types'"
                   >
-                    ادارة الملاحظات
+                    اداره انواع الملاحظات
                   </div>
                 </div>
                 <div class="tab-border"></div>
               </div>
 
               <v-row class="mt-6">
-                <v-col
-                  v-for="note in notes"
-                  :key="note.noteId"
-                  cols="12"
-                  sm="6"
-                  md="4"
-                  lg="4"
-                  class="pa-3"
-                >
-                  <transition name="fade" mode="out-in">
+                <template v-if="activeTab === 'all'">
+                  <v-col
+                    v-for="note in notes"
+                    :key="note.id"
+                    cols="12"
+                    sm="6"
+                    md="4"
+                    lg="4"
+                    class="pa-3"
+                  >
+                    <!-- {{ note.report_by }} -->
                     <noteCard
-                      v-if="activeTab === 'all'"
-                      :note-id="note.noteId"
-                      :note-type="note.noteType"
+                      :note-id="note.id"
+                      :note-type="note.report_type?.title"
                       :status="note.status"
-                      :key="'note-' + note.noteId"
+                      :description="note.description"
+                      :report-date="note.report_date"
+                      :report-time="note.report_time"
+                      :address="note.address"
+                      :reportBy="note.report_by"
+                      :latitude="note.latitude"
+                      :longitude="note.longitude"
+                      :created-at="note.created_at"
                     />
-                    <editNoteCard
-                      v-else
-                      :site-id="note.noteId"
-                      :authorization-number="note.noteId"
-                      :status="note.status"
-                      :key="'edit-' + note.noteId"
+                  </v-col>
+                  <v-col
+                    v-if="!isLoading && notes.length === 0"
+                    cols="12"
+                    class="text-center"
+                  >
+                    <p class="text-medium-emphasis">لا توجد ملاحظات متاحة</p>
+                  </v-col>
+                </template>
+                <template v-else>
+                  <v-col
+                    v-for="type in noteTypes"
+                    :key="type.id"
+                    cols="12"
+                    sm="6"
+                    md="4"
+                    lg="4"
+                    class="pa-3"
+                  >
+                    <noteTypeCard
+                      :id="type.id"
+                      :title="type.title"
+                      :total_reports="type.total_reports || 0"
+                      :created_at="type.created_at"
+                      :updated_at="type.updated_at || type.created_at"
+                      @edit="openEditDialog(type)"
+                      @delete="deleteNoteType(type.id)"
                     />
-                  </transition>
-                </v-col>
+                  </v-col>
+                  <v-col
+                    v-if="!isLoading && noteTypes.length === 0"
+                    cols="12"
+                    class="text-center"
+                  >
+                    <p class="text-medium-emphasis">
+                      لا توجد أنواع ملاحظات متاحة
+                    </p>
+                  </v-col>
+                </template>
               </v-row>
 
               <!-- pagination -->
               <Pagination
-                :total-items="2300"
+                :total-items="activeTab === 'all' ? totalNotes : totalNoteTypes"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
               />
@@ -472,6 +429,60 @@ onMounted(() => {
         </v-container>
       </div>
     </v-container>
+
+    <!-- Add Note Type Dialog -->
+    <v-dialog v-model="addNoteTypeDialog" max-width="500px">
+      <v-card class="pa-4">
+        <v-card-title class="text-h5 mb-4">إضافة نوع ملاحظة جديد</v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="newNoteType"
+            label="عنوان نوع الملاحظة"
+            required
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="error"
+            variant="text"
+            @click="addNoteTypeDialog = false"
+          >
+            إلغاء
+          </v-btn>
+          <v-btn color="primary" :loading="loading" @click="addNoteType">
+            إضافة
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Edit Note Type Dialog -->
+    <v-dialog v-model="editNoteTypeDialog" max-width="500px">
+      <v-card class="pa-4">
+        <v-card-title class="text-h5 mb-4">تعديل نوع الملاحظة</v-card-title>
+        <v-card-text>
+          <v-text-field
+            v-model="editedNoteType"
+            label="عنوان نوع الملاحظة"
+            required
+          ></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="error"
+            variant="text"
+            @click="editNoteTypeDialog = false"
+          >
+            إلغاء
+          </v-btn>
+          <v-btn color="primary" :loading="loading" @click="editNoteType">
+            حفظ
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
