@@ -25,6 +25,7 @@ import ContractsPage from "@/pages/contracts";
 import ContractDetailsPage from "@/pages/contracts/contract_details";
 import UserDetailsPage from "@/pages/users/user-details";
 import NotFoundPage from "@/pages/NotFound";
+import ShiftsView from "@/views/shifts/ShiftsView.vue";
 // import TempPage from "@/pages/temp";
 
 export default [
@@ -188,6 +189,14 @@ export default [
         component: () => import("@/pages/company/company_details.vue"),
         meta: {
           layout: "default",
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/shifts",
+        name: "shifts",
+        component: ShiftsView,
+        meta: {
           requiresAuth: true,
         },
       },

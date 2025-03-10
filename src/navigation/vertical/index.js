@@ -8,6 +8,7 @@ import NotesIcon from "./icons/Notes";
 import RatingIcon from "./icons/Rating";
 import ContractsIcon from "./icons/Contracts";
 import CompanyIcon from "./icons/Company";
+import ShiftsIcon from "./icons/Shifts";
 
 export default [
   {
@@ -68,6 +69,12 @@ export default [
     title: "إدارة الأدوار والصلاحيات ",
     to: { name: "roles" },
     icon: RolesIcon,
+    permission: true,
+  },
+  {
+    title: "اداره الورديات",
+    to: { name: "shifts" },
+    icon: ShiftsIcon,
     permission: true,
   },
   // {
