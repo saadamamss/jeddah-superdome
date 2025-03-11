@@ -2,7 +2,8 @@
 import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/stores/app";
-import axios from "@/plugins/axios";
+// import axios from "@/plugins/axios";
+import axiosIns from "@/plugins/axios";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 
@@ -38,18 +39,19 @@ watch(
   () => route.params.id,
   (newId) => {
     if (newId) {
-      fetchContract();
+      fetchContractDetails();
     }
   }
 );
 
 // Fetch contract details
-const fetchContract = async () => {
+const fetchContractDetails = async () => {
   if (!validateRoute()) return;
 
   try {
     isLoading.value = true;
-    const response = await axios.get(`contracts/${route.params.id}`);
+    // const response = await axios.get(`contracts/${route.params.id}`);
+    const response = await axiosIns.get(`contracts/${route.params.id}`);
 
     if (response.data?.status?.success) {
       contract.value = response.data.data;
@@ -89,7 +91,10 @@ const updateContract = async () => {
       updated_at: formatDateForAPI(editForm.value.updated_at),
     };
 
-    const response = await axios.put(`contracts/${route.params.id}`, formData);
+    const response = await axiosIns.put(
+      `contracts/${route.params.id}`,
+      formData
+    );
 
     if (response.data?.status?.success) {
       appStore.showSnackbar({
@@ -165,7 +170,7 @@ const goBack = () => {
 
 onMounted(() => {
   if (validateRoute()) {
-    fetchContract();
+    fetchContractDetails();
   }
 });
 </script>
