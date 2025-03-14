@@ -21,6 +21,8 @@ defineProps({
     default: "medium",
   },
 });
+
+const fallbackAvatar = "/imgs/business-man.png";
 </script>
 
 <template>
@@ -35,9 +37,10 @@ defineProps({
     <div class="d-flex gap-3 align-center">
       <div>
         <span class="avatar-wrapper d-flex justify-center align-center">
+          <!-- <img :src="fallbackAvatar" alt="User avatar" /> -->
           <img
-            src="/imgs/person.svg"
-            class="avatar-img"
+            :src="user?.personal_image"
+            class="avatar-img border rounded-circle"
             alt="User avatar"
             :style="{ width: size === 'small' ? '2rem' : '2.5rem' }"
           />
@@ -45,7 +48,7 @@ defineProps({
       </div>
       <div>
         <h2 class="user-name text-subtitle-1 text-black mb-1">
-          {{ user?.name }}
+          {{ user?.firstname }} {{ user?.lastname }}
         </h2>
         <p class="user-job mb-0 text-body-2">
           {{ user?.job }}

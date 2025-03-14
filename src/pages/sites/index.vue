@@ -563,9 +563,10 @@ const dialogStep = ref(1);
 // Add function to fetch site types
 const fetchSiteTypes = async () => {
   try {
-    const response = await axios.get("data-operations/location-types");
+    const response = await axios.get("/locations-types");
+    // console.log(response.data.data.sub_types);
     if (response.data?.data) {
-      locationSubTypes.value = response.data.data;
+      locationSubTypes.value = response.data.data.sub_types;
     }
   } catch (error) {
     console.error("Error fetching site types:", error);

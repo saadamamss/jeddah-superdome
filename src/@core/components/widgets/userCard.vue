@@ -1,7 +1,8 @@
 <script setup>
 import router from "@/router";
 import UserWidget from "./UserWidget.vue";
-defineProps({
+
+const props = defineProps({
   user: {
     type: Object,
     required: true,
@@ -11,10 +12,17 @@ defineProps({
     default: () => {},
   },
 });
+
+const emit = defineEmits(["delete"]);
+
+const handleDelete = () => {
+  emit("delete", props.user.id);
+};
 </script>
 
 <template>
   <v-card elevation="0" class="user-card rounded-lg">
+    <!-- {{ user }} -->
     <v-card-text class="pa-4">
       <router-link :to="`/users/user-details/${user.id}`">
         <div class="border-b mb-4 border-color-light-white pb-4">
@@ -23,7 +31,10 @@ defineProps({
       </router-link>
 
       <div class="user-info d-flex align-center ga-12">
-        <div class="d-flex justify-space-between align-center">
+        <div
+          v-if="user.sa_id"
+          class="d-flex justify-space-between align-center"
+        >
           <div class="d-flex align-start gap-2">
             <svg
               width="17"
@@ -56,7 +67,7 @@ defineProps({
             <div>
               <div class="text-body-2 text-medium-emphasis">رقم الهوية</div>
               <div class="text-body-2 font-weight-medium">
-                {{ user.identityNumber }}
+                {{ user.sa_id }}
               </div>
             </div>
           </div>
@@ -98,11 +109,17 @@ defineProps({
             <div>
               <div class="text-body-2 text-medium-emphasis">الموقع</div>
               <div class="text-body-2 font-weight-medium">
-                {{ user.location }}
+                {{ user.city }}
               </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="d-flex justify-end mt-4">
+        <v-btn color="error" variant="text" @click="handleDelete">
+          حذف المستخدم
+        </v-btn>
       </div>
     </v-card-text>
   </v-card>

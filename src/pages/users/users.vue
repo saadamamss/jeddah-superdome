@@ -1,76 +1,279 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
-import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
-import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import Pagination from "@/@core/components/Pagination";
-import UserCard from "@/@core/components/widgets/userCard.vue";
-import UserWidget from "@/@core/components/widgets/UserWidget.vue";
-import { ref, onMounted } from "vue";
+import UserCard from "@/@core/components/widgets/userCard";
+import { ref, onMounted, watch } from "vue";
+import axios from "@/plugins/axios";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
 const search = ref("");
-const dialog = ref(false);
-
 const loading = ref(false);
-const locationDialog = ref(false);
-const selectedUser = ref(null);
 
-const users = ref([
-  {
-    id: "6127782187",
-    identityNumber: "231 3456 567",
-    location: "الرياض",
-    name: "محمد احمد",
-    job: "مدير تنفيذي",
-  },
-  {
-    id: "6127782188",
-    identityNumber: "231 3456 568",
-    location: "جدة",
-    name: "احمد محمد",
-    job: "مشرف",
-  },
-  {
-    id: "6127782189",
-    identityNumber: "231 3456 569",
-    location: "الدمام",
-    name: "خالد عبدالله",
-    job: "موظف",
-  },
+// Data for users
+const users = ref([]);
+const totalUsers = ref(0);
+const userDialog = ref(false);
+const editUserDialog = ref(false);
+const selectedUser = ref(null);
+const deleteDialog = ref(false);
+const userToDelete = ref(null);
+
+// Form data for new/edit user
+const userForm = ref({
+  firstname: "",
+  secondname: "",
+  thirdname: "",
+  lastname: "",
+  email: "",
+  phone: "",
+  password: "",
+  password_confirmation: "",
+  role_id: null,
+  city: "",
+  blood_type: "",
+  gender: "",
+  nationality: "",
+  sa_id: "",
+  personal_image: "",
+});
+
+// Available roles for selection
+const roles = ref([
+  { id: 1, title: "ADMIN" },
+  { id: 2, title: "SUPERVISOR" },
+  { id: 3, title: "INSPECTOR" },
 ]);
 
-const handleSubmit = async () => {
-  loading.value = true;
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
+// Blood types for selection
+const bloodTypes = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+
+// Fetch users with pagination and search
+const fetchUsers = async () => {
+  try {
+    isLoading.value = true;
+    const queryParams = new URLSearchParams({
+      page: currentPage.value.toString(),
+      per_page: perPage.value.toString(),
+      search: search.value,
+    });
+
+    const response = await axios.get(`/users?${queryParams.toString()}`);
+    if (response.data?.data) {
+      users.value = response.data.data;
+      console.log(response.data.data);
+      // Update pagination data
+      if (response.data.pagination) {
+        totalUsers.value = response.data.pagination.i_total_objects;
+        perPage.value = response.data.pagination.i_per_page;
+        currentPage.value = response.data.pagination.i_current_page;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب البيانات",
+      color: "error",
+    });
+    users.value = [];
+    totalUsers.value = 0;
+  } finally {
+    isLoading.value = false;
+  }
 };
 
-const openLocationMap = (user) => {
-  selectedUser.value = user;
-  locationDialog.value = true;
+// Add new user
+const addUser = async () => {
+  try {
+    loading.value = true;
+    const response = await axios.post("/users", userForm.value);
+
+    if (response.data) {
+      appStore.showSnackbar({
+        message: "تم إضافة المستخدم بنجاح",
+        color: "success",
+      });
+      resetForm();
+      userDialog.value = false;
+      await fetchUsers();
+    }
+  } catch (error) {
+    console.error("Error adding user:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء إضافة المستخدم",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 };
 
-const getMapUrl = (location) => {
-  if (!location) return "";
-  const query = encodeURIComponent(location);
-  return `https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY&q=${query}&language=ar`;
+// Get user details
+const getUserDetails = async (userId) => {
+  try {
+    loading.value = true;
+    const response = await axios.get(`/users/${userId}`);
+    if (response.data?.data?.user) {
+      selectedUser.value = response.data.data.user;
+      populateEditForm(response.data.data.user);
+      editUserDialog.value = true;
+    }
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات المستخدم",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
 };
+
+// Update user
+const updateUser = async () => {
+  try {
+    loading.value = true;
+    const response = await axios.put(
+      `/users/${selectedUser.value.id}`,
+      userForm.value
+    );
+
+    if (response.data) {
+      appStore.showSnackbar({
+        message: "تم تحديث بيانات المستخدم بنجاح",
+        color: "success",
+      });
+      editUserDialog.value = false;
+      await fetchUsers();
+    }
+  } catch (error) {
+    console.error("Error updating user:", error);
+    appStore.showSnackbar({
+      message:
+        error.response?.data?.message || "حدث خطأ أثناء تحديث بيانات المستخدم",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Delete user confirmation
+const confirmDelete = (userId) => {
+  userToDelete.value = userId;
+  deleteDialog.value = true;
+};
+
+// Delete user
+const deleteUser = async () => {
+  if (!userToDelete.value) return;
+
+  try {
+    loading.value = true;
+    const response = await axios.delete(`/users/${userToDelete.value}`);
+
+    if (response.data) {
+      appStore.showSnackbar({
+        message: "تم حذف المستخدم بنجاح",
+        color: "success",
+      });
+      deleteDialog.value = false;
+      userToDelete.value = null;
+      await fetchUsers();
+    }
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء حذف المستخدم",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Helper functions
+const resetForm = () => {
+  userForm.value = {
+    firstname: "",
+    secondname: "",
+    thirdname: "",
+    lastname: "",
+    email: "",
+    phone: "",
+    password: "",
+    password_confirmation: "",
+    role_id: null,
+    city: "",
+    blood_type: "",
+    gender: "",
+    nationality: "",
+    sa_id: "",
+    personal_image: "",
+  };
+};
+
+const populateEditForm = (user) => {
+  userForm.value = {
+    firstname: user.firstname || "",
+    secondname: user.secondname || "",
+    thirdname: user.thirdname || "",
+    lastname: user.lastname || "",
+    email: user.email || "",
+    phone: user.phone || "",
+    role_id: user.role?.id || null,
+    city: user.city || "",
+    blood_type: user.blood_type || "",
+    gender: user.gender || "",
+    nationality: user.nationality || "",
+    sa_id: user.sa_id || "",
+    personal_image: user.personal_image || "",
+  };
+};
+
+// Watch for changes in search with debounce
+const debouncedSearch = ref(null);
+watch(search, (newValue) => {
+  if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+  debouncedSearch.value = setTimeout(() => {
+    currentPage.value = 1;
+    fetchUsers();
+  }, 500);
+});
+
+// Watch for page changes
+watch(currentPage, () => {
+  fetchUsers();
+});
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 100);
+  fetchUsers();
 });
 </script>
 
 <template>
   <div>
     <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
-      <div v-if="!isLoading">
+      <div v-if="isLoading">
+        <v-row>
+          <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
+            <VCard elevation="0">
+              <v-card-text class="px-1 py-2">
+                <v-skeleton-loader
+                  class="mx-auto"
+                  elevation="0"
+                  max-width="400"
+                  type="list-item-two-line, table-heading"
+                ></v-skeleton-loader>
+              </v-card-text>
+            </VCard>
+          </v-col>
+        </v-row>
+      </div>
+
+      <div v-else>
         <v-container fluid class="px-0 rounded-lg">
           <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
             <v-card-title class="pt-4 pb-6">
@@ -84,33 +287,10 @@ onMounted(() => {
                     clearable
                     height="48"
                     class="bg-white"
-                    style="
-                      width: 320px;
-                      max-width: 100%;
-                      color: #929a9f !important;
-                      border-radius: 1rem;
-                    "
+                    style="width: 320px; max-width: 100%"
                   >
                     <template v-slot:prepend-inner>
-                      <svg
-                        width="1.3rem"
-                        height="1.3rem"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          opacity="0.4"
-                          d="M16.6666 9.16669C16.6666 5.02455 13.3088 1.66669 9.16663 1.66669C5.02449 1.66669 1.66663 5.02455 1.66663 9.16669C1.66663 13.3088 5.02449 16.6667 9.16663 16.6667C13.3088 16.6667 16.6666 13.3088 16.6666 9.16669Z"
-                          fill="#B69265"
-                        />
-                        <path
-                          fill-rule="evenodd"
-                          clip-rule="evenodd"
-                          d="M9.16663 1.04169C4.67931 1.04169 1.04163 4.67937 1.04163 9.16669C1.04163 13.654 4.67931 17.2917 9.16663 17.2917C11.1853 17.2917 13.032 16.5555 14.453 15.337L17.8914 18.7753C18.1354 19.0194 18.5312 19.0194 18.7752 18.7753C19.0193 18.5312 19.0193 18.1355 18.7752 17.8914L15.3369 14.4531C16.5554 13.0321 17.2916 11.1854 17.2916 9.16669C17.2916 4.67937 13.6539 1.04169 9.16663 1.04169ZM2.29163 9.16669C2.29163 5.36973 5.36967 2.29169 9.16663 2.29169C12.9636 2.29169 16.0416 5.36973 16.0416 9.16669C16.0416 12.9636 12.9636 16.0417 9.16663 16.0417C5.36967 16.0417 2.29163 12.9636 2.29163 9.16669Z"
-                          fill="#B69265"
-                        />
-                      </svg>
+                      <v-icon>mdi-magnify</v-icon>
                     </template>
                   </v-text-field>
 
@@ -118,7 +298,7 @@ onMounted(() => {
                     height="48"
                     elevation="0"
                     class="rounded-lg"
-                    @click="dialog = true"
+                    @click="userDialog = true"
                   >
                     إضافة مستخدم جديد
                   </VBtn>
@@ -137,14 +317,22 @@ onMounted(() => {
                 >
                   <UserCard
                     :user="user"
-                    :onClick="() => openLocationMap(user)"
+                    @edit="getUserDetails(user.id)"
+                    @delete="confirmDelete(user.id)"
                   />
+                </v-col>
+                <v-col
+                  v-if="!isLoading && users.length === 0"
+                  cols="12"
+                  class="text-center"
+                >
+                  <p class="text-medium-emphasis">لا يوجد مستخدمين</p>
                 </v-col>
               </v-row>
 
               <!-- pagination -->
               <Pagination
-                :total-items="2300"
+                :total-items="totalUsers"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
               />
@@ -152,138 +340,263 @@ onMounted(() => {
           </VCard>
         </v-container>
       </div>
-
-      <!-- Add User Modal -->
-      <v-dialog v-model="dialog" width="500" class="add-user-dialog">
-        <v-card class="rounded-lg">
-          <v-card-text class="pa-6">
-            <div class="d-flex justify-space-between align-center mb-6">
-              <h2 class="text-h6">إضافة مستخدم جديد</h2>
-              <v-btn icon variant="text" @click="dialog = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </div>
-            <p class="text-subtitle-1 mb-6">
-              يرجى إدخال بيانات المستخدم الجديد لإضافته إلى النظام
-            </p>
-
-            <v-form @submit.prevent="handleSubmit">
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">اسم المستخدم</label>
-                <v-text-field
-                  placeholder="اسم المستخدم"
-                  variant="outlined"
-                  density="comfortable"
-                  hide-details
-                  class="rounded-lg"
-                />
-              </div>
-
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">رقم الهوية</label>
-                <v-text-field
-                  placeholder="رقم الهوية"
-                  variant="outlined"
-                  density="comfortable"
-                  hide-details
-                  class="rounded-lg"
-                />
-              </div>
-
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">رقم الجوال</label>
-                <div class="d-flex">
-                  <v-text-field
-                    placeholder="00"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    class="rounded-lg flex-grow-1"
-                  />
-                  <v-select
-                    value="+966"
-                    :items="['+966', '+964', '+965']"
-                    variant="outlined"
-                    density="comfortable"
-                    hide-details
-                    class="country-code-select ms-2 rounded-lg"
-                    style="max-width: 110px"
-                  />
-                </div>
-              </div>
-
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block"
-                  >البريد الإلكتروني</label
-                >
-                <v-text-field
-                  placeholder="البريد الإلكتروني"
-                  variant="outlined"
-                  density="comfortable"
-                  hide-details
-                  class="rounded-lg"
-                />
-              </div>
-
-              <div class="mb-4">
-                <label class="text-subtitle-2 mb-2 d-block">دور المستخدم</label>
-                <v-select
-                  placeholder="اختر دور المستخدم"
-                  :items="['مدير', 'مشرف', 'موظف']"
-                  variant="outlined"
-                  density="comfortable"
-                  hide-details
-                  class="rounded-lg"
-                />
-              </div>
-
-              <div class="d-flex justify-end mt-6">
-                <v-btn
-                  variant="text"
-                  color="grey-darken-1"
-                  class="me-4"
-                  @click="dialog = false"
-                >
-                  إلغاء
-                </v-btn>
-                <v-btn
-                  color="#B69265"
-                  class="text-white"
-                  type="submit"
-                  :loading="loading"
-                >
-                  إضافة
-                </v-btn>
-              </div>
-            </v-form>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <!-- Location Map Modal -->
-      <v-dialog v-model="locationDialog" width="800">
-        <v-card class="rounded-lg">
-          <v-card-text class="pa-6">
-            <div class="d-flex justify-space-between align-center mb-6">
-              <h2 class="text-h6">موقع الموظف</h2>
-              <v-btn icon variant="text" @click="locationDialog = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </div>
-            <div class="map-container" style="height: 400px">
-              <iframe
-                width="100%"
-                height="100%"
-                style="border: 0"
-                loading="lazy"
-                allowfullscreen
-                :src="getMapUrl(selectedUser?.location)"
-              ></iframe>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
     </v-container>
+
+    <!-- Add User Dialog -->
+    <v-dialog v-model="userDialog" max-width="600px">
+      <v-card class="pa-4">
+        <v-card-title class="text-h5 mb-4">إضافة مستخدم جديد</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="addUser">
+            <v-row>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">الاسم الأول</label>
+                <v-text-field
+                  v-model="userForm.firstname"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">الاسم الثاني</label>
+                <v-text-field v-model="userForm.secondname"></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">الاسم الثالث</label>
+                <v-text-field v-model="userForm.thirdname"></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">اسم العائلة</label>
+                <v-text-field
+                  v-model="userForm.lastname"
+                  required
+                ></v-text-field>
+              </v-col>
+              <!-- <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">البريد الإلكتروني</label>
+                <v-text-field
+                  v-model="userForm.email"
+                  type="email"
+                  required
+                ></v-text-field>
+              </v-col> -->
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">رقم الهاتف</label>
+                <v-text-field v-model="userForm.phone" required></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">الدور</label>
+                <v-select
+                  v-model="userForm.role_id"
+                  :items="roles"
+                  item-title="title"
+                  item-value="id"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">المدينة</label>
+                <v-text-field v-model="userForm.city" required></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">فصيلة الدم</label>
+                <v-select
+                  v-model="userForm.blood_type"
+                  :items="bloodTypes"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <label class="mb-2 d-block">الجنس</label>
+                <v-select
+                  v-model="userForm.gender"
+                  :items="['male', 'female']"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12">
+                <label class="mb-2 d-block">الجنسية</label>
+                <v-text-field
+                  v-model="userForm.nationality"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <label class="mb-2 d-block">البريد الإلكتروني</label>
+                <v-text-field
+                  v-model="userForm.email"
+                  type="email"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" v-if="!selectedUser">
+                <label class="mb-2 d-block">كلمة المرور</label>
+                <v-text-field
+                  v-model="userForm.password"
+                  type="password"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" v-if="!selectedUser">
+                <label class="mb-2 d-block">تأكيد كلمة المرور</label>
+                <v-text-field
+                  v-model="userForm.password_confirmation"
+                  type="password"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" variant="text" @click="userDialog = false">
+            إلغاء
+          </v-btn>
+          <v-btn color="primary" :loading="loading" @click="addUser">
+            إضافة
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Edit User Dialog -->
+    <v-dialog v-model="editUserDialog" max-width="600px">
+      <v-card class="pa-4">
+        <v-card-title class="text-h5 mb-4">تعديل بيانات المستخدم</v-card-title>
+        <v-card-text>
+          <v-form @submit.prevent="updateUser">
+            <v-row>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userForm.firstname"
+                  label="الاسم الأول"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userForm.secondname"
+                  label="الاسم الثاني"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userForm.thirdname"
+                  label="الاسم الثالث"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userForm.lastname"
+                  label="اسم العائلة"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userForm.email"
+                  label="البريد الإلكتروني"
+                  type="email"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userForm.phone"
+                  label="رقم الهاتف"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-select
+                  v-model="userForm.role_id"
+                  :items="roles"
+                  item-title="title"
+                  item-value="id"
+                  label="الدور"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="userForm.city"
+                  label="المدينة"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-select
+                  v-model="userForm.blood_type"
+                  :items="bloodTypes"
+                  label="فصيلة الدم"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-select
+                  v-model="userForm.gender"
+                  :items="['male', 'female']"
+                  label="الجنس"
+                  required
+                ></v-select>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="userForm.nationality"
+                  label="الجنسية"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="userForm.sa_id"
+                  label="رقم الهوية"
+                  required
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" variant="text" @click="editUserDialog = false">
+            إلغاء
+          </v-btn>
+          <v-btn color="primary" :loading="loading" @click="updateUser">
+            حفظ
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="deleteDialog" max-width="500px">
+      <v-card>
+        <v-card-title class="text-h5 pa-4">تأكيد الحذف</v-card-title>
+        <v-card-text class="pa-4">
+          هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn
+            color="error"
+            variant="text"
+            @click="deleteDialog = false"
+            :disabled="loading"
+          >
+            إلغاء
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="flat"
+            @click="deleteUser"
+            :loading="loading"
+          >
+            تأكيد الحذف
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -293,43 +606,20 @@ onMounted(() => {
   border-radius: 16px;
 }
 
-.user-info {
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.add-user-dialog {
-  :deep(.v-card) {
-    background-color: white;
-  }
-
+.v-text-field {
   :deep(.v-field) {
-    border-radius: 8px !important;
+    border-radius: 8px;
     background-color: rgb(250, 250, 250);
 
     &.v-field--focused {
       background-color: white;
     }
   }
-
-  :deep(.v-btn) {
-    text-transform: none;
-    letter-spacing: 0;
-    border-radius: 8px;
-  }
 }
 
-.map-container {
+.v-btn {
+  text-transform: none;
+  letter-spacing: 0;
   border-radius: 8px;
-  overflow: hidden;
-}
-.v-select .v-field {
-  border: 1px solid rgba(182, 146, 101, 0.648) !important;
-  border-radius: 8px !important;
 }
 </style>
