@@ -154,6 +154,11 @@ export default [
         },
       },
       {
+        path: "/rating/details/:id",
+        name: "rating-details",
+        component: () => import("@/pages/rating/details.vue"),
+      },
+      {
         path: "/rating/company-rating/:id",
         name: "company-rating",
         component: CompanyRatingPage,
