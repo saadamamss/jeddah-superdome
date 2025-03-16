@@ -26,6 +26,7 @@ import ContractDetailsPage from "@/pages/contracts/contract_details";
 import UserDetailsPage from "@/pages/users/user-details";
 import NotFoundPage from "@/pages/NotFound";
 import ShiftsView from "@/views/shifts/ShiftsView.vue";
+import QuestionnairesPage from "@/pages/questionnaires/index.vue";
 // import TempPage from "@/pages/temp";
 
 export default [
@@ -175,6 +176,22 @@ export default [
         path: "/contracts/:id",
         name: "contract-details",
         component: ContractDetailsPage,
+        meta: {
+          // requiresAuth: true,
+        },
+      },
+      {
+        path: "/questionnaires",
+        name: "questionnaires",
+        component: QuestionnairesPage,
+        meta: {
+          // requiresAuth: true,
+        },
+      },
+      {
+        path: "/questionnaires/details",
+        name: "questionnaire-details",
+        component: () => import("@/pages/questionnaires/details.vue"),
         meta: {
           // requiresAuth: true,
         },

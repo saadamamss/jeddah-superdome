@@ -9,6 +9,7 @@ import RatingIcon from "./icons/Rating";
 import ContractsIcon from "./icons/Contracts";
 import CompanyIcon from "./icons/Company";
 import ShiftsIcon from "./icons/Shifts";
+import QuestionnairesIcon from "./icons/Questionnaires";
 
 export default [
   {
@@ -45,6 +46,12 @@ export default [
     title: "إدارة الباقات (التعاقدات)",
     to: { name: "contracts" },
     icon: ContractsIcon,
+    permission: true,
+  },
+  {
+    title: "إدارة الاستبيانات",
+    to: { name: "questionnaires" },
+    icon: QuestionnairesIcon,
     permission: true,
   },
   {

@@ -1,10 +1,6 @@
 <script setup>
-import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
-import {
-  VList,
-  VListItem,
-  VListSubheader,
-} from 'vuetify/components'
+import { PerfectScrollbar } from "vue3-perfect-scrollbar";
+import { VList, VListItem, VListSubheader } from "vuetify/components";
 
 const props = defineProps({
   isDialogVisible: {
@@ -27,75 +23,66 @@ const props = defineProps({
     type: Array,
     required: false,
   },
-})
+});
 
 const emit = defineEmits([
-  'update:isDialogVisible',
-  'update:searchQuery',
-  'itemSelected',
-])
+  "update:isDialogVisible",
+  "update:searchQuery",
+  "itemSelected",
+]);
 
-const { ctrl_k, meta_k } = useMagicKeys()
-const refSearchList = ref()
-const searchQuery = ref(structuredClone(toRaw(props.searchQuery)))
-const refSearchInput = ref()
-const isLocalDialogVisible = ref(structuredClone(toRaw(props.isDialogVisible)))
-const searchResults = ref(structuredClone(toRaw(props.searchResults)))
+const { ctrl_k, meta_k } = useMagicKeys();
+const refSearchList = ref();
+const searchQuery = ref(structuredClone(toRaw(props.searchQuery)));
+const refSearchInput = ref();
+const isLocalDialogVisible = ref(structuredClone(toRaw(props.isDialogVisible)));
+const searchResults = ref(structuredClone(toRaw(props.searchResults)));
 
 // 👉 Watching props change
 watch(props, () => {
-  isLocalDialogVisible.value = structuredClone(toRaw(props.isDialogVisible))
-  searchResults.value = structuredClone(toRaw(props.searchResults))
-  searchQuery.value = structuredClone(toRaw(props.searchQuery))
-})
-watch([
-  ctrl_k,
-  meta_k,
-], () => {
-  isLocalDialogVisible.value = true
-  emit('update:isDialogVisible', true)
-})
+  isLocalDialogVisible.value = structuredClone(toRaw(props.isDialogVisible));
+  searchResults.value = structuredClone(toRaw(props.searchResults));
+  searchQuery.value = structuredClone(toRaw(props.searchQuery));
+});
+watch([ctrl_k, meta_k], () => {
+  isLocalDialogVisible.value = true;
+  emit("update:isDialogVisible", true);
+});
 
 // 👉 clear search result and close the dialog
 const clearSearchAndCloseDialog = () => {
-  emit('update:isDialogVisible', false)
-  emit('update:searchQuery', '')
-}
+  emit("update:isDialogVisible", false);
+  emit("update:searchQuery", "");
+};
 
 watchEffect(() => {
-  if (!searchQuery.value.length)
-    searchResults.value = []
-})
+  if (!searchQuery.value.length) searchResults.value = [];
+});
 
-const getFocusOnSearchList = e => {
-  if (e.key === 'ArrowDown') {
-    e.preventDefault()
-    refSearchList.value?.focus('next')
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault()
-    refSearchList.value?.focus('prev')
+const getFocusOnSearchList = (e) => {
+  if (e.key === "ArrowDown") {
+    e.preventDefault();
+    refSearchList.value?.focus("next");
+  } else if (e.key === "ArrowUp") {
+    e.preventDefault();
+    refSearchList.value?.focus("prev");
   }
-}
+};
 
-const dialogModelValueUpdate = val => {
-  emit('update:isDialogVisible', val)
-  emit('update:searchQuery', '')
-}
+const dialogModelValueUpdate = (val) => {
+  emit("update:isDialogVisible", val);
+  emit("update:searchQuery", "");
+};
 
-const resolveCategories = val => {
-  if (val === 'dashboards')
-    return 'Dashboards'
-  if (val === 'appsPages')
-    return 'Apps & Pages'
-  if (val === 'userInterface')
-    return 'User Interface'
-  if (val === 'formsTables')
-    return 'Forms Tables'
-  if (val === 'chartsMisc')
-    return 'Charts Misc'
-  
-  return 'Misc'
-}
+const resolveCategories = (val) => {
+  if (val === "dashboards") return "Dashboards";
+  if (val === "appsPages") return "Apps & Pages";
+  if (val === "userInterface") return "User Interface";
+  if (val === "formsTables") return "Forms Tables";
+  if (val === "chartsMisc") return "Charts Misc";
+
+  return "Misc";
+};
 </script>
 
 <template>
@@ -108,15 +95,8 @@ const resolveCategories = val => {
     @update:model-value="dialogModelValueUpdate"
     @keyup.esc="clearSearchAndCloseDialog"
   >
-    <VCard
-      height="100%"
-      width="100%"
-      class="position-relative"
-    >
-      <VCardText
-        class="pt-1"
-        style="max-height: 65px;"
-      >
+    <VCard height="100%" width="100%" class="position-relative">
+      <VCardText class="pt-1" style="max-height: 65px">
         <!-- 👉 Search Input -->
         <VTextField
           ref="refSearchInput"
@@ -138,10 +118,7 @@ const resolveCategories = val => {
               size="x-small"
               class="text-high-emphasis ms-n1"
             >
-              <VIcon
-                size="22"
-                icon="tabler-search"
-              />
+              <VIcon size="22" icon="tabler-search" />
             </VBtn>
           </template>
 
@@ -162,10 +139,7 @@ const resolveCategories = val => {
                 size="x-small"
                 @click="clearSearchAndCloseDialog"
               >
-                <VIcon
-                  size="22"
-                  icon="tabler-x"
-                />
+                <VIcon size="22" icon="tabler-x" />
               </VBtn>
             </div>
           </template>
@@ -188,32 +162,29 @@ const resolveCategories = val => {
           class="app-bar-search-list"
         >
           <!-- 👉 list Item /List Sub header -->
-          <template
-            v-for="item in searchResults"
-            :key="item.title"
-          >
-            <VListSubheader
-              v-if="'header' in item"
-              class="text-disabled"
-            >
+          <template v-for="item in searchResults" :key="item.title">
+            <VListSubheader v-if="'header' in item" class="text-disabled">
               {{ resolveCategories(item.title) }}
             </VListSubheader>
 
             <template v-else>
-              <slot
-                name="searchResult"
-                :item="item"
-              >
-                <VListItem
-                  link
-                  @click="$emit('itemSelected', item)"
-                >
+              <slot name="searchResult" :item="item">
+                <VListItem link @click="$emit('itemSelected', item)">
                   <template #prepend>
-                    <VIcon
-                      size="20"
-                      :icon="item.icon"
-                      class="me-3"
-                    />
+                    <div class="d-flex align-center">
+                      <div class="me-3">
+                        <VIcon
+                          v-if="!item.customIcon"
+                          :icon="item.icon"
+                          size="20"
+                        />
+                        <span
+                          v-else
+                          v-html="item.customIcon"
+                          class="custom-icon"
+                        ></span>
+                      </div>
+                    </div>
                   </template>
 
                   <template #append>
@@ -234,16 +205,10 @@ const resolveCategories = val => {
         </VList>
 
         <!-- 👉 Suggestions -->
-        <div
-          v-show="!!searchResults && !searchQuery"
-          class="h-100"
-        >
+        <div v-show="!!searchResults && !searchQuery" class="h-100">
           <slot name="suggestions">
             <VCardText class="app-bar-search-suggestions h-100 pa-10">
-              <VRow
-                v-if="props.suggestions"
-                class="gap-y-4"
-              >
+              <VRow v-if="props.suggestions" class="gap-y-4">
                 <VCol
                   v-for="suggestion in props.suggestions"
                   :key="suggestion.title"
@@ -265,11 +230,20 @@ const resolveCategories = val => {
                       @click="$emit('itemSelected', item)"
                     >
                       <template #prepend>
-                        <VIcon
-                          :icon="item.icon"
-                          size="20"
-                          class="me-2"
-                        />
+                        <div class="d-flex align-center">
+                          <div class="me-3">
+                            <VIcon
+                              v-if="!item.customIcon"
+                              :icon="item.icon"
+                              size="20"
+                            />
+                            <span
+                              v-else
+                              v-html="item.customIcon"
+                              class="custom-icon"
+                            ></span>
+                          </div>
+                        </div>
                       </template>
                     </VListItem>
                   </VList>
@@ -280,36 +254,38 @@ const resolveCategories = val => {
         </div>
 
         <!-- 👉 No Data found -->
-        <div
-          v-show="!searchResults.length && searchQuery.length"
-          class="h-100"
-        >
+        <div v-show="!searchResults.length && searchQuery.length" class="h-100">
           <slot name="noData">
             <VCardText class="h-100">
-              <div class="app-bar-search-suggestions d-flex flex-column align-center justify-center text-high-emphasis h-100">
-                <VIcon
-                  size="75"
-                  icon="tabler-file-x"
-                />
-                <h6 class="text-h6 my-3">
-                  No Result For "{{ searchQuery }}"
-                </h6>
-                <div
-                  v-if="props.noDataSuggestion"
-                  class="mt-8"
-                >
-                  <span class="d-flex justify-center text-disabled">Try searching for</span>
+              <div
+                class="app-bar-search-suggestions d-flex flex-column align-center justify-center text-high-emphasis h-100"
+              >
+                <VIcon size="75" icon="tabler-file-x" />
+                <h6 class="text-h6 my-3">No Result For "{{ searchQuery }}"</h6>
+                <div v-if="props.noDataSuggestion" class="mt-8">
+                  <span class="d-flex justify-center text-disabled"
+                    >Try searching for</span
+                  >
                   <h6
                     v-for="suggestion in props.noDataSuggestion"
                     :key="suggestion.title"
                     class="app-bar-search-suggestion text-sm font-weight-regular cursor-pointer mt-3"
                     @click="$emit('itemSelected', suggestion)"
                   >
-                    <VIcon
-                      size="20"
-                      :icon="suggestion.icon"
-                      class="me-3"
-                    />
+                    <div class="d-flex align-center">
+                      <div class="me-3">
+                        <VIcon
+                          v-if="!suggestion.customIcon"
+                          :icon="suggestion.icon"
+                          size="20"
+                        />
+                        <span
+                          v-else
+                          v-html="suggestion.customIcon"
+                          class="custom-icon"
+                        ></span>
+                      </div>
+                    </div>
                     <span class="text-sm">{{ suggestion.title }}</span>
                   </h6>
                 </div>
@@ -375,6 +351,19 @@ const resolveCategories = val => {
       text-transform: uppercase;
     }
   }
+}
+
+.custom-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.custom-icon svg {
+  width: 20px;
+  height: 20px;
 }
 </style>
 
