@@ -92,6 +92,7 @@ const companiesSearch = ref("");
 const housing_count = ref(0);
 const camp_count = ref(0);
 const siteTypes = ref([]);
+const locationSubTypes = ref([]);
 
 // Add contracts state
 const contracts = ref([]);
@@ -422,9 +423,14 @@ const addNewLocation = () => {
 
 // Add function to handle next step
 const nextStep = () => {
-  if (formData.value.location_type_id) {
-    dialogStep.value = 2;
+  if (!formData.value.location_type_id) {
+    useAppStore().showSnackbar({
+      message: "يرجى اختيار نوع الموقع",
+      color: "error",
+    });
+    return;
   }
+  dialogStep.value = 2;
 };
 
 // Add function to handle previous step
@@ -456,6 +462,9 @@ const resetForm = () => {
   };
   selectedLocation.value = { lat: 24.7136, lng: 46.6753 };
   dialogStep.value = 1;
+  if (form.value) {
+    form.value.resetValidation();
+  }
 };
 
 // Add location change handler
@@ -554,9 +563,10 @@ const dialogStep = ref(1);
 // Add function to fetch site types
 const fetchSiteTypes = async () => {
   try {
-    const response = await axios.get("locations-types");
+    const response = await axios.get("/locations-types");
+    // console.log(response.data.data.sub_types);
     if (response.data?.data) {
-      siteTypes.value = response.data.data.sub_types;
+      locationSubTypes.value = response.data.data.sub_types;
     }
   } catch (error) {
     console.error("Error fetching site types:", error);
@@ -1036,6 +1046,25 @@ const fetchSiteTypes = async () => {
                 placeholder="أدخل اسم الموقع"
                 variant="outlined"
                 density="comfortable"
+                class="rounded-lg bg-grey-lighten-4"
+                required
+              />
+            </div>
+
+            <!-- Location Sub Type -->
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block"
+                >نوع الموقع الفرعي</label
+              >
+              <v-select
+                v-model="formData.location_sub_type_id"
+                :items="locationSubTypes"
+                item-title="name"
+                item-value="id"
+                variant="outlined"
+                density="comfortable"
+                placeholder="اختر نوع الموقع الفرعي"
+                hide-details
                 class="rounded-lg bg-grey-lighten-4"
                 required
               />

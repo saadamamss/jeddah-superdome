@@ -98,6 +98,7 @@ const formatDate = (date) => {
         >
           <span class="font-weight-bold">عرض</span>
           <svg
+            style="rotate: 180deg"
             width="1.1rem"
             height="1.1rem"
             viewBox="0 0 16 16"

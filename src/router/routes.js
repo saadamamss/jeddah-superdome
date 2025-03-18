@@ -25,6 +25,8 @@ import ContractsPage from "@/pages/contracts";
 import ContractDetailsPage from "@/pages/contracts/contract_details";
 import UserDetailsPage from "@/pages/users/user-details";
 import NotFoundPage from "@/pages/NotFound";
+import ShiftsView from "@/views/shifts/ShiftsView.vue";
+import QuestionnairesPage from "@/pages/questionnaires/index.vue";
 // import TempPage from "@/pages/temp";
 
 export default [
@@ -153,6 +155,11 @@ export default [
         },
       },
       {
+        path: "/rating/details/:id",
+        name: "rating-details",
+        component: () => import("@/pages/rating/details.vue"),
+      },
+      {
         path: "/rating/company-rating/:id",
         name: "company-rating",
         component: CompanyRatingPage,
@@ -174,6 +181,22 @@ export default [
         },
       },
       {
+        path: "/questionnaires",
+        name: "questionnaires",
+        component: QuestionnairesPage,
+        meta: {
+          // requiresAuth: true,
+        },
+      },
+      {
+        path: "/questionnaires/details",
+        name: "questionnaire-details",
+        component: () => import("@/pages/questionnaires/details.vue"),
+        meta: {
+          // requiresAuth: true,
+        },
+      },
+      {
         path: "/company",
         name: "companies",
         component: () => import("@/pages/company/index.vue"),
@@ -188,6 +211,14 @@ export default [
         component: () => import("@/pages/company/company_details.vue"),
         meta: {
           layout: "default",
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/shifts",
+        name: "shifts",
+        component: ShiftsView,
+        meta: {
           requiresAuth: true,
         },
       },

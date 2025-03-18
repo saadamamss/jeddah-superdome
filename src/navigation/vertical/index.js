@@ -8,6 +8,8 @@ import NotesIcon from "./icons/Notes";
 import RatingIcon from "./icons/Rating";
 import ContractsIcon from "./icons/Contracts";
 import CompanyIcon from "./icons/Company";
+import ShiftsIcon from "./icons/Shifts";
+import QuestionnairesIcon from "./icons/Questionnaires";
 
 export default [
   {
@@ -47,6 +49,12 @@ export default [
     permission: true,
   },
   {
+    title: "إدارة الاستبيانات",
+    to: { name: "questionnaires" },
+    icon: QuestionnairesIcon,
+    permission: true,
+  },
+  {
     title: "⁠⁠إدارة المراحل",
     to: { name: "main-sectors" },
     icon: PointIcon,
@@ -68,6 +76,12 @@ export default [
     title: "إدارة الأدوار والصلاحيات ",
     to: { name: "roles" },
     icon: RolesIcon,
+    permission: true,
+  },
+  {
+    title: "اداره الورديات",
+    to: { name: "shifts" },
+    icon: ShiftsIcon,
     permission: true,
   },
   // {
