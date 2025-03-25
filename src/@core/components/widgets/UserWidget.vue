@@ -22,7 +22,7 @@ defineProps({
   },
 });
 
-const fallbackAvatar = "/imgs/business-man.png";
+const fallbackAvatar = "https://placehold.co/400";
 </script>
 
 <template>
@@ -39,10 +39,11 @@ const fallbackAvatar = "/imgs/business-man.png";
         <span class="avatar-wrapper d-flex justify-center align-center">
           <!-- <img :src="fallbackAvatar" alt="User avatar" /> -->
           <img
-            :src="user?.personal_image"
+            :src="user?.personal_image || user?.avatar_image || fallbackAvatar"
             class="avatar-img border rounded-circle"
             alt="User avatar"
             :style="{ width: size === 'small' ? '2rem' : '2.5rem' }"
+            @error="$event.target.src = fallbackAvatar"
           />
         </span>
       </div>
