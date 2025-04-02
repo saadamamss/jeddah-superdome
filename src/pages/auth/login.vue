@@ -87,11 +87,11 @@ const loginUser = async () => {
             <VRow>
               <VCol cols="12" class="py-1">
                 <label class="d-block text-subtitle-1 mb-2 text-dark">
-                  رقم الهوية الوطنية أو الإقامة*
+                  البريد الإلكتروني
                 </label>
                 <VTextField
                   v-model="formState.email"
-                  type="text"
+                  type="email"
                   bg-color="white"
                   density="comfortable"
                   placeholder="ادخل البريد الإلكتروني"

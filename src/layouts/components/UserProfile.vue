@@ -1,22 +1,38 @@
 <script setup>
 import { useSettingsStore } from "@/stores/Settings";
+import { useAuthStore } from "@/stores/Auth";
+import { useRouter } from "vue-router";
 
 const user = ref();
 const settingsListStore = useSettingsStore();
+const authStore = useAuthStore();
+const router = useRouter();
 const isLoading = ref(false);
 const isMenu = ref(false);
 
-const logout = () => {
-  isLoading.value = true;
-  localStorage.removeItem("SAR_TOKEN");
-  location.reload();
-  settingsListStore.alertColor = "error";
-  settingsListStore.alertMessage = "تم تسجيل الخروج";
-  settingsListStore.isAlertShow = true;
-  setTimeout(() => {
-    settingsListStore.isAlertShow = false;
-    settingsListStore.alertMessage = "";
-  }, 3000);
+const logout = async () => {
+  try {
+    isLoading.value = true;
+    // Clear auth store state
+    authStore.logout();
+    // Navigate to login page
+    await router.push("/auth/login");
+    // Show success message
+    settingsListStore.alertColor = "success";
+    settingsListStore.alertMessage = "تم تسجيل الخروج بنجاح";
+    settingsListStore.isAlertShow = true;
+    setTimeout(() => {
+      settingsListStore.isAlertShow = false;
+      settingsListStore.alertMessage = "";
+    }, 3000);
+  } catch (error) {
+    console.error("Logout error:", error);
+    settingsListStore.alertColor = "error";
+    settingsListStore.alertMessage = "حدث خطأ أثناء تسجيل الخروج";
+    settingsListStore.isAlertShow = true;
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 

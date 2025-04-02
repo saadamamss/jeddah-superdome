@@ -1,10 +1,10 @@
 <script setup>
 import { useAuthStore } from "@/stores/Auth";
-import { phoneValidator, requiredValidator } from "@validators";
+import { emailValidator, requiredValidator } from "@validators";
 import { toast } from "vue3-toastify";
 
 const formState = reactive({
-  phone: null,
+  email: null,
 });
 
 const auth = useAuthStore();
@@ -12,14 +12,14 @@ const router = useRouter();
 
 const isSubmitting = ref(false);
 
-const submitPhoneNumber = async () => {
+const submitEmail = async () => {
   try {
     isSubmitting.value = true;
     const { data } = await auth.resetPassword(formState);
 
     console.log(data?.code);
 
-    router.replace({ name: "otp", query: { phone: formState.phone } });
+    router.replace({ name: "otp", query: { email: formState.email } });
   } catch (error) {
     console.error(error);
 
@@ -29,6 +29,7 @@ const submitPhoneNumber = async () => {
     }
 
     toast("خطأ غير متوقع!", { rtl: true, hideProgressBar: true });
+    router.replace({ name: "otp", query: { email: formState.email } });
   } finally {
     isSubmitting.value = false;
   }
@@ -53,25 +54,25 @@ const submitPhoneNumber = async () => {
             هل نسيت كلمة المرور؟
           </h1>
           <p class="mb-4 text-lg" style="color: #75797c">
-            أدخل رقم هاتفك المسجل لإرسال رابط إعادة تعيين كلمة المرور.
+            أدخل بريدك الإلكتروني المسجل لإرسال رمز التحقق.
           </p>
         </VCardTitle>
         <v-divider class="my-3" />
         <VCardText style="flex: 0" class="px-4">
-          <VForm @submit.prevent="submitPhoneNumber" class="mb-8">
+          <VForm @submit.prevent="submitEmail" class="mb-8">
             <VRow>
               <VCol cols="12" class="py-1">
                 <label class="d-block text-subtitle-1 mb-2 text-dark">
-                  رقم الجوال*
+                  البريد الإلكتروني*
                 </label>
                 <VTextField
-                  v-model="formState.phone"
-                  type="number"
+                  v-model="formState.email"
+                  type="email"
                   bg-color="white"
                   density="comfortable"
-                  placeholder="05XXXXXXX"
+                  placeholder="example@domain.com"
                   rounded="lg"
-                  :rules="[requiredValidator, phoneValidator]"
+                  :rules="[requiredValidator, emailValidator]"
                   dir="ltr"
                 />
               </VCol>
