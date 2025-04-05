@@ -2,29 +2,32 @@
 import { useAuthStore } from "@/stores/Auth";
 import { requiredValidator } from "@validators";
 import { toast } from "vue3-toastify";
+import VOtpInput from "vue3-otp-input";
+
+const route = useRoute();
+const router = useRouter();
+const auth = useAuthStore();
+
+const email = route.query.email;
+if (!email) {
+  router.replace({ name: "forgot-password" });
+}
 
 const formState = reactive({
   code: "",
 });
 
-const auth = useAuthStore();
-const router = useRouter();
-const route = useRoute();
-
 const isSubmitting = ref(false);
-const phoneNumber = computed(() => route.query?.phone || null);
+const otpInput = ref(null);
 
-const submitCode = async () => {
+const submitOTP = async () => {
   try {
     isSubmitting.value = true;
-    await auth.verifyOTP({
-      phone: phoneNumber.value,
-      code: formState.code,
-    });
+    await auth.verifyOTP({ email, code: formState.code });
 
     router.replace({
-      name: "create-password",
-      query: { new: 1, code: formState.code, phone: phoneNumber.value },
+      name: "reset-password",
+      query: { email, code: formState.code },
     });
   } catch (error) {
     console.error(error);
@@ -40,7 +43,29 @@ const submitCode = async () => {
   }
 };
 
-const resendCode = () => {};
+const resendOTP = async () => {
+  try {
+    await auth.resetPassword({ email });
+    toast("تم إرسال رمز التحقق مرة أخرى", { rtl: true, hideProgressBar: true });
+    // Reset OTP input after resending
+    otpInput.value?.clearInput();
+  } catch (error) {
+    console.error(error);
+    toast("حدث خطأ أثناء إعادة إرسال رمز التحقق", {
+      rtl: true,
+      hideProgressBar: true,
+    });
+  }
+};
+
+const handleOnComplete = (value) => {
+  formState.code = value;
+  submitOTP();
+};
+
+const handleOnChange = (value) => {
+  formState.code = value;
+};
 </script>
 
 <template>
@@ -58,47 +83,45 @@ const resendCode = () => {};
       <VCard flat class="w-100 app-logo py-4 px-2 px-sm-6 px-xl-12 rounded-xl">
         <VCardTitle style="flex: 0">
           <h1 class="text-h5 text-sm-h4 font-weight-semibold mb-1">
-            تحقق من رقم الجوال
+            التحقق من البريد الإلكتروني
           </h1>
           <p class="mb-4 text-lg" style="color: #75797c">
-            <span>تم إرسال رمز التحقق إلى رقم هاتفك </span>
-            <!-- <span dir="ltr">+966 12** **** ***</span> -->
-            <span>، يرجى إدخال الرمز لتأكيد العملية</span>
+            أدخل رمز التحقق المكون من 4 أرقام الذي تم إرساله إلى بريدك
+            الإلكتروني
           </p>
         </VCardTitle>
         <v-divider class="my-3" />
         <VCardText style="flex: 0" class="px-4">
-          <VForm @submit.prevent="submitCode" class="mb-8">
+          <VForm @submit.prevent="submitOTP" class="mb-8">
             <VRow>
               <VCol cols="12" class="py-1">
                 <div dir="ltr" class="mb-4">
-                  <v-otp-input
+                  <VOtpInput
+                    ref="otpInput"
                     v-model="formState.code"
                     :disabled="isSubmitting"
-                    autofocus
-                    length="4"
-                    width="500"
-                    min-height="80"
                     :rules="[requiredValidator]"
-                    @finish="submitCode"
-                  ></v-otp-input>
-                </div>
-
-                <div class="d-flex flex-column align-center">
-                  <p class="mb-0">لم يصلك رمز التحقق؟</p>
-                  <v-btn
-                    @click="resendCode"
-                    variant="link"
-                    :disabled="isSubmitting"
-                  >
-                    إعادة الإرسال خلال <span>59</span> ثانية ...
-                  </v-btn>
+                    :length="4"
+                    :input-classes="'otp-input'"
+                    separator=" "
+                    :num-inputs="4"
+                    input-type="number"
+                    should-auto-focus
+                    @on-change="handleOnChange"
+                    @on-complete="handleOnComplete"
+                  />
                 </div>
               </VCol>
 
               <VCol cols="12" class="py-1">
                 <div class="d-flex align-center justify-space-between mt-6">
-                  <div></div>
+                  <VBtn
+                    variant="text"
+                    @click="resendOTP"
+                    :disabled="isSubmitting"
+                  >
+                    إعادة إرسال الرمز
+                  </VBtn>
 
                   <VBtn
                     rounded="pill"
@@ -108,7 +131,7 @@ const resendCode = () => {};
                     height="50"
                     class="px-10"
                   >
-                    تأكيد رقم الجوال
+                    تحقق
                   </VBtn>
                 </div>
               </VCol>
@@ -120,15 +143,36 @@ const resendCode = () => {};
   </VRow>
 </template>
 
-<style lang="scss">
-@use "@core/scss/template/pages/page-auth.scss";
+<style lang="scss" scoped>
+:deep(.vue-otp-input) {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
 
-.text-danger {
-  color: red;
+:deep(.otp-input) {
+  width: 60px !important;
+  height: 60px !important;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  font-size: 1.5rem;
+  text-align: center;
+
+  &:focus {
+    outline: none;
+    border-color: rgb(var(--v-theme-primary));
+  }
 }
 
 .auth-wrapper {
   background: url(/bg.webp) no-repeat center;
   background-size: cover;
+}
+.otp-input-container {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
 }
 </style>

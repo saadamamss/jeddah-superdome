@@ -3,33 +3,63 @@ import AvatarGroup from "@/@core/components/shared/AvatarGroup";
 import { computed } from "vue";
 
 const props = defineProps({
+  id: {
+    type: [Number, String],
+    default: null,
+  },
   title: "",
   companiesCount: 0,
-  teamMembers: {
-    type: Array,
-    default: () => [
-      {
-        id: 1,
-        name: "عبدالله قحطاني",
-        avatar: "/imgs/person.svg",
-      },
-      {
-        id: 2,
-        name: "أحمد علي",
-        avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
-      },
-      {
-        id: 3,
-        name: "عبدالله قحطاني",
-        avatar: "/imgs/person.svg",
-      },
-    ],
+  supervisor: {
+    type: Object,
+    default: () => ({}),
   },
+  inspectors: {
+    type: Array,
+    default: () => [],
+  },
+});
+
+const fallbackAvatar = "https://placehold.co/400";
+
+// Format supervisor name
+const supervisorName = computed(() => {
+  if (!props.supervisor) return "";
+  return `${props.supervisor.firstname} ${props.supervisor.lastname}`;
+});
+
+// Format team members (supervisor + inspectors) for AvatarGroup
+const teamMembers = computed(() => {
+  const members = [];
+
+  // Add supervisor if available
+  if (props.supervisor && props.supervisor.id) {
+    members.push({
+      id: props.supervisor.id,
+      name: supervisorName.value,
+      avatar:
+        props.supervisor.avatar ||
+        props.supervisor.personal_image ||
+        fallbackAvatar,
+    });
+  }
+
+  // Add inspectors if available
+  if (props.inspectors && props.inspectors.length) {
+    props.inspectors.forEach((inspector) => {
+      members.push({
+        id: inspector.id,
+        name: `${inspector.firstname} ${inspector.lastname}`,
+        avatar: inspector.avatar || inspector.personal_image || fallbackAvatar,
+      });
+    });
+  }
+
+  return members;
 });
 
 // Map teamMembers to the format expected by AvatarGroup
 const avatars = computed(() =>
-  props.teamMembers.map((member) => ({
+  teamMembers.value.map((member) => ({
     name: member.name,
     avatar: member.avatar,
   }))
@@ -42,9 +72,13 @@ const avatars = computed(() =>
     style="box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)"
   >
     <v-card-text class="pa-3 pa-sm-4">
-      <div class="d-flex justify-space-between align-center ga-2">
+      <div class="d-flex justify-space-between align-center ga-1">
         <div>
-          <span class="text-lg text-black">{{ title }}</span>
+          <span
+            class="text-lg text-black text-truncate"
+            style="max-width: 200px; display: inline-block"
+            >{{ title }}</span
+          >
         </div>
         <div class="d-flex align-center ga-2">
           <span>
@@ -81,7 +115,33 @@ const avatars = computed(() =>
         </div>
       </div>
       <VDivider class="my-5" />
-      <div class="d-flex align-center justify-space-between ga-4">
+
+      <!-- Team Members Section -->
+      <div class="team-members mb-3" v-if="supervisor && supervisor.id">
+        <div class="d-flex align-center mb-2">
+          <span class="text-subtitle-2 font-weight-medium me-2">المشرف:</span>
+          <span class="text-body-2">{{ supervisorName }}</span>
+        </div>
+
+        <div
+          class="d-flex align-center mt-2"
+          v-if="inspectors && inspectors.length"
+        >
+          <span class="text-subtitle-2 font-weight-medium me-2">المفتشين:</span>
+          <div class="d-flex flex-wrap">
+            <span
+              v-for="(inspector, index) in inspectors"
+              :key="inspector.id"
+              class="text-body-2 me-2"
+            >
+              {{ inspector.firstname }} {{ inspector.lastname
+              }}{{ index < inspectors.length - 1 ? "،" : "" }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- <div class="d-flex align-center justify-space-between ga-4">
         <AvatarGroup :avatars="avatars" :size="32" />
         <v-btn
           size="small"
@@ -89,7 +149,7 @@ const avatars = computed(() =>
           class="btn-card-link px-3 text-primary rounded-xl"
         >
           <router-link
-            :to="`/teams/team-management/32`"
+            :to="`/teams/team-management/${props.id || 'details'}`"
             class="d-flex align-center ga-2"
           >
             <span class="font-weight-bold">عرض</span>
@@ -115,7 +175,7 @@ const avatars = computed(() =>
             </svg>
           </router-link>
         </v-btn>
-      </div>
+      </div> -->
     </v-card-text>
   </VCard>
 </template>

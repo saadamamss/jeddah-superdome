@@ -1,8 +1,37 @@
 <script setup>
 defineProps({
-  title: "",
-  number: 0,
-  type: "camp",
+  title: {
+    type: String,
+    default: "",
+  },
+  type: {
+    type: String,
+    default: "camp",
+  },
+  campNumber: {
+    type: String,
+    default: null,
+  },
+  squareNumber: {
+    type: String,
+    default: null,
+  },
+  companiesCount: {
+    type: Number,
+    default: 0,
+  },
+  delegateName: {
+    type: String,
+    default: "",
+  },
+  delegatePhone: {
+    type: String,
+    default: "",
+  },
+  licenseNo: {
+    type: String,
+    default: "",
+  },
 });
 </script>
 
@@ -14,9 +43,11 @@ defineProps({
     <v-card-text class="pa-4">
       <div class="d-flex justify-space-between align-center mb-4">
         <div class="d-flex align-center justify-space-between w-100">
-          <h2 v-if="type == 'camp'" class="text-h6 font-weight-medium">
-            رقم المخيم
-          </h2>
+          <div v-if="type == 'camp'" class="font-weight-medium">
+            {{
+              title || `المخيم ${campNumber || ""} المربع ${squareNumber || ""}`
+            }}
+          </div>
           <h2
             v-else
             class="d-flex align-center ga-1 text-h6 font-weight-medium"
@@ -39,7 +70,7 @@ defineProps({
               />
             </svg>
 
-            <span>اسم المسكن</span>
+            <span>{{ title }}</span>
           </h2>
 
           <div class="d-flex align-center ga-2">
@@ -109,7 +140,9 @@ defineProps({
           />
         </svg>
 
-        <span class="card-gray-text">شركة رواف منى</span>
+        <span class="card-gray-text">{{
+          delegateName || "شركة رواف منى"
+        }}</span>
       </div>
 
       <div v-else class="d-flex align-center ga-2 mt-n2">
@@ -141,7 +174,7 @@ defineProps({
           </svg>
         </span>
         <span class="card-gray-text">
-          <span>12</span>
+          <span>{{ companiesCount }}</span>
           <span> شركة</span>
         </span>
       </div>
@@ -178,7 +211,9 @@ defineProps({
 
             <div>
               <div class="text-body-2 text-medium-emphasis">رقم البريد</div>
-              <div class="text-body-2 font-weight-medium">6127782187</div>
+              <div class="text-body-2 font-weight-medium">
+                {{ licenseNo || "6127782187" }}
+              </div>
             </div>
           </div>
         </div>
@@ -211,7 +246,9 @@ defineProps({
 
             <div>
               <div class="text-body-2 text-medium-emphasis">رقم المفوض</div>
-              <div class="text-body-2 font-weight-medium">6127782187</div>
+              <div class="text-body-2 font-weight-medium">
+                {{ delegatePhone || "6127782187" }}
+              </div>
             </div>
           </div>
         </div>

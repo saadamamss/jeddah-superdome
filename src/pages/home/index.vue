@@ -1,5 +1,5 @@
 <script setup>
-// import { useAppStore } from "@/stores/app";
+import { useAppStore } from "@/stores/app";
 import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import NotificationWidget from "@/@core/components/widgets/NotificationWidget";
 import UserWidget from "@/@core/components/widgets/UserWidget";
@@ -10,18 +10,50 @@ import SiteWidget from "@/@core/components/widgets/SiteWidget";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 import { useLayouts } from "@layouts";
 import Pagination from "@/@core/components/Pagination.vue";
+import axios from "@/plugins/axios";
+import { ref, onMounted } from "vue";
 
-// const appStore = useAppStore();
+const appStore = useAppStore();
 const { isAppRtl } = useLayouts();
 const isLoading = ref(true);
 const currentPage = ref(1);
-const perPage = ref(5);
+const perPage = ref(4); // Set to match the API response of 4 items per page
 const teamLocation = ref();
+const homeData = ref(null);
+const search = ref(""); // Added this line to define the search variable used in the template
+
+// Fetch statistics data
+const fetchHomeData = async () => {
+  try {
+    isLoading.value = true;
+    const queryParams = new URLSearchParams({
+      page: currentPage.value.toString(),
+    });
+
+    const response = await axios.get(`/statistics?${queryParams.toString()}`);
+    if (response.data) {
+      homeData.value = response.data;
+    }
+  } catch (error) {
+    console.error("Error fetching home statistics:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب البيانات",
+      color: "error",
+    });
+    homeData.value = null;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Function to handle page changes for locations
+const handleLocationPageChange = (page) => {
+  currentPage.value = page;
+  fetchHomeData();
+};
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 3000);
+  fetchHomeData();
 });
 </script>
 
@@ -148,6 +180,7 @@ onMounted(() => {
       </v-menu>
     </div> -->
     <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+      <!-- {{  }} -->
       <v-row>
         <v-col cols="12" lg="9">
           <v-row v-if="isLoading">
@@ -166,7 +199,10 @@ onMounted(() => {
           </v-row>
           <v-row v-else>
             <v-col cols="6" md="3">
-              <StatsWidget title="المواقع" number="234">
+              <StatsWidget
+                title="المواقع"
+                :number="homeData?.data?.statistics?.locations_count || 0"
+              >
                 <template #icon>
                   <svg
                     width="2.2rem"
@@ -197,7 +233,10 @@ onMounted(() => {
               </StatsWidget>
             </v-col>
             <v-col cols="6" md="3">
-              <StatsWidget title="الشركات" number="23">
+              <StatsWidget
+                title="الشركات"
+                :number="homeData?.data?.statistics?.companies_count || 0"
+              >
                 <template #icon>
                   <svg
                     width="2.2rem"
@@ -237,7 +276,10 @@ onMounted(() => {
               </StatsWidget>
             </v-col>
             <v-col cols="6" md="3">
-              <StatsWidget title="الملاحظات" number="23">
+              <StatsWidget
+                title="الملاحظات"
+                :number="homeData.data.statistics.reports_count"
+              >
                 <template #icon>
                   <svg
                     width="2.2rem"
@@ -280,7 +322,10 @@ onMounted(() => {
               </StatsWidget>
             </v-col>
             <v-col cols="6" md="3">
-              <StatsWidget title="الفرق الميدانية" number="23">
+              <StatsWidget
+                title="الفرق الميدانية"
+                :number="homeData?.data?.teams_count || 0"
+              >
                 <template #icon>
                   <svg
                     width="2.2rem"
@@ -587,17 +632,70 @@ onMounted(() => {
               </div>
             </v-card-title>
             <v-card-text class="mt-2">
-              <v-row>
+              <v-row v-if="isLoading">
                 <v-col v-for="item in 4" :key="item" cols="12" md="6">
-                  <SiteWidget :type="`${item % 2 != 0 ? 'camp' : 'company'}`" />
+                  <VCard elevation="0" class="py-2">
+                    <v-card-text class="px-1 py-2">
+                      <v-skeleton-loader
+                        class="mx-auto"
+                        elevation="0"
+                        max-width="400"
+                        type="list-item-two-line, table-heading"
+                      ></v-skeleton-loader>
+                    </v-card-text>
+                  </VCard>
+                </v-col>
+              </v-row>
+              <v-row
+                v-else-if="
+                  homeData?.data?.location_section &&
+                  homeData.data.location_section.locations &&
+                  homeData.data.location_section.locations.length
+                "
+              >
+                <v-col
+                  v-for="location in homeData.data.location_section.locations"
+                  :key="location.id"
+                  cols="12"
+                  md="6"
+                >
+                  <SiteWidget
+                    :type="
+                      location.location_type.title === 'مخيم'
+                        ? 'camp'
+                        : 'company'
+                    "
+                    :title="
+                      location.name ||
+                      `المخيم ${location.camp_number || ''} المربع ${
+                        location.square_number || ''
+                      }`
+                    "
+                    :camp-number="location.camp_number"
+                    :square-number="location.square_number"
+                    :companies-count="location.companies_count"
+                    :delegate-name="location.delegate_name"
+                    :delegate-phone="location.delegate_phone"
+                    :license-no="location.license_no"
+                  />
+                </v-col>
+              </v-row>
+              <v-row v-else>
+                <v-col cols="12">
+                  <p class="text-center text-medium-emphasis">
+                    لا توجد مواقع متاحة
+                  </p>
                 </v-col>
               </v-row>
 
               <!-- pagination -->
               <Pagination
-                :total-items="2300"
+                v-if="homeData?.data?.pagination"
+                :total-items="homeData.data.pagination.total"
+                :total-pages="homeData.data.pagination.last_page"
                 v-model:per-page="perPage"
                 v-model:page="currentPage"
+                @update:page="handleLocationPageChange"
               />
             </v-card-text>
           </VCard>
@@ -638,12 +736,45 @@ onMounted(() => {
               </div>
             </v-card-title>
             <v-card-text class="mt-4">
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <TeamWidget title="اسم المواقع" companies-count="12" />
+              <v-row v-if="isLoading">
+                <v-col v-for="item in 2" :key="item" cols="12" sm="6">
+                  <VCard elevation="0" class="py-2">
+                    <v-card-text class="px-1 py-2">
+                      <v-skeleton-loader
+                        class="mx-auto"
+                        elevation="0"
+                        max-width="400"
+                        type="list-item-two-line, table-heading"
+                      ></v-skeleton-loader>
+                    </v-card-text>
+                  </VCard>
                 </v-col>
-                <v-col cols="12" sm="6">
-                  <TeamWidget title="اسم المواقع" companies-count="12" />
+              </v-row>
+              <v-row
+                v-else-if="
+                  homeData?.data?.teams && homeData?.data?.teams.length
+                "
+              >
+                <v-col
+                  v-for="team in homeData?.data?.teams || []"
+                  :key="team.id"
+                  cols="12"
+                  sm="6"
+                >
+                  <TeamWidget
+                    :id="team.id"
+                    :title="team.title"
+                    :companies-count="team.locations_count"
+                    :supervisor="team.supervisor"
+                    :inspectors="team.inspectors"
+                  />
+                </v-col>
+              </v-row>
+              <v-row v-else>
+                <v-col cols="12">
+                  <p class="text-center text-medium-emphasis">
+                    لا توجد فرق ميدانية
+                  </p>
                 </v-col>
               </v-row>
             </v-card-text>
@@ -700,6 +831,7 @@ onMounted(() => {
               <v-card-text class="px-2">
                 <NotificationWidget
                   v-for="index in 10"
+                  :key="index"
                   :notification="{
                     id: index,
                     title: 'تمت مراجعة تقريرك',
@@ -757,17 +889,13 @@ onMounted(() => {
                   </span>
                 </v-btn>
               </v-card-title>
+
               <v-card-text class="px-2">
                 <UserWidget
-                  v-for="index in 10"
-                  :key="index"
-                  :user="{
-                    id: index,
-                    name: 'عبدالله قحطاني',
-                    job: 'مراقب ميداني',
-                    avatar: '',
-                  }"
-                  :class="{ 'mb-4': index < 10 }"
+                  v-for="(user, index) in homeData?.data?.users || []"
+                  :key="user.id"
+                  :user="user"
+                  :class="{ 'mb-4': index < homeData?.data?.users?.length - 1 }"
                 />
               </v-card-text>
             </PerfectScrollbar>

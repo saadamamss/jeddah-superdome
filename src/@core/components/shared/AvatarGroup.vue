@@ -1,6 +1,9 @@
 <script setup>
 const props = defineProps({
-  avatars: [],
+  avatars: {
+    type: Array,
+    default: () => [],
+  },
   size: {
     type: String,
     default: "45",
@@ -10,6 +13,8 @@ const props = defineProps({
     default: 4,
   },
 });
+
+const fallbackAvatar = "https://placehold.co/400";
 
 const visibleItems = computed(() => {
   if (props.avatars?.length > props.maxAvatars) {
@@ -29,7 +34,11 @@ const visibleItems = computed(() => {
         :class="{ 'ms-n3': index > 0 }"
       >
         <v-tooltip activator="parent" location="top">{{ item.name }}</v-tooltip>
-        <v-img :alt="item.name" :src="item.avatar"></v-img>
+        <v-img
+          :alt="item.name"
+          :src="item.avatar || fallbackAvatar"
+          @error="$event.target.src = fallbackAvatar"
+        ></v-img>
       </v-avatar>
     </template>
     <v-avatar
