@@ -96,4 +96,58 @@ body pre {
   opacity: 0;
   transform: translateY(-30px);
 }
+
+.custom-panel .v-expansion-panel {
+  background-color: #f8f9f9 !important;
+}
+
+.custom-panel .v-expansion-panel:not(:first-child)::after {
+  border: none;
+}
+
+.custom-panel.v-expansion-panels--variant-accordion > .v-expansion-panel {
+  border-radius: 1rem !important;
+}
+
+.v-select.custom-select,
+.v-input.v-filter-input {
+  .v-input__control {
+    border-radius: 25px !important;
+    overflow: hidden;
+  }
+
+  &.v-input--density-default .v-field--variant-filled {
+    --v-input-control-height: 22px !important;
+    --v-field-padding-bottom: 4px;
+  }
+
+  .v-field--variant-filled .v-field__outline::before,
+  .v-field--variant-underlined .v-field__outline::before {
+    border-width: 0;
+  }
+
+  .v-field__append-inner > .v-icon {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+  }
+
+  .v-field__input {
+    padding: 12px 10px;
+  }
+
+  .v-field .v-field__input > input {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.9rem !important;
+  }
+
+  .v-select__selection-text {
+    font-size: 0.9rem !important;
+    color: #1b2559;
+  }
+}
+
+body .v-btn--variant-outlined {
+  border-color: #e9ebec;
+}
 </style>

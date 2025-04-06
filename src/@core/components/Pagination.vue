@@ -5,7 +5,7 @@
     <div class="d-flex align-center justify-space-between ga-3">
       <v-select
         v-model="perPageModel"
-        :items="[5, 10, 25, 50, 100]"
+        :items="[5, 12, 25, 50, 100]"
         min-width="100"
         max-width="120"
         bg-color="#F8F9F9"

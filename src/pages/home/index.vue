@@ -278,7 +278,7 @@ onMounted(() => {
             <v-col cols="6" md="3">
               <StatsWidget
                 title="الملاحظات"
-                :number="homeData.data.statistics.reports_count"
+                :number="homeData.data?.statistics.reports_count"
               >
                 <template #icon>
                   <svg
@@ -324,7 +324,7 @@ onMounted(() => {
             <v-col cols="6" md="3">
               <StatsWidget
                 title="الفرق الميدانية"
-                :number="homeData?.data?.teams_count || 0"
+                :number="homeData.data?.statistics?.teams_count || 0"
               >
                 <template #icon>
                   <svg

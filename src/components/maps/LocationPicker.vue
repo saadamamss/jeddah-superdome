@@ -13,6 +13,10 @@ const props = defineProps({
     type: Object,
     default: () => ({ lat: 24.7136, lng: 46.6753 }), // Default to Riyadh coordinates
   },
+  isDraggable: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -52,7 +56,7 @@ const initMap = async () => {
         lng: parseFloat(props.modelValue.lng),
       },
       map: map,
-      draggable: true,
+      draggable: props.isDraggable,
       animation: maps.Animation.DROP,
     });
 
