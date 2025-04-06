@@ -1,6 +1,9 @@
 import { VCheckbox } from "vuetify/components";
 
 export default {
+  global: {
+    rtl: true,
+  },
   VAlert: {
     density: "comfortable",
   },

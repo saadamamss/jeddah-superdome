@@ -1,0 +1,16 @@
+<template>
+  <v-select
+    item-title="label"
+    item-value="value"
+    hide-details
+    hide-no-data
+    return-object
+    min-width="150"
+    open-on-clear
+    variant="filled"
+    bg-color="#F8F9F9"
+    class="custom-select"
+    clearable
+  >
+  </v-select>
+</template>
