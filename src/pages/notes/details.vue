@@ -72,13 +72,47 @@
                 "
                 class="action-buttons-container"
               >
+                <div @click="printInfo">
+                  <svg
+                    width="44"
+                    height="43"
+                    viewBox="0 0 44 43"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M0.620117 16C0.620117 7.43959 7.5597 0.5 16.1201 0.5H27.1201C35.6805 0.5 42.6201 7.43959 42.6201 16V27C42.6201 35.5604 35.6805 42.5 27.1201 42.5H16.1201C7.5597 42.5 0.620117 35.5604 0.620117 27V16Z"
+                      stroke="#E9EBEC"
+                    />
+                    <path
+                      opacity="0.4"
+                      d="M16.9741 17.5H26.2662C28.0385 17.5 28.9246 17.5 29.6121 17.8535C30.0635 18.0856 30.4486 18.4213 30.7333 18.8308C31.1669 19.4545 31.2551 20.3039 31.4314 22.0025C31.6427 24.0373 31.7483 25.0547 31.3554 25.8242C31.0985 26.3271 30.7006 26.7506 30.2066 27.0468C29.4508 27.5 28.3893 27.5 26.2662 27.5H26.2283C26.1012 26.9554 26.0193 26.6526 25.8739 26.4099C25.6499 26.036 25.317 25.754 24.9283 25.6089C24.6367 25.5 24.2941 25.5 23.6088 25.5H19.6314C18.9461 25.5 18.6035 25.5 18.3119 25.6089C17.9232 25.754 17.5904 26.036 17.3663 26.4099C17.2209 26.6526 17.1391 26.9554 17.012 27.5H16.9741C14.851 27.5 13.7894 27.5 13.0336 27.0468C12.5396 26.7506 12.1417 26.3271 11.8849 25.8242C11.4919 25.0547 11.5975 24.0373 11.8088 22.0025C11.9852 20.3039 12.0733 19.4545 12.507 18.8308C12.7917 18.4213 13.1767 18.0856 13.6281 17.8535C14.3156 17.5 15.2018 17.5 16.9741 17.5Z"
+                      fill="#B69265"
+                    />
+                    <path
+                      d="M27.6201 20.5C27.0678 20.5 26.6201 20.9477 26.6201 21.5C26.6201 22.0523 27.0678 22.5 27.6201 22.5H27.6291C28.1814 22.5 28.6291 22.0523 28.6291 21.5C28.6291 20.9477 28.1814 20.5 27.6291 20.5H27.6201Z"
+                      fill="#B69265"
+                    />
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M22.6721 10.75H20.5681C19.6697 10.75 18.9204 10.7499 18.3256 10.8299C17.6978 10.9143 17.131 11.1 16.6756 11.5555C16.2201 12.0109 16.0344 12.5777 15.95 13.2055C15.8701 13.8003 15.8701 14.5495 15.8701 15.448L15.8701 16.7544C15.4813 16.7597 15.1372 16.7713 14.8318 16.7968C14.2545 16.845 13.7516 16.9467 13.2851 17.1866C12.7266 17.4737 12.2472 17.8906 11.8911 18.4027C11.5917 18.8335 11.4339 19.3146 11.3253 19.8696C11.2206 20.4055 11.1515 21.0705 11.0664 21.8904L11.0588 21.9639C10.9566 22.9483 10.8742 23.7417 10.8703 24.3833C10.8662 25.0438 10.9425 25.628 11.2169 26.1653C11.539 26.796 12.036 27.3231 12.6479 27.69C13.165 28.0001 13.7482 28.1291 14.4234 28.1903C14.8865 28.2323 15.4311 28.2447 16.0714 28.2484C16.0109 28.5221 15.9613 28.7644 15.9271 28.9789C15.8677 29.3519 15.8428 29.7066 15.9116 30.0588C16.0696 30.8673 16.5672 31.5768 17.2917 31.9603C17.6141 32.1309 17.961 32.1935 18.319 32.2223C18.6647 32.25 19.0915 32.25 19.6012 32.25H23.639C24.1487 32.25 24.5755 32.25 24.9212 32.2223C25.2792 32.1935 25.6261 32.1309 25.9485 31.9603C26.673 31.5768 27.1705 30.8673 27.3286 30.0588C27.3974 29.7066 27.3725 29.3519 27.3131 28.9789C27.2789 28.7644 27.2293 28.5221 27.1688 28.2484C27.8091 28.2447 28.3537 28.2323 28.8168 28.1903C29.4921 28.1291 30.0753 28.0001 30.5923 27.69C31.2043 27.3231 31.7012 26.796 32.0233 26.1653C32.2977 25.628 32.374 25.0438 32.37 24.3833C32.3661 23.7416 32.2837 22.9483 32.1814 21.9638L32.1738 21.8904C32.0887 21.0705 32.0197 20.4055 31.9149 19.8696C31.8064 19.3146 31.6486 18.8335 31.3491 18.4027C30.9931 17.8906 30.5136 17.4737 29.9551 17.1866C29.4886 16.9467 28.9857 16.845 28.4084 16.7968C28.103 16.7713 27.7589 16.7597 27.3701 16.7544L27.3701 15.448C27.3701 14.5496 27.3702 13.8003 27.2902 13.2055C27.2058 12.5777 27.0201 12.0109 26.5647 11.5555C26.1092 11.1 25.5424 10.9143 24.9146 10.8299C24.3198 10.7499 23.5706 10.75 22.6721 10.75ZM16.7229 26.0244C16.5958 26.2366 16.5059 26.4753 16.4271 26.7496C15.6337 26.7481 15.038 26.7398 14.5588 26.6964C13.9835 26.6443 13.658 26.5467 13.4193 26.4036C13.0433 26.1781 12.7444 25.8582 12.5528 25.4831C12.4342 25.2509 12.3669 24.9417 12.3702 24.3924C12.3737 23.8327 12.4476 23.1123 12.5548 22.0799C12.6444 21.2172 12.7071 20.6194 12.7975 20.1575C12.8855 19.7073 12.9886 19.4519 13.1228 19.2589C13.3361 18.952 13.6268 18.6976 13.9711 18.5205C14.1921 18.4069 14.476 18.3317 14.9567 18.2916C15.4473 18.2506 16.0753 18.25 16.9741 18.25H26.2662C27.1649 18.25 27.793 18.2506 28.2835 18.2916C28.7642 18.3317 29.0482 18.4069 29.2692 18.5205C29.6134 18.6976 29.9041 18.952 30.1175 19.2589C30.2516 19.4519 30.3547 19.7073 30.4428 20.1575C30.5331 20.6194 30.5959 21.2172 30.6854 22.0799C30.7926 23.1123 30.8666 23.8327 30.87 24.3924C30.8734 24.9417 30.806 25.2509 30.6874 25.4831C30.4959 25.8582 30.1969 26.1781 29.8209 26.4036C29.5822 26.5467 29.2567 26.6443 28.6815 26.6964C28.2022 26.7398 27.6065 26.7481 26.8131 26.7496C26.7343 26.4753 26.6444 26.2366 26.5173 26.0244C26.2106 25.5126 25.7471 25.114 25.1906 24.9062C24.7688 24.7487 24.2946 24.7492 23.7218 24.7499H19.5184C18.9456 24.7492 18.4714 24.7487 18.0496 24.9062C17.4931 25.114 17.0296 25.5126 16.7229 26.0244ZM25.8701 16.75V15.5C25.8701 14.536 25.8685 13.8884 25.8036 13.4054C25.7415 12.9439 25.6343 12.7464 25.504 12.6161C25.3737 12.4858 25.1762 12.3786 24.7147 12.3165C24.2317 12.2516 23.5841 12.25 22.6201 12.25H20.6201C19.6561 12.25 19.0085 12.2516 18.5255 12.3165C18.0641 12.3786 17.8666 12.4858 17.7362 12.6161C17.6059 12.7464 17.4987 12.9439 17.4367 13.4054C17.3717 13.8884 17.3701 14.536 17.3701 15.5V16.75H25.8701ZM19.6314 26.25C18.8848 26.25 18.7081 26.2615 18.5743 26.3115C18.3533 26.394 18.1511 26.5593 18.0097 26.7954C17.9175 26.9491 17.8584 27.1655 17.6798 27.9408C17.5476 28.5146 17.4574 28.9079 17.4085 29.2148C17.3601 29.5183 17.3643 29.6713 17.3838 29.771C17.4612 30.1674 17.6977 30.478 17.9935 30.6346C18.0538 30.6665 18.1658 30.7052 18.4389 30.7271C18.7175 30.7494 19.0837 30.75 19.6314 30.75H23.6088C24.1565 30.75 24.5227 30.7494 24.8013 30.7271C25.0744 30.7052 25.1864 30.6665 25.2467 30.6346C25.5425 30.478 25.779 30.1674 25.8564 29.771C25.8759 29.6713 25.8801 29.5183 25.8317 29.2148C25.7828 28.9079 25.6926 28.5146 25.5604 27.9408C25.3818 27.1655 25.3227 26.9491 25.2305 26.7954C25.0891 26.5593 24.8869 26.394 24.6659 26.3115C24.5321 26.2615 24.3554 26.25 23.6088 26.25H19.6314Z"
+                      fill="#B69265"
+                    />
+                  </svg>
+                </div>
                 <v-btn
                   v-if="['REJECTED', 'PENDING'].includes(note?.status)"
                   color="success"
                   variant="tonal"
                   size="small"
-                  class="text-none font-weight-medium px-6 py-2 rounded-pill"
+                  class="text-none font-weight-medium px-6 py-2 rounded-pill font-weight-bold"
                   @click="updateStatus('APPROVED')"
+                  style="
+                    background-color: rgba(45, 202, 114, 0.08);
+                    min-width: 150px;
+                    min-height: 40px;
+                  "
                   :loading="loading"
                 >
                   <span class="me-2">
@@ -86,7 +120,6 @@
                       note?.status === "REJECTED" ? "تراجع عن الرفض" : "قبول"
                     }}
                   </span>
-                  <v-icon size="small">mdi-check</v-icon>
                 </v-btn>
 
                 <v-btn
@@ -94,16 +127,20 @@
                   color="error"
                   variant="tonal"
                   size="small"
-                  class="text-none font-weight-medium px-6 py-2 rounded-pill"
+                  class="text-none font-weight-medium px-6 py- rounded-pill font-weight-bold"
                   @click="showRejectDialog = true"
                   :loading="loading"
+                  style="
+                    background-color: rgba(250, 238, 235, 1);
+                    min-width: 150px;
+                    min-height: 40px;
+                  "
                 >
                   <span class="me-2">
                     {{
                       note?.status === "APPROVED" ? "تراجع عن القبول" : "رفض"
                     }}
                   </span>
-                  <v-icon size="small">mdi-close</v-icon>
                 </v-btn>
               </div>
             </div>
@@ -288,48 +325,140 @@
 
                     <!-- Map -->
                     <div
-                      v-if="note?.latitude && note?.longitude"
+                      v-if="note?.lat && note?.long"
                       class="map-container rounded-lg overflow-hidden"
                     >
-                      <LocationPicker
-                        v-model="selectedLocation"
+                      <MapDisplay
+                        :latitude="note?.lat"
+                        :longitude="note?.long"
                         :readonly="true"
-                        :height="300"
-                        :hideCoordinates="true"
+                        height="300px"
                         class="rounded-lg"
+                        @error="handleMapError"
                       />
+                      <div v-if="mapError" class="text-error pa-2 text-center">
+                        {{ mapError }}
+                      </div>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Attachments -->
-                  <div class="info-section" v-if="note?.attachments?.length">
-                    <div class="d-flex align-center mb-3">
-                      <v-icon size="20" color="primary" class="me-2"
-                        >mdi-paperclip</v-icon
-                      >
-                      <span class="section-subtitle"
-                        >الأدلة والشواهد الميدانية</span
-                      >
-                    </div>
-                    <div class="attachments-grid me-8">
-                      <v-card
-                        v-for="(attachment, index) in note.attachments"
-                        :key="index"
-                        elevation="0"
-                        class="attachment-card"
-                      >
-                        <v-img
-                          :src="attachment.url"
-                          height="120"
-                          cover
-                          class="rounded"
-                        ></v-img>
-                        <div class="text-caption mt-2 text-center">
-                          {{ attachment.size }}
-                        </div>
-                      </v-card>
-                    </div>
+                <!-- Attachments -->
+
+                <div class="section-container mb-6">
+                  <div class="section-title mb-4">
+                    الأدلة والشواهد الميدانية
                   </div>
+                  <v-row>
+                    <v-col
+                      v-for="(attachment, index) in note.attachments"
+                      :key="index"
+                      cols="12"
+                      md="6"
+                    >
+                      <div
+                        elevation="0"
+                        class="text-body-1 bg-gray-1 pa-4 rounded-lg d-flex align-center justify-space-between"
+                      >
+                        <div class="d-flex align-center">
+                          <svg
+                            width="40"
+                            height="41"
+                            viewBox="0 0 40 41"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <rect
+                              y="0.125"
+                              width="40"
+                              height="40"
+                              rx="4"
+                              fill="white"
+                            />
+                            <g opacity="0.3">
+                              <path
+                                opacity="0.3"
+                                d="M25.2517 10.6905C24.5279 10.6901 23.8338 10.4003 23.322 9.8848C22.8102 9.36926 22.5225 8.67015 22.5221 7.94107V4.125H10.325C9.85705 4.125 9.39373 4.21785 8.96145 4.39825C8.52917 4.57865 8.13638 4.84306 7.80558 5.17639C7.47478 5.50971 7.21243 5.90542 7.03349 6.3409C6.85455 6.77638 6.76252 7.24311 6.7627 7.71441V29.3428C6.76252 29.8141 6.85455 30.2808 7.03349 30.7163C7.21243 31.1518 7.47478 31.5475 7.80558 31.8808C8.13638 32.2142 8.52917 32.4786 8.96145 32.659C9.39373 32.8394 9.85705 32.9322 10.325 32.9322H24.9658C25.4337 32.9322 25.897 32.8394 26.3293 32.659C26.7616 32.4786 27.1543 32.2142 27.4851 31.8808C27.8159 31.5475 28.0783 31.1518 28.2572 30.7163C28.4362 30.2808 28.5282 29.8141 28.528 29.3428V10.6918L25.2517 10.6905Z"
+                                fill="#00C650"
+                              />
+                            </g>
+                            <path
+                              d="M28.5284 10.6905H25.2521C24.5282 10.6901 23.8342 10.4003 23.3223 9.8848C22.8105 9.36926 22.5228 8.67015 22.5225 7.94107V4.125L28.5284 10.6905Z"
+                              fill="#00C650"
+                            />
+                            <path
+                              d="M31.1119 26.8721H14.5596C13.3854 26.8721 12.4336 27.8308 12.4336 29.0135V33.9842C12.4336 35.1669 13.3854 36.1256 14.5596 36.1256H31.1119C32.286 36.1256 33.2378 35.1669 33.2378 33.9842V29.0135C33.2378 27.8308 32.286 26.8721 31.1119 26.8721Z"
+                              fill="#00C650"
+                            />
+                            <path
+                              d="M17.9118 32.5752V33.5459H16.915V32.5752H17.9118Z"
+                              fill="white"
+                            />
+                            <path
+                              d="M20.8701 29.5361V32.2749C20.8701 32.6953 20.7567 33.0184 20.5299 33.2442C20.4033 33.3618 20.2545 33.4525 20.0923 33.5109C19.9302 33.5693 19.758 33.5943 19.5861 33.5842C19.3978 33.5944 19.2093 33.5669 19.0316 33.5033C18.854 33.4396 18.6905 33.3412 18.5509 33.2135C18.2958 32.9655 18.1679 32.61 18.167 32.1469H19.1188C19.1188 32.5215 19.2604 32.7082 19.541 32.7082C19.7859 32.7082 19.9077 32.5642 19.9077 32.2775V29.5388L20.8701 29.5361Z"
+                              fill="white"
+                            />
+                            <path
+                              d="M22.4663 32.1389V33.5456H21.5039V29.5361H23.0633C23.5354 29.5361 23.8955 29.6539 24.1435 29.8895C24.269 30.0133 24.367 30.1626 24.4311 30.3274C24.4952 30.4921 24.524 30.6687 24.5155 30.8455C24.5191 31.0785 24.462 31.3083 24.35 31.5122C24.2347 31.7109 24.0633 31.8706 23.8576 31.9708C23.6097 32.0893 23.3375 32.1469 23.0633 32.1389H22.4663ZM23.5359 30.8455C23.5359 30.4899 23.3426 30.3122 22.9561 30.3122H22.4663V31.3562H22.9561C23.3426 31.3597 23.5359 31.1895 23.5359 30.8455Z"
+                              fill="white"
+                            />
+                            <path
+                              d="M28.0862 29.8586C28.4067 30.1013 28.6223 30.4589 28.6885 30.8572H27.6692C27.6002 30.7177 27.4914 30.6021 27.3568 30.5252C27.2052 30.4345 27.0314 30.3883 26.8551 30.3919C26.7182 30.3863 26.5818 30.4111 26.4555 30.4645C26.3292 30.518 26.2161 30.5988 26.1243 30.7012C25.9302 30.9345 25.8313 31.2333 25.8477 31.5372C25.8477 31.9186 25.9443 32.2115 26.1376 32.4159C26.2463 32.5221 26.3758 32.6042 26.5178 32.657C26.6598 32.7098 26.8112 32.7322 26.9623 32.7226C27.1783 32.7266 27.3897 32.6596 27.5646 32.5319C27.7432 32.3976 27.8722 32.2071 27.9313 31.9906H26.7147V31.2932H28.7361V32.2519C28.6589 32.4906 28.5366 32.712 28.3761 32.9039C28.2022 33.1108 27.9858 33.2773 27.742 33.392C27.4663 33.5203 27.1653 33.5841 26.8617 33.5786C26.4923 33.5884 26.127 33.4996 25.8027 33.3213C25.506 33.1532 25.2645 32.9016 25.1077 32.5973C24.9393 32.2678 24.8551 31.9011 24.8628 31.5306C24.8562 31.1623 24.9403 30.7981 25.1077 30.4706C25.2642 30.1669 25.5047 29.9155 25.8 29.7466C26.1196 29.5696 26.4799 29.4808 26.8445 29.4892C27.2876 29.4698 27.7246 29.5997 28.0862 29.8586Z"
+                              fill="white"
+                            />
+                            <path
+                              d="M20.5696 23.6471H14.7225C14.1501 23.6464 13.6014 23.417 13.1966 23.0093C12.7919 22.6017 12.5642 22.0489 12.5635 21.4724V15.5829C12.5642 15.0064 12.7919 14.4536 13.1966 14.0459C13.6014 13.6383 14.1501 13.4089 14.7225 13.4082H20.5696C21.1419 13.4089 21.6905 13.6383 22.095 14.046C22.4996 14.4537 22.727 15.0065 22.7273 15.5829V21.4724C22.727 22.0488 22.4996 22.6015 22.095 23.0093C21.6905 23.417 21.1419 23.6464 20.5696 23.6471ZM14.7225 14.3696C14.4032 14.3699 14.0969 14.4979 13.8711 14.7253C13.6453 14.9528 13.5183 15.2612 13.5179 15.5829V21.4724C13.5183 21.7941 13.6453 22.1025 13.8711 22.3299C14.0969 22.5574 14.4032 22.6854 14.7225 22.6857H20.5696C20.8889 22.6854 21.1949 22.5574 21.4205 22.3299C21.6462 22.1024 21.7729 21.7939 21.7729 21.4724V15.5829C21.7729 15.2613 21.6462 14.9529 21.4205 14.7254C21.1949 14.4979 20.8889 14.3699 20.5696 14.3696H14.7225Z"
+                              fill="#00C650"
+                            />
+                            <path
+                              d="M22.2504 20.3512V21.4713C22.2501 21.9203 22.0728 22.3508 21.7576 22.6683C21.4424 22.9857 21.015 23.1643 20.5692 23.1646H14.7222C14.2763 23.1646 13.8487 22.9862 13.5334 22.6686C13.2181 22.3511 13.041 21.9204 13.041 21.4713V19.5912C13.9769 19.3886 15.4026 19.3245 17.1328 20.0206L18.205 18.9912L18.9357 20.8579C18.9357 20.8579 19.1316 20.1712 19.7644 20.2686C20.3971 20.3659 21.4217 20.7112 21.8599 20.4166C21.978 20.348 22.1167 20.3248 22.2504 20.3512Z"
+                              fill="#00C650"
+                            />
+                            <path
+                              d="M20.2037 16.7859C20.5626 16.7859 20.8537 16.4928 20.8537 16.1312C20.8537 15.7697 20.5626 15.4766 20.2037 15.4766C19.8447 15.4766 19.5537 15.7697 19.5537 16.1312C19.5537 16.4928 19.8447 16.7859 20.2037 16.7859Z"
+                              fill="#00C650"
+                            />
+                          </svg>
+
+                          <div
+                            @click="downloadAttachment(attachment)"
+                            class="ms-4"
+                          >
+                            <div class="text-body-1">
+                              {{ attachment.name || `الملف ${index + 1}` }}
+                            </div>
+                            <div class="text-body-1 me-2">
+                              {{ attachment.size || "0 KB" }}
+                            </div>
+                          </div>
+                        </div>
+                        <div class="d-flex align-center">
+                          <!-- <v-icon
+                            color="primary"
+                            size="small"
+                            class="me-2"
+                            @click="downloadAttachment(attachment)"
+                            >mdi-download</v-icon
+                          > -->
+                          <svg
+                            width="20"
+                            height="21"
+                            viewBox="0 0 20 21"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M14.375 5.75L5.625 14.5M5.625 5.75L14.375 14.5"
+                              stroke="#9EA3A5"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+                    </v-col>
+                  </v-row>
                 </div>
               </v-col>
             </v-row>
@@ -393,7 +522,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 import { useAppStore } from "@/stores/app";
-import LocationPicker from "@/components/maps/LocationPicker.vue";
+import MapDisplay from "@/components/maps/MapDisplay.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -404,7 +533,7 @@ const loading = ref(true);
 const error = ref(null);
 const showRejectDialog = ref(false);
 const rejectionReason = ref("");
-const selectedLocation = ref(null);
+const mapError = ref(null);
 
 // Format date and time
 const formatDateTime = (date) => {
@@ -428,16 +557,6 @@ const getInitials = (firstName, lastName) => {
   }`.toUpperCase();
 };
 
-// Update location when note data is loaded
-const updateLocation = () => {
-  if (note.value?.latitude && note.value?.longitude) {
-    selectedLocation.value = {
-      lat: parseFloat(note.value.latitude),
-      lng: parseFloat(note.value.longitude),
-    };
-  }
-};
-
 // Fetch note details
 const fetchNoteDetails = async () => {
   try {
@@ -445,7 +564,6 @@ const fetchNoteDetails = async () => {
     error.value = null;
     const response = await axios.get(`/reports/${route.params.id}`);
     note.value = response.data.data;
-    updateLocation(); // Update location after fetching note details
   } catch (err) {
     console.error("Error fetching note details:", err);
     error.value = "حدث خطأ أثناء جلب تفاصيل الملاحظة";
@@ -524,6 +642,81 @@ const getStatusText = (status) => {
   return statusMap[status] || "قيد المراجعة";
 };
 
+// Print note information
+const printInfo = () => {
+  // Store current page body
+  const originalBody = document.body.innerHTML;
+
+  // Create print-friendly content
+  let printContent = `
+    <div dir="rtl" style="font-family: Arial, sans-serif; padding: 20px;">
+      <h1 style="text-align: center; margin-bottom: 30px;">تفاصيل الملاحظة</h1>
+
+      <div style="margin-bottom: 20px;">
+        <h2>الوصف</h2>
+        <p style="padding: 10px; background-color: #f5f5f5; border-radius: 8px;">${
+          note.value?.description || "غير متوفر"
+        }</p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h2>معلومات الملاحظة</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px; background-color: #f8f9f9; border-radius: 8px;">
+          <div>
+            <h3>تاريخ ووقت الملاحظة</h3>
+            <p>${formatDate(note.value?.report_date) || "غير متوفر"}</p>
+          </div>
+          <div>
+            <h3>مرسل الملاحظة</h3>
+            <p>${note.value?.report_by?.firstname || ""} ${
+    note.value?.report_by?.lastname || ""
+  }</p>
+            <p>${note.value?.report_by?.email || ""}</p>
+          </div>
+          <div>
+            <h3>موقع الملاحظة</h3>
+            <p>${note.value?.address || "غير متوفر"}</p>
+          </div>
+          <div>
+            <h3>الحالة</h3>
+            <p>${getStatusText(note.value?.status)}</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <h2>الأدلة والشواهد الميدانية</h2>
+        <ul style="padding: 10px; background-color: #f5f5f5; border-radius: 8px;">
+          ${
+            note.value?.attachments
+              ?.map(
+                (attachment) =>
+                  `<li>${
+                    attachment.name ||
+                    `ملف ${Math.random().toString(36).substring(7)}`
+                  }</li>`
+              )
+              .join("") || "<li>لا توجد مرفقات</li>"
+          }
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #666;">
+        تم الطباعة بتاريخ: ${new Date().toLocaleDateString("ar")}
+      </div>
+    </div>
+  `;
+
+  // Replace the body with print content
+  document.body.innerHTML = printContent;
+
+  // Print
+  window.print();
+
+  // Restore original body
+  document.body.innerHTML = originalBody;
+};
+
 // Status text class
 const statusTextClass = computed(() => {
   const classMap = {
@@ -533,6 +726,36 @@ const statusTextClass = computed(() => {
   };
   return classMap[note.value?.status] || "text-warning";
 });
+
+const handleMapError = (error) => {
+  console.error("Map error:", error);
+  mapError.value = "Could not load the map. Please try again later.";
+};
+
+const getFileName = (url) => {
+  if (!url) return "file";
+  const parts = url.split("/");
+  return parts[parts.length - 1];
+};
+
+const downloadAttachment = (attachment) => {
+  try {
+    // Create anchor element
+    const a = document.createElement("a");
+    a.href = attachment.url;
+    a.download = getFileName(attachment.url);
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error("Error downloading attachment:", err);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء تحميل الملف",
+      color: "error",
+    });
+  }
+};
 
 onMounted(() => {
   fetchNoteDetails();
@@ -578,20 +801,44 @@ onMounted(() => {
 
 .attachments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
   margin-top: 1rem;
 }
 
 .attachment-card {
   background-color: white;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
+  cursor: pointer;
 
   &:hover {
     transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(182, 146, 101, 0.3);
+
+    .download-btn {
+      opacity: 1;
+    }
+  }
+
+  .attachment-card-inner {
+    position: relative;
+    height: 100%;
+  }
+
+  .attachment-info {
+    position: relative;
+  }
+
+  .download-btn {
+    position: absolute;
+    right: 4px;
+    top: 0;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
   }
 }
 
