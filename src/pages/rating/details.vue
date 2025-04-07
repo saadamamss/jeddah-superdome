@@ -5,13 +5,14 @@ import axios from "@/plugins/axios";
 import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 import LocationPicker from "@/components/maps/LocationPicker.vue";
 import { format } from "@core/utils/formatters";
+import { printElement } from "@core/utils/helpers";
 
 const route = useRoute();
 const isLoading = ref(true);
 const rating = ref(null);
 const ratingBy = ref(null);
 const ratingId = computed(() => route.params.id);
-const breadcrumbItems = [
+const breadcrumbItems = computed(() => [
   {
     title: "الرئيسية",
     disabled: false,
@@ -20,13 +21,13 @@ const breadcrumbItems = [
   {
     title: "⁠⁠إدارة التقييمات",
     disabled: false,
-    to: "/rating",
+    to: `/rating?location_type=${rating.value?.location?.location_type_id}`,
   },
   {
     title: `التقييم ${ratingId.value}#`,
     disabled: true,
   },
-];
+]);
 
 const fetchRatingDetails = async () => {
   try {
@@ -91,6 +92,7 @@ onMounted(() => {
             height="42"
             elevation="0"
             class="px-4 bg-white rounded-xl"
+            @click="printElement(`rating_${rating.id}`, `تقييم - ${rating.id}`)"
           >
             <div class="d-flex align-center ga-2">
               <span>
@@ -123,7 +125,11 @@ onMounted(() => {
           </VBtn>
         </div>
         <v-container fluid class="px-0 rounded-lg">
-          <v-card elevation="0" class="rounded-lg px-sm-4 bg-light-white">
+          <v-card
+            :id="`rating_${rating.id}`"
+            elevation="0"
+            class="rounded-lg px-sm-4 bg-light-white"
+          >
             <!-- Header -->
             <v-card-title class="pt-4 pb-6">
               <div class="d-flex justify-space-between align-start ga-2">
@@ -152,9 +158,6 @@ onMounted(() => {
                   </span>
                 </div>
                 <div class="d-flex align-center gap-4">
-                  <!-- <span class="text-grey"
-                    >تاريخ التقييم: {{ rating.created_at }}</span
-                  > -->
                   <v-chip
                     v-if="rating.status === 'PENDING'"
                     color="warning"
@@ -193,7 +196,11 @@ onMounted(() => {
                       وزن الاستبانة
                     </h2>
                     <span class="text-body-2 font-weight-medium">
-                      {{ rating?.questionnaire_weight || "-" }}
+                      {{
+                        rating?.questionnaire?.questionnaire_weight != null
+                          ? rating?.questionnaire?.questionnaire_weight
+                          : "-"
+                      }}
                     </span>
                   </div>
                 </div>
@@ -572,6 +579,7 @@ onMounted(() => {
                     rating?.location.longitude
                   "
                   cols="12"
+                  class="no-print"
                 >
                   <div class="mt-4">
                     <div class="d-flex align-start ga-2">
@@ -628,133 +636,13 @@ onMounted(() => {
               </div>
             </v-card-text>
 
-            <hr class="my-4" style="border-color: rgba(248, 249, 249, 0.15)" />
+            <hr
+              class="my-4 no-print"
+              style="border-color: rgba(248, 249, 249, 0.15)"
+            />
 
             <!-- Questionnaire Categories -->
-            <v-card-text>
-              <!-- <div
-                v-for="category in rating.questionnaire
-                  ?.questionnaire_categories"
-                :key="category.id"
-                class="mb-8"
-              >
-                <v-card variant="outlined" class="pa-4">
-                  <h3 class="text-h6 font-weight-bold mb-6 primary--text">
-                    {{ category.title }}
-                  </h3>
-
-                  <div v-if="category.questions?.length" class="questions-list">
-                    <div
-                      v-for="question in category.questions"
-                      :key="question.id"
-                      class="question-item mb-4 pb-4 border-b"
-                    >
-                      <p class="text-body-1 mb-3">{{ question.question }}</p>
-
-                      <div class="answer-section">
-                        <template v-if="question.question_type === 'yes_no'">
-                          <v-chip
-                            :color="
-                              question.answer?.yes_no_value === '1'
-                                ? 'success'
-                                : 'error'
-                            "
-                            size="small"
-                          >
-                            {{
-                              question.answer?.yes_no_value === "1"
-                                ? "نعم"
-                                : "لا"
-                            }}
-                          </v-chip>
-                        </template>
-
-                        <template
-                          v-else-if="question.question_type === 'rating'"
-                        >
-                          <v-rating
-                            :model-value="Number(question.answer?.rating_value)"
-                            readonly
-                            color="warning"
-                            half-increments
-                          ></v-rating>
-                        </template>
-
-                        <template
-                          v-else-if="question.question_type === 'text_input'"
-                        >
-                          <p class="text-body-2 text-grey-darken-1">
-                            {{
-                              question.answer?.text_input_value ||
-                              "لا توجد إجابة"
-                            }}
-                          </p>
-                        </template>
-
-                        <template
-                          v-else-if="question.question_type === 'select'"
-                        >
-                          <p class="text-body-2 text-grey-darken-1">
-                            {{
-                              question.answer?.selected_option ||
-                              "لا توجد إجابة"
-                            }}
-                          </p>
-                        </template>
-
-                        <div class="mt-2 d-flex align-center">
-                          <v-chip
-                            :color="
-                              question.answer?.status === 'PENDING'
-                                ? 'warning'
-                                : 'success'
-                            "
-                            size="x-small"
-                            class="me-2"
-                          >
-                            {{
-                              question.answer?.status === "PENDING"
-                                ? "قيد المراجعة"
-                                : "تمت الموافقة"
-                            }}
-                          </v-chip>
-                          <span
-                            v-if="question.answer?.approved_at"
-                            class="text-caption text-grey"
-                          >
-                            تمت الموافقة في: {{ question.answer.approved_at }}
-                          </span>
-                        </div>
-
-                        <div
-                          v-if="
-                            question.has_upload && question.answer?.upload_urls
-                          "
-                          class="mt-3"
-                        >
-                          <v-btn
-                            v-for="(url, index) in question.answer.upload_urls"
-                            :key="index"
-                            :href="url"
-                            target="_blank"
-                            variant="outlined"
-                            color="primary"
-                            size="small"
-                            class="me-2"
-                            prepend-icon="mdi-file-document-outline"
-                          >
-                            عرض الملف {{ index + 1 }}
-                          </v-btn>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <p v-else class="text-grey text-center py-4">
-                    لا توجد أسئلة في هذا القسم
-                  </p>
-                </v-card>
-              </div> -->
-
+            <v-card-text class="no-print">
               <v-expansion-panels
                 elevation="0"
                 variant="accordion"
