@@ -85,9 +85,14 @@ const formatDate = (date) => {
     style="box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)"
   >
     <v-card-text class="pa-3 pa-sm-4">
-      <div class="d-flex justify-space-between align-center ga-2">
+      <div class="d-flex justify-space-between align-center ga-2 flex-wrap">
         <div>
-          <span class="text-lg text-black font-weight-medium">{{ title }}</span>
+          <h2
+            style="white-space: wrap"
+            class="text-lg text-black font-weight-medium"
+          >
+            {{ title }}
+          </h2>
         </div>
         <v-btn
           size="small"

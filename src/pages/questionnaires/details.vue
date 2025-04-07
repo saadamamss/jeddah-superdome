@@ -174,7 +174,12 @@ onMounted(() => {
                       الفئات والأسئلة
                     </h4>
 
-                    <v-expansion-panels variant="accordion" class="mb-4">
+                    <v-expansion-panels
+                      elevation="0"
+                      variant="accordion"
+                      class="custom-panel mb-4"
+                      model-value="0"
+                    >
                       <v-expansion-panel
                         v-for="(
                           category, categoryIndex
@@ -183,8 +188,8 @@ onMounted(() => {
                         class="mb-3 rounded-lg"
                       >
                         <v-expansion-panel-title>
-                          <div class="d-flex align-center w-100">
-                            <span>{{
+                          <div class="d-flex align-center py-4">
+                            <span style="color: #75797c; font-weight: 300">{{
                               category.title || "فئة " + (categoryIndex + 1)
                             }}</span>
                           </div>
@@ -195,6 +200,7 @@ onMounted(() => {
                               category.questions &&
                               category.questions.length > 0
                             "
+                            class="px-4"
                           >
                             <div
                               v-for="(
@@ -203,16 +209,41 @@ onMounted(() => {
                               :key="questionIndex"
                               class="pa-3 mb-3 border rounded-lg"
                             >
-                              <div
+                              <!-- <div
                                 class="d-flex justify-space-between align-center mb-2"
                               >
                                 <label class="text-subtitle-2"
                                   >سؤال {{ questionIndex + 1 }}</label
                                 >
-                              </div>
+                              </div> -->
+                              <div
+                                class="d-flex align-center justify-space-between"
+                              >
+                                <h2 class="mb-3 text-h6 font-weight-medium">
+                                  {{ question.question }}
+                                </h2>
+                                <div class="d-flex align-start ga-2">
+                                  <div class="pt-1">
+                                    <img
+                                      width="18"
+                                      src="/imgs/icons/question.svg"
+                                      alt="icon"
+                                    />
+                                  </div>
 
-                              <div class="mb-3 font-weight-medium">
-                                {{ question.question }}
+                                  <div class="d-flex flex-column">
+                                    <small class="mb-1"> وزن السؤال </small>
+                                    <span
+                                      class="text-body-2 font-weight-medium"
+                                    >
+                                      {{
+                                        question?.question_weight != null
+                                          ? rating.question_weight
+                                          : "-"
+                                      }}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
 
                               <div class="d-flex gap-3">

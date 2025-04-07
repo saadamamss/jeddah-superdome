@@ -667,11 +667,10 @@ onMounted(() => {
                       v-if="category.questions && category.questions.length > 0"
                       class="px-4"
                     >
-                      <v-card
+                      <div
                         v-for="(question, questionIndex) in category.questions"
                         :key="questionIndex"
-                        class="pa-3 mb-3 border-0 rounded-lg"
-                        elevation="10"
+                        class="pa-3 mb-3 border rounded-lg"
                       >
                         <h2 class="text-h6 mb-3 font-weight-medium">
                           {{ question.question }}
@@ -780,7 +779,7 @@ onMounted(() => {
                             </v-col>
                           </v-row>
                         </div>
-                      </v-card>
+                      </div>
                     </div>
                     <div v-else class="text-center pa-4 text-medium-emphasis">
                       لا توجد أسئلة في هذه الفئة

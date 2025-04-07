@@ -12,84 +12,79 @@ import ShiftsIcon from "./icons/Shifts";
 import QuestionnairesIcon from "./icons/Questionnaires";
 
 export default [
-  {
-    title: "الصفحة الرئيسية",
-    to: { name: "home" },
-    icon: HomeIcon,
-    permission: true,
-  },
-  {
-    title: "إدارة المواقع",
-    to: { name: "sites" },
-    icon: SiteIcon,
-    permission: true,
-  },
-  {
-    title: "إدارة الشركات",
-    to: { name: "companies" },
-    icon: CompanyIcon,
-    permission: true,
-  },
-  {
-    title: "⁠⁠إدارة الفرق الميدانية",
-    to: { name: "teams" },
-    icon: TeamIcon,
-    permission: true,
-  },
+  // {
+  //   title: "الصفحة الرئيسية",
+  //   to: { name: "home" },
+  //   icon: HomeIcon,
+  //   permission: true,
+  // },
+  // {
+  //   title: "إدارة المواقع",
+  //   to: { name: "sites" },
+  //   icon: SiteIcon,
+  //   permission: true,
+  // },
+  // {
+  //   title: "إدارة الشركات",
+  //   to: { name: "companies" },
+  //   icon: CompanyIcon,
+  //   permission: true,
+  // },
+  // {
+  //   title: "⁠⁠إدارة الفرق الميدانية",
+  //   to: { name: "teams" },
+  //   icon: TeamIcon,
+  //   permission: true,
+  // },
   {
     title: "⁠⁠إدارة التقييمات",
     to: { name: "rating" },
     icon: RatingIcon,
     permission: true,
   },
-  {
-    title: "إدارة الباقات (التعاقدات)",
-    to: { name: "contracts" },
-    icon: ContractsIcon,
-    permission: true,
-  },
+  // {
+  //   title: "إدارة الباقات (التعاقدات)",
+  //   to: { name: "contracts" },
+  //   icon: ContractsIcon,
+  //   permission: true,
+  // },
   {
     title: "إدارة الاستبيانات",
     to: { name: "questionnaires" },
     icon: QuestionnairesIcon,
     permission: true,
   },
-  {
-    title: "⁠⁠إدارة المراحل",
-    to: { name: "main-sectors" },
-    icon: PointIcon,
-    permission: true,
-  },
+  // {
+  //   title: "⁠⁠إدارة المراحل",
+  //   to: { name: "main-sectors" },
+  //   icon: PointIcon,
+  //   permission: true,
+  // },
   {
     title: "⁠⁠إدارة الملاحظات",
     to: { name: "notes" },
     icon: NotesIcon,
     permission: true,
   },
-  {
-    title: "إدارة المستخدمين",
-    to: { name: "users" },
-    icon: UsersIcon,
-    permission: true,
-  },
-  {
-    title: "إدارة الأدوار والصلاحيات ",
-    to: { name: "roles" },
-    icon: RolesIcon,
-    permission: true,
-  },
-  {
-    title: "اداره الورديات",
-    to: { name: "shifts" },
-    icon: ShiftsIcon,
-    permission: true,
-  },
   // {
-  //   title: "مثال للاسترشاد",
-  //   to: { name: "temp" },
-  //   icon: HomeIcon,
+  //   title: "إدارة المستخدمين",
+  //   to: { name: "users" },
+  //   icon: UsersIcon,
   //   permission: true,
   // },
+  // {
+  //   title: "إدارة الأدوار والصلاحيات ",
+  //   to: { name: "roles" },
+  //   icon: RolesIcon,
+  //   permission: true,
+  // },
+  // {
+  //   title: "اداره الورديات",
+  //   to: { name: "shifts" },
+  //   icon: ShiftsIcon,
+  //   permission: true,
+  // },
+  // --------------
 
   // {
   //   title: "الإعدادت",

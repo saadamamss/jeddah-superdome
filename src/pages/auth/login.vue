@@ -28,7 +28,8 @@ const loginUser = async () => {
     const { token, user } = await auth.login(formState);
 
     if (token) {
-      location.href = "/";
+      // location.href = "/";
+      location.href = "/rating";
     } else {
       throw new Error("بيانات تسجيل الدخول غير صحيحة");
     }
