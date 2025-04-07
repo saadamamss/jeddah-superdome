@@ -7,10 +7,17 @@ import companyCard from "@/@core/components/widgets/companyCard.vue";
 import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import { format } from "@core/utils/formatters";
+import { printElement } from "@core/utils/helpers";
+
+const router = useRouter();
+const route = useRoute();
 
 const isLoading = ref(true);
 const isExporting = ref(false);
+const isGettingFilters = ref(false);
 const ratings = ref([]);
+const phases = ref([]);
+const contracts = ref([]);
 
 const isDatepickerMenu = ref(false);
 const filters = reactive({
@@ -19,7 +26,7 @@ const filters = reactive({
   status: undefined,
   created_at: undefined,
   imtithal_phase_id: undefined,
-  package: undefined,
+  contract_id: undefined,
 });
 
 const pagination = reactive({
@@ -28,6 +35,10 @@ const pagination = reactive({
   total: 0,
   items_on_page: 0,
 });
+
+const onClearDateFilter = () => {
+  filters.created_at = undefined;
+};
 
 const fetchRatings = async () => {
   try {
@@ -62,7 +73,7 @@ watch(
     filters.status,
     filters.created_at,
     filters.imtithal_phase_id,
-    filters.package,
+    filters.contract_id,
     pagination.page,
     pagination.per_page,
   ],
@@ -71,20 +82,85 @@ watch(
   }
 );
 
+watch(
+  () => [filters.location_type_id],
+  (locationType) => {
+    router.push({ query: { ...route.query, location_type: locationType } });
+  }
+);
+
+const debouncedSearch = ref(null);
+watch(
+  () => filters.search,
+  (newValue) => {
+    if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+    debouncedSearch.value = setTimeout(() => {
+      filters.page = 1; // Reset to first page when searching
+      fetchRatings();
+    }, 500); // 500ms debounce
+  }
+);
+
 const exportData = async () => {
+  // try {
+  //   isExporting.value = true;
+  //   const response = await axios.post("/ratings-export-excel");
+  //   console.log({ response });
+  // } catch (error) {
+  //   console.error("Error fetching ratings:", error);
+  // } finally {
+  //   isExporting.value = false;
+  // }
   try {
     isExporting.value = true;
-    const response = await axios.post("/ratings-export-excel");
-    console.log({ response });
+
+    const response = await axios.post("/ratings-export-excel", {
+      responseType: "blob", // 🔥 Important: ensures binary data is handled correctly
+    });
+
+    console.log(response.data);
+
+    const blob = new Blob([response.data], {
+      type: "application/vnd.ms-excel",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "report.xml");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error("Error fetching ratings:", error);
+    console.error("Download failed:", error);
   } finally {
     isExporting.value = false;
   }
 };
 
+const getFiltersUtilities = async () => {
+  try {
+    isGettingFilters.value = true;
+    const phasesResponse = await axios.get("/reports?page=-1");
+    phases.value = phasesResponse?.data?.data || [];
+
+    const contractsResponse = await axios.get("/contracts?page=-1");
+    contracts.value = contractsResponse?.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching ratings:", error);
+  } finally {
+    isGettingFilters.value = false;
+  }
+};
+
 onMounted(() => {
+  if (route.query.location_type) {
+    filters.location_type_id = route.query.location_type;
+  }
+
   fetchRatings();
+  getFiltersUtilities();
 });
 </script>
 
@@ -186,7 +262,6 @@ onMounted(() => {
                   <v-text-field
                     :value="format(filters.created_at, 'YYYY-MM-DD')"
                     placeholder="التاريخ"
-                    readonly
                     v-bind="props"
                     min-width="180"
                     height="50"
@@ -195,6 +270,8 @@ onMounted(() => {
                     variant="filled"
                     bg-color="#F8F9F9"
                     class="v-filter-input"
+                    clearable
+                    @click:clear="onClearDateFilter"
                   ></v-text-field>
                   <!-- prepend-inner-icon="mdi-calendar" -->
                 </template>
@@ -210,20 +287,26 @@ onMounted(() => {
 
               <CustomVSelect
                 v-model="filters.imtithal_phase_id"
-                :items="[]"
+                :items="phases"
                 min-width="140"
                 max-width="200"
                 :return-object="false"
                 placeholder="المرحلة"
+                :loading="isGettingFilters"
+                item-title="id"
+                item-value="id"
               />
 
               <CustomVSelect
-                v-model="filters.package"
-                :items="[]"
+                v-model="filters.contract_id"
+                :items="contracts"
                 min-width="140"
                 max-width="200"
                 :return-object="false"
                 placeholder="الباقة"
+                :loading="isGettingFilters"
+                item-title="name"
+                item-value="id"
               />
 
               <CustomVSelect
@@ -246,7 +329,7 @@ onMounted(() => {
                 max-width="200"
                 :return-object="false"
                 placeholder="الحالة"
-                @update:modelValue="fetchRatings()"
+                :loading="isGettingFilters"
               />
 
               <VBtn
@@ -345,7 +428,10 @@ onMounted(() => {
               md="6"
               class="pa-3"
             >
-              <v-card class="h-100 pa-4 pa-sm-6 rounded-lg">
+              <v-card
+                :id="`rating_${rating.id}`"
+                class="h-100 pa-4 pa-sm-6 rounded-lg"
+              >
                 <v-card-title class="pa-0">
                   <div class="d-flex justify-space-between align-start ga-2">
                     <div>
@@ -387,7 +473,7 @@ onMounted(() => {
                         variant="outlined"
                         icon
                         elevation="0"
-                        class="bg-white"
+                        class="bg-white no-print"
                         size="small"
                       >
                         <img
@@ -400,8 +486,14 @@ onMounted(() => {
                         variant="outlined"
                         icon
                         elevation="0"
-                        class="bg-white"
+                        class="bg-white no-print"
                         size="small"
+                        @click="
+                          printElement(
+                            `rating_${rating.id}`,
+                            `تقييم - ${rating.id}`
+                          )
+                        "
                       >
                         <img
                           width="22"
