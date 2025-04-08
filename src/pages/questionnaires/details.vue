@@ -238,7 +238,7 @@ onMounted(() => {
                                     >
                                       {{
                                         question?.question_weight != null
-                                          ? rating.question_weight
+                                          ? question.question_weight
                                           : "-"
                                       }}
                                     </span>
