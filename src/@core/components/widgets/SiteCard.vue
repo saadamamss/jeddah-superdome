@@ -47,9 +47,37 @@
                 />
               </svg>
             </span>
-            <span class="mt-n2 text-truncate">{{ name }}</span>
+            <span class="mt-n2 text-truncate" style="max-width: 200px">{{
+              name
+            }}</span>
           </div>
 
+          <!-- open dialog have map take lat and long latitude and longitude -->
+          <button @click="openMapDialog">
+            <svg
+              width="33"
+              height="32"
+              viewBox="0 0 33 32"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0.666992 16C0.666992 7.16344 7.83044 0 16.667 0C25.5035 0 32.667 7.16344 32.667 16C32.667 24.8366 25.5035 32 16.667 32C7.83044 32 0.666992 24.8366 0.666992 16Z"
+                fill="#F9F9F9"
+              />
+              <path
+                opacity="0.4"
+                d="M9.5 15.2839C9.5 11.7397 12.4839 8.83337 16.002 8.83337C19.2879 8.83337 22.1078 11.3688 22.4657 14.5912C22.4878 14.791 22.4989 14.8908 22.4376 14.9365C22.3763 14.9822 22.2764 14.9398 22.0768 14.8551C21.5379 14.6264 20.9488 14.5 20.3366 14.5C19.8496 14.5 19.3773 14.58 18.9333 14.7278C18.7882 14.7761 18.7156 14.8002 18.6659 14.775C18.6162 14.7497 18.5922 14.6743 18.5442 14.5236C18.2013 13.4467 17.1928 12.6667 16.002 12.6667C14.5288 12.6667 13.3345 13.8606 13.3345 15.3334C13.3345 16.676 14.3271 17.7869 15.6186 17.9727C15.774 17.9951 15.8517 18.0062 15.8848 18.0507C15.9179 18.0953 15.9066 18.1704 15.884 18.3208C15.8519 18.5343 15.8352 18.7529 15.8352 18.9753C15.8352 20.264 16.3878 21.3008 17.0601 22.0825C17.1254 22.1584 17.1924 22.2326 17.2606 22.3049C17.3688 22.4196 17.4229 22.4769 17.415 22.5393C17.4072 22.6017 17.343 22.6423 17.2145 22.7236C17.103 22.7942 16.9918 22.8633 16.8812 22.931L16.8737 22.9356L16.866 22.9399C16.6024 23.0887 16.3047 23.1667 16.002 23.1667C15.6992 23.1667 15.4015 23.0887 15.1379 22.9399L15.1291 22.935L15.1205 22.9296C13.8135 22.1208 12.4175 21.1152 11.3452 19.8684C10.2681 18.6161 9.5 17.0989 9.5 15.2839Z"
+                fill="#B69265"
+              />
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M20.333 15.5C18.4395 15.5 16.833 17.062 16.833 18.9753C16.833 19.9589 17.2506 20.7732 17.8157 21.4305C18.3762 22.0824 19.0991 22.601 19.7608 23.0107L19.7694 23.016L19.7782 23.021C19.9475 23.1166 20.1387 23.1667 20.333 23.1667C20.5273 23.1667 20.7185 23.1166 20.8878 23.021L20.8955 23.0166L20.903 23.0121C21.5683 22.6049 22.2914 22.0845 22.8517 21.4306C23.4163 20.7718 23.833 19.9558 23.833 18.9753C23.833 17.062 22.2265 15.5 20.333 15.5ZM20.327 17.6667C19.594 17.6667 18.9997 18.2636 18.9997 19C18.9997 19.7364 19.594 20.3333 20.327 20.3333H20.339C21.0721 20.3333 21.6663 19.7364 21.6663 19C21.6663 18.2636 21.0721 17.6667 20.339 17.6667H20.327Z"
+                fill="#B69265"
+              />
+            </svg>
+          </button>
           <!-- <div class="d-flex align-center ga-2 flex-shrink-0">
             <v-btn
               :to="`/sites/housing-details?siteId=${siteId}`"
@@ -151,10 +179,32 @@
       </div>
     </v-card-text>
   </v-card>
+
+  <!-- Map Dialog -->
+  <v-dialog v-model="mapDialog" max-width="800">
+    <v-card>
+      <v-card-title class="d-flex justify-space-between align-center pa-4">
+        <span>موقع {{ name }}</span>
+        <v-btn icon @click="mapDialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-card-title>
+      <v-card-text class="pa-0">
+        <MapDisplay
+          :latitude="latitude"
+          :longitude="longitude"
+          :readonly="true"
+          height="500px"
+          @error="handleMapError"
+        />
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, defineEmits, ref } from "vue";
+import MapDisplay from "@/components/maps/MapDisplay.vue";
 
 const props = defineProps({
   siteId: {
@@ -188,9 +238,31 @@ const props = defineProps({
     type: String,
     default: "active",
   },
+  latitude: {
+    type: Number,
+    required: true,
+  },
+  longitude: {
+    type: Number,
+    required: true,
+  },
 });
 
 const emit = defineEmits(["update"]);
+
+// Dialog state
+const mapDialog = ref(false);
+
+// Open map dialog
+const openMapDialog = () => {
+  mapDialog.value = true;
+};
+
+// Handle map loading errors
+const handleMapError = (error) => {
+  console.error("Map loading error:", error);
+  // You can add error handling here, such as displaying a notification
+};
 </script>
 
 <style lang="scss" scoped>

@@ -18,12 +18,12 @@ export default [
   //   icon: HomeIcon,
   //   permission: true,
   // },
-  // {
-  //   title: "إدارة المواقع",
-  //   to: { name: "sites" },
-  //   icon: SiteIcon,
-  //   permission: true,
-  // },
+  {
+    title: "إدارة المواقع",
+    to: { name: "sites" },
+    icon: SiteIcon,
+    permission: true,
+  },
   // {
   //   title: "إدارة الشركات",
   //   to: { name: "companies" },
