@@ -102,34 +102,34 @@ watch(
 );
 
 const exportData = async () => {
-  // try {
-  //   isExporting.value = true;
-  //   const response = await axios.post("/ratings-export-excel");
-  //   console.log({ response });
-  // } catch (error) {
-  //   console.error("Error fetching ratings:", error);
-  // } finally {
-  //   isExporting.value = false;
-  // }
   try {
     isExporting.value = true;
 
-    const response = await axios.post("/ratings-export-excel", {
-      responseType: "blob", // 🔥 Important: ensures binary data is handled correctly
-    });
+    const response = await axios.post(
+      "/ratings-export-excel",
+      {},
+      {
+        responseType: "blob", // Important to receive binary data
+      }
+    );
 
-    console.log(response.data);
+    const url = window.URL.createObjectURL(new Blob([response.data]));
 
-    const blob = new Blob([response.data], {
-      type: "application/vnd.ms-excel",
-    });
-
-    const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "report.xml");
+
+    // Optional: Get file name from headers
+    const disposition = response.headers["content-disposition"];
+    let fileName = "التقييمات.xlsx";
+    if (disposition && disposition.includes("filename=")) {
+      fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
+    }
+
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
+
+    // Clean up
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
