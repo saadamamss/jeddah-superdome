@@ -105,41 +105,33 @@ const exportData = async () => {
   try {
     isExporting.value = true;
 
-    axios
-      .post(
-        "/ratings-export-excel",
-        {},
-        {
-          responseType: "blob", // Important to receive binary data
-        }
-      )
-      .then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+    const response = await axios.post(
+      "/ratings-export-excel",
+      {},
+      {
+        responseType: "blob", // Important to receive binary data
+      }
+    );
 
-        const link = document.createElement("a");
-        link.href = url;
+    const url = window.URL.createObjectURL(new Blob([response.data]));
 
-        // Optional: Get file name from headers
-        const disposition = response.headers["content-disposition"];
-        let fileName = "التقييمات.xlsx";
-        if (disposition && disposition.includes("filename=")) {
-          fileName = disposition
-            .split("filename=")[1]
-            .replace(/['"]/g, "")
-            .trim();
-        }
+    const link = document.createElement("a");
+    link.href = url;
 
-        link.setAttribute("download", fileName);
-        document.body.appendChild(link);
-        link.click();
+    // Optional: Get file name from headers
+    const disposition = response.headers["content-disposition"];
+    let fileName = "التقييمات.xlsx";
+    if (disposition && disposition.includes("filename=")) {
+      fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
+    }
 
-        // Clean up
-        link.remove();
-        window.URL.revokeObjectURL(url);
-      })
-      .catch((error) => {
-        console.error("Download failed:", error);
-      });
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    link.remove();
+    window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Download failed:", error);
   } finally {
