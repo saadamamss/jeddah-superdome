@@ -260,7 +260,7 @@ const formatDate = (date) => {
           }}</span>
         </div>
 
-        <div class="d-flex align-center mb-2">
+        <!-- <div class="d-flex align-center mb-2">
           <svg
             width="1rem"
             height="1rem"
@@ -296,7 +296,7 @@ const formatDate = (date) => {
           <span class="text-body-2 text-grey-darken-1">{{
             questionnaire?.company?.name || "-"
           }}</span>
-        </div>
+        </div> -->
       </div>
 
       <!-- <div class="d-flex align-center justify-space-between mt-4">
