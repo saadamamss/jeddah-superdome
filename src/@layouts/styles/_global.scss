@@ -149,3 +149,8 @@ ul {
 .v-card--variant-outlined {
   border: 0px solid rgba(249, 249, 249, 1) !important;
 }
+
+.v-date-picker-header__content,
+.v-date-picker-header {
+  display: none;
+}
