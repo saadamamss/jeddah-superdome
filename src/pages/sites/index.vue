@@ -599,7 +599,7 @@ const exportData = async () => {
   try {
     isExporting.value = true;
 
-    const response = await axios.post("/locations-export-excel", {
+    const response = await axios.post("/locations-export", {
       responseType: "blob", // Important: ensures binary data is handled correctly
     });
 

@@ -27,6 +27,7 @@ import UserDetailsPage from "@/pages/users/user-details";
 import NotFoundPage from "@/pages/NotFound";
 import ShiftsView from "@/views/shifts/ShiftsView.vue";
 import QuestionnairesPage from "@/pages/questionnaires/index.vue";
+import AttendancePage from "@/pages/attendance/index.vue";
 // import TempPage from "@/pages/temp";
 
 export default [
@@ -218,6 +219,14 @@ export default [
         path: "/shifts",
         name: "shifts",
         component: ShiftsView,
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/attendance",
+        name: "attendance",
+        component: AttendancePage,
         meta: {
           requiresAuth: true,
         },

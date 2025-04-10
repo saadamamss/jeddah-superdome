@@ -10,6 +10,7 @@ import ContractsIcon from "./icons/Contracts";
 import CompanyIcon from "./icons/Company";
 import ShiftsIcon from "./icons/Shifts";
 import QuestionnairesIcon from "./icons/Questionnaires";
+import AttendanceIcon from "./icons/Attendance";
 
 export default [
   // {
@@ -64,6 +65,12 @@ export default [
     title: "⁠⁠إدارة الملاحظات",
     to: { name: "notes" },
     icon: NotesIcon,
+    permission: true,
+  },
+  {
+    title: "سجل الحضور و الإنصراف",
+    to: { name: "attendance" },
+    icon: AttendanceIcon,
     permission: true,
   },
   // {
