@@ -193,7 +193,7 @@ onMounted(() => {
 
                   <div>
                     <h2 class="text-body-1 text-medium-emphasis mb-1">
-                      وزن الاستبانة
+                      المجموع الكلي للاستبانة
                     </h2>
                     <span class="text-body-2 font-weight-medium">
                       {{
