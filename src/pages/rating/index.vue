@@ -3,8 +3,6 @@
 import { ref, watch, onMounted } from "vue";
 import axios from "@/plugins/axios";
 import Pagination from "@/@core/components/Pagination";
-import companyCard from "@/@core/components/widgets/companyCard.vue";
-import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import { format } from "@core/utils/formatters";
 import { printElement } from "@core/utils/helpers";
