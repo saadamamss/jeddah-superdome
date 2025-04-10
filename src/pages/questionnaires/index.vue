@@ -340,6 +340,7 @@ onMounted(() => {
                 class="pa-3"
               >
                 <questionnaireWidget
+                  :questionnaire="questionnaire"
                   :id="questionnaire.id"
                   :title="questionnaire.title"
                   :contract="questionnaire.contract"
