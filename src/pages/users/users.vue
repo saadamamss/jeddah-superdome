@@ -64,8 +64,8 @@ const editUserForm = ref({
 
 // Filter form data
 const filterForm = ref({
-  role: "مشرف", // Default role
-  district: "العزيزية", // Default district
+  role_id: null,
+  district: "العزيزية",
 });
 
 // Available roles for selection
@@ -126,9 +126,13 @@ const fetchUsers = async () => {
       page: currentPage.value.toString(),
       per_page: perPage.value.toString(),
       search: search.value,
-      role: filterForm.value.role,
       district: filterForm.value.district,
     });
+
+    // Only add role_id to params if it's not null
+    if (filterForm.value.role_id !== null) {
+      queryParams.append("role_id", filterForm.value.role_id.toString());
+    }
 
     const response = await axios.get(`/users?${queryParams.toString()}`);
     if (response.data?.data) {
@@ -336,6 +340,16 @@ const applyFilter = async () => {
   filterDialog.value = false;
   currentPage.value = 1;
   await fetchUsers();
+};
+
+// Add reset filter function
+const resetFilter = () => {
+  filterForm.value = {
+    role_id: null,
+    district: "العزيزية",
+  };
+  filterDialog.value = false;
+  fetchUsers();
 };
 
 onMounted(() => {
@@ -776,17 +790,13 @@ onMounted(() => {
             <v-row class="">
               <v-col cols="12" class="bg-gray-1 mt-4">
                 <label class="mb-2 d-block">فلترة حسب الدور</label>
-                <v-radio-group v-model="filterForm.role" class="mt-2">
+                <v-radio-group v-model="filterForm.role_id" class="mt-2">
                   <div class="d-flex flex-row">
                     <v-radio
-                      label="مشرف"
-                      value="مشرف"
-                      style="width: 50%"
-                      class="mx-0"
-                    ></v-radio>
-                    <v-radio
-                      label="مراقب"
-                      value="مراقب"
+                      v-for="role in roles"
+                      :key="role.id"
+                      :label="role.title"
+                      :value="role.id"
                       style="width: 50%"
                       class="mx-0"
                     ></v-radio>
@@ -818,9 +828,9 @@ onMounted(() => {
             variant="text"
             color="error"
             class="bg-gray-1 w-50"
-            @click="filterDialog = false"
+            @click="resetFilter"
           >
-            إلغاء
+            إعادة تعيين
           </v-btn>
           <v-btn class="bg-primary w-50 text-white" @click="applyFilter">
             تطبيق الفلترة
