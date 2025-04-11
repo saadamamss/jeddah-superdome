@@ -608,7 +608,10 @@ onMounted(() => {
                 <label class="mb-2 d-block">الجنس</label>
                 <v-select
                   v-model="newUserForm.gender"
-                  :items="['male', 'female']"
+                  :items="[
+                    { title: 'ذكر', value: 'male' },
+                    { title: 'أنثى', value: 'female' },
+                  ]"
                   :rules="[rules.required]"
                   required
                 ></v-select>
@@ -662,7 +665,12 @@ onMounted(() => {
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn class="bg-red" color="error" @click="userDialog = false">
+          <v-btn
+            type="button"
+            class="bg-red"
+            color="error"
+            @click="userDialog = false"
+          >
             إلغاء
           </v-btn>
           <v-btn
