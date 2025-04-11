@@ -140,7 +140,7 @@ const exportData = async () => {
 const getFiltersUtilities = async () => {
   try {
     isGettingFilters.value = true;
-    const phasesResponse = await axios.get("/reports?page=-1");
+    const phasesResponse = await axios.get("/phases?page=-1");
     phases.value = phasesResponse?.data?.data || [];
 
     const contractsResponse = await axios.get("/contracts?page=-1");
@@ -291,7 +291,7 @@ onMounted(() => {
                 :return-object="false"
                 placeholder="المرحلة"
                 :loading="isGettingFilters"
-                item-title="id"
+                item-title="title"
                 item-value="id"
               />
 
