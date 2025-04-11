@@ -26,8 +26,8 @@ const filterDialog = ref(false);
 const userDetailsDialog = ref(false);
 const userStatistics = ref(null);
 
-// Form data for new/edit user
-const userForm = ref({
+// Form data for new user
+const newUserForm = ref({
   firstname: "",
   secondname: "",
   thirdname: "",
@@ -45,10 +45,27 @@ const userForm = ref({
   personal_image: "",
 });
 
+// Form data for edit user
+const editUserForm = ref({
+  firstname: "",
+  secondname: "",
+  thirdname: "",
+  lastname: "",
+  email: "",
+  phone: "",
+  role_id: null,
+  city: "",
+  blood_type: "",
+  gender: "",
+  nationality: "",
+  sa_id: "",
+  personal_image: "",
+});
+
 // Filter form data
 const filterForm = ref({
-  role: "مشرف", // Default role
-  district: "العزيزية", // Default district
+  role_id: null,
+  district: "العزيزية",
 });
 
 // Available roles for selection
@@ -73,6 +90,34 @@ const districts = [
   "الزاهر",
 ];
 
+// Add validation rules
+const rules = {
+  required: (v) => !!v || "هذا الحقل مطلوب",
+  email: (v) => {
+    if (!v) return true;
+    return /.+@.+\..+/.test(v) || "البريد الإلكتروني غير صالح";
+  },
+  phone: (v) => {
+    if (!v) return true;
+    return /^[0-9]{10}$/.test(v) || "رقم الهاتف يجب أن يكون 10 أرقام";
+  },
+  password: (v) => {
+    if (!v) return true;
+    return v.length >= 8 || "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+  },
+  passwordMatch: (v) => {
+    if (!v) return true;
+    return v === newUserForm.value.password || "كلمة المرور غير متطابقة";
+  },
+  saId: (v) => {
+    if (!v) return true;
+    return /^[0-9]{10}$/.test(v) || "رقم الهوية يجب أن يكون 10 أرقام";
+  },
+};
+
+// Add form ref
+const addUserForm = ref(null);
+
 // Fetch users with pagination and search
 const fetchUsers = async () => {
   try {
@@ -81,9 +126,13 @@ const fetchUsers = async () => {
       page: currentPage.value.toString(),
       per_page: perPage.value.toString(),
       search: search.value,
-      role: filterForm.value.role,
       district: filterForm.value.district,
     });
+
+    // Only add role_id to params if it's not null
+    if (filterForm.value.role_id !== null) {
+      queryParams.append("role_id", filterForm.value.role_id.toString());
+    }
 
     const response = await axios.get(`/users?${queryParams.toString()}`);
     if (response.data?.data) {
@@ -109,18 +158,28 @@ const fetchUsers = async () => {
   }
 };
 
-// Add new user
+// Modify addUser function to use newUserForm
 const addUser = async () => {
+  const { valid } = await addUserForm.value.validate();
+
+  if (!valid) {
+    appStore.showSnackbar({
+      message: "يرجى التحقق من صحة البيانات المدخلة",
+      color: "error",
+    });
+    return;
+  }
+
   try {
     loading.value = true;
-    const response = await axios.post("/users", userForm.value);
+    const response = await axios.post("/users", newUserForm.value);
 
     if (response.data) {
       appStore.showSnackbar({
         message: "تم إضافة المستخدم بنجاح",
         color: "success",
       });
-      resetForm();
+      resetNewUserForm();
       userDialog.value = false;
       await fetchUsers();
     }
@@ -157,13 +216,13 @@ const getUserDetails = async (userId) => {
   }
 };
 
-// Update user
+// Modify updateUser function to use editUserForm
 const updateUser = async () => {
   try {
     loading.value = true;
     const response = await axios.put(
       `/users/${selectedUser.value.id}`,
-      userForm.value
+      editUserForm.value
     );
 
     if (response.data) {
@@ -221,8 +280,8 @@ const deleteUser = async () => {
 };
 
 // Helper functions
-const resetForm = () => {
-  userForm.value = {
+const resetNewUserForm = () => {
+  newUserForm.value = {
     firstname: "",
     secondname: "",
     thirdname: "",
@@ -244,7 +303,7 @@ const resetForm = () => {
 const countryCode = ref("+966");
 
 const populateEditForm = (user) => {
-  userForm.value = {
+  editUserForm.value = {
     firstname: user.firstname || "",
     secondname: user.secondname || "",
     thirdname: user.thirdname || "",
@@ -281,6 +340,16 @@ const applyFilter = async () => {
   filterDialog.value = false;
   currentPage.value = 1;
   await fetchUsers();
+};
+
+// Add reset filter function
+const resetFilter = () => {
+  filterForm.value = {
+    role_id: null,
+    district: "العزيزية",
+  };
+  filterDialog.value = false;
+  fetchUsers();
 };
 
 onMounted(() => {
@@ -457,100 +526,134 @@ onMounted(() => {
       <v-card class="pa-4">
         <v-card-title class="text-h5 mb-4">إضافة مستخدم جديد</v-card-title>
         <v-card-text>
-          <v-form @submit.prevent="addUser">
+          <v-form ref="addUserForm" @submit.prevent="addUser">
             <v-row>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">الاسم الأول</label>
                 <v-text-field
-                  v-model="userForm.firstname"
+                  v-model="newUserForm.firstname"
+                  :rules="[rules.required]"
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">الاسم الثاني</label>
-                <v-text-field v-model="userForm.secondname"></v-text-field>
+                <v-text-field v-model="newUserForm.secondname"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">الاسم الثالث</label>
-                <v-text-field v-model="userForm.thirdname"></v-text-field>
+                <v-text-field v-model="newUserForm.thirdname"></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">اسم العائلة</label>
                 <v-text-field
-                  v-model="userForm.lastname"
+                  v-model="newUserForm.lastname"
+                  :rules="[rules.required]"
                   required
                 ></v-text-field>
               </v-col>
-              <!-- <v-col cols="12" sm="6">
-                <label class="mb-2 d-block">البريد الإلكتروني</label>
-                <v-text-field
-                  v-model="userForm.email"
-                  type="email"
-                  required
-                ></v-text-field>
-              </v-col> -->
-              <v-col cols="12" sm="6">
-                <label class="mb-2 d-block">رقم الهاتف</label>
-                <v-text-field v-model="userForm.phone" required></v-text-field>
+              <v-col cols="12">
+                <label class="mb-2 d-block">رقم الجوال</label>
+                <div class="d-flex gap-2">
+                  <v-text-field
+                    v-model="newUserForm.phone"
+                    :rules="[rules.required, rules.phone]"
+                    placeholder="00"
+                    variant="outlined"
+                    density="compact"
+                    bg-color="white"
+                    hide-details
+                    style="flex: 1"
+                  ></v-text-field>
+                  <v-select
+                    v-model="countryCode"
+                    :items="['+966']"
+                    variant="outlined"
+                    density="compact"
+                    bg-color="white"
+                    hide-details
+                    style="max-width: 120px"
+                  ></v-select>
+                </div>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">الدور</label>
                 <v-select
-                  v-model="userForm.role_id"
+                  v-model="newUserForm.role_id"
                   :items="roles"
                   item-title="title"
                   item-value="id"
+                  :rules="[rules.required]"
                   required
                 ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">المدينة</label>
-                <v-text-field v-model="userForm.city" required></v-text-field>
+                <v-text-field
+                  v-model="newUserForm.city"
+                  :rules="[rules.required]"
+                  required
+                ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">فصيلة الدم</label>
                 <v-select
-                  v-model="userForm.blood_type"
+                  v-model="newUserForm.blood_type"
                   :items="bloodTypes"
+                  :rules="[rules.required]"
                   required
                 ></v-select>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
                 <label class="mb-2 d-block">الجنس</label>
                 <v-select
-                  v-model="userForm.gender"
+                  v-model="newUserForm.gender"
                   :items="['male', 'female']"
+                  :rules="[rules.required]"
                   required
                 ></v-select>
               </v-col>
               <v-col cols="12">
                 <label class="mb-2 d-block">الجنسية</label>
                 <v-text-field
-                  v-model="userForm.nationality"
+                  v-model="newUserForm.nationality"
+                  :rules="[rules.required]"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
                 <label class="mb-2 d-block">البريد الإلكتروني</label>
                 <v-text-field
-                  v-model="userForm.email"
+                  v-model="newUserForm.email"
                   type="email"
+                  :rules="[rules.required, rules.email]"
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" v-if="!selectedUser">
+              <v-col cols="12">
+                <label class="mb-2 d-block">رقم الهوية</label>
+                <v-text-field
+                  v-model="newUserForm.sa_id"
+                  :rules="[rules.required, rules.saId]"
+                  placeholder="مثال: 1234567890"
+                  required
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
                 <label class="mb-2 d-block">كلمة المرور</label>
                 <v-text-field
-                  v-model="userForm.password"
+                  v-model="newUserForm.password"
                   type="password"
+                  :rules="[rules.required, rules.password]"
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" v-if="!selectedUser">
+              <v-col cols="12">
                 <label class="mb-2 d-block">تأكيد كلمة المرور</label>
                 <v-text-field
-                  v-model="userForm.password_confirmation"
+                  v-model="newUserForm.password_confirmation"
                   type="password"
+                  :rules="[rules.required, rules.passwordMatch]"
                   required
                 ></v-text-field>
               </v-col>
@@ -583,33 +686,33 @@ onMounted(() => {
             <v-row>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="userForm.firstname"
+                  v-model="editUserForm.firstname"
                   label="الاسم الأول"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="userForm.secondname"
+                  v-model="editUserForm.secondname"
                   label="الاسم الثاني"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="userForm.thirdname"
+                  v-model="editUserForm.thirdname"
                   label="الاسم الثالث"
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="userForm.lastname"
+                  v-model="editUserForm.lastname"
                   label="اسم العائلة"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="userForm.email"
+                  v-model="editUserForm.email"
                   label="البريد الإلكتروني"
                   type="email"
                   required
@@ -617,14 +720,14 @@ onMounted(() => {
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="userForm.phone"
+                  v-model="editUserForm.phone"
                   label="رقم الهاتف"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="userForm.role_id"
+                  v-model="editUserForm.role_id"
                   :items="roles"
                   item-title="title"
                   item-value="id"
@@ -634,14 +737,14 @@ onMounted(() => {
               </v-col>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="userForm.city"
+                  v-model="editUserForm.city"
                   label="المدينة"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="userForm.blood_type"
+                  v-model="editUserForm.blood_type"
                   :items="bloodTypes"
                   label="فصيلة الدم"
                   required
@@ -649,7 +752,7 @@ onMounted(() => {
               </v-col>
               <v-col cols="12" sm="6">
                 <v-select
-                  v-model="userForm.gender"
+                  v-model="editUserForm.gender"
                   :items="['male', 'female']"
                   label="الجنس"
                   required
@@ -657,14 +760,14 @@ onMounted(() => {
               </v-col>
               <v-col cols="12">
                 <v-text-field
-                  v-model="userForm.nationality"
+                  v-model="editUserForm.nationality"
                   label="الجنسية"
                   required
                 ></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-text-field
-                  v-model="userForm.sa_id"
+                  v-model="editUserForm.sa_id"
                   label="رقم الهوية"
                   required
                 ></v-text-field>
@@ -677,7 +780,12 @@ onMounted(() => {
           <v-btn color="error" variant="text" @click="editUserDialog = false">
             إلغاء
           </v-btn>
-          <v-btn color="primary" :loading="loading" @click="updateUser">
+          <v-btn
+            color="primary"
+            class="text-white"
+            :loading="loading"
+            @click="updateUser"
+          >
             حفظ
           </v-btn>
         </v-card-actions>
@@ -726,17 +834,13 @@ onMounted(() => {
             <v-row class="">
               <v-col cols="12" class="bg-gray-1 mt-4">
                 <label class="mb-2 d-block">فلترة حسب الدور</label>
-                <v-radio-group v-model="filterForm.role" class="mt-2">
+                <v-radio-group v-model="filterForm.role_id" class="mt-2">
                   <div class="d-flex flex-row">
                     <v-radio
-                      label="مشرف"
-                      value="مشرف"
-                      style="width: 50%"
-                      class="mx-0"
-                    ></v-radio>
-                    <v-radio
-                      label="مراقب"
-                      value="مراقب"
+                      v-for="role in roles"
+                      :key="role.id"
+                      :label="role.title"
+                      :value="role.id"
                       style="width: 50%"
                       class="mx-0"
                     ></v-radio>
@@ -768,9 +872,9 @@ onMounted(() => {
             variant="text"
             color="error"
             class="bg-gray-1 w-50"
-            @click="filterDialog = false"
+            @click="resetFilter"
           >
-            إلغاء
+            إعادة تعيين
           </v-btn>
           <v-btn class="bg-primary w-50 text-white" @click="applyFilter">
             تطبيق الفلترة
@@ -799,7 +903,7 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">اسم المستخدم</label>
                 <v-text-field
-                  v-model="userForm.firstname"
+                  v-model="editUserForm.firstname"
                   placeholder="محمد القحطاني عبدالله"
                   variant="outlined"
                   density="compact"
@@ -811,7 +915,7 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">رقم الهوية</label>
                 <v-text-field
-                  v-model="userForm.sa_id"
+                  v-model="editUserForm.sa_id"
                   placeholder="6127782187"
                   variant="outlined"
                   density="compact"
@@ -824,7 +928,7 @@ onMounted(() => {
                 <label class="mb-2 d-block">رقم الجوال</label>
                 <div class="d-flex gap-2">
                   <v-text-field
-                    v-model="userForm.phone"
+                    v-model="editUserForm.phone"
                     placeholder="00"
                     variant="outlined"
                     density="compact"
@@ -847,7 +951,7 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">البريد الإلكتروني</label>
                 <v-text-field
-                  v-model="userForm.email"
+                  v-model="editUserForm.email"
                   type="email"
                   placeholder="البريد الإلكتروني"
                   variant="outlined"
@@ -860,7 +964,7 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">كلمة المرور</label>
                 <v-text-field
-                  v-model="userForm.password"
+                  v-model="editUserForm.password"
                   type="password"
                   placeholder="***********"
                   variant="outlined"
@@ -873,7 +977,7 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">دور المستخدم</label>
                 <v-select
-                  v-model="userForm.role_id"
+                  v-model="editUserForm.role_id"
                   :items="roles"
                   item-title="title"
                   item-value="id"
@@ -888,7 +992,7 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">دور النظام</label>
                 <v-select
-                  v-model="userForm.system_role"
+                  v-model="editUserForm.system_role"
                   :items="['مشرف', 'مستخدم']"
                   placeholder="اختر دور النظام"
                   variant="outlined"
