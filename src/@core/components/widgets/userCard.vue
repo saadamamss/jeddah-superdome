@@ -1,7 +1,6 @@
 <script setup>
-import router from "@/router";
 import UserWidget from "./UserWidget.vue";
-
+import MapDisplay from "@/components/maps/MapDisplay.vue";
 const props = defineProps({
   user: {
     type: Object,
@@ -13,22 +12,110 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["delete"]);
+const mapDialog = ref(false);
+const openMapDialog = () => {
+  mapDialog.value = true;
+};
+
+const emit = defineEmits(["delete", "edit"]);
 
 const handleDelete = () => {
   emit("delete", props.user.id);
+};
+
+const handleEdit = () => {
+  emit("edit", props.user.id);
 };
 </script>
 
 <template>
   <v-card elevation="0" class="user-card rounded-lg">
-    <!-- {{ user }} -->
     <v-card-text class="pa-4">
-      <router-link :to="`/users/user-details/${user.id}`">
-        <div class="border-b mb-4 border-color-light-white pb-4">
-          <UserWidget :user="user" class="pa-0" />
+      <div class="border-b mb-4 border-color-light-white pb-4 cursor-pointer">
+        <div class="d-flex align-center gap-1 justify-space-between">
+          <div class="d-flex align-start flex-column">
+            <UserWidget :user="user" class="pa-0" />
+
+            <div class="font-weight-medium ms-12" style="font-size: 12px">
+              {{ user.role.title }}
+            </div>
+          </div>
+          <div class="d-flex gap-2">
+            <button @click="handleDelete" class="icon-container">
+              <svg
+                width="24"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M21 5.98C17.67 5.65 14.32 5.48 10.98 5.48C9 5.48 7.02 5.58 5.04 5.78L3 5.98"
+                  stroke="#B69265"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M8.5 4.97L8.72 3.66C8.88 2.71 9 2 10.69 2H13.31C15 2 15.13 2.75 15.28 3.67L15.5 4.97"
+                  stroke="#B69265"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M18.85 9.14L18.2 19.21C18.09 20.78 18 22 15.21 22H8.79002C6.00002 22 5.91002 20.78 5.80002 19.21L5.15002 9.14"
+                  stroke="#B69265"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M10.33 16.5H13.66"
+                  stroke="#B69265"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M9.5 12.5H14.5"
+                  stroke="#B69265"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <button @click="handleEdit">
+              <svg
+                width="41"
+                height="40"
+                viewBox="0 0 41 40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M0.666992 20C0.666992 8.95431 9.6213 0 20.667 0C31.7127 0 40.667 8.95431 40.667 20C40.667 31.0457 31.7127 40 20.667 40C9.6213 40 0.666992 31.0457 0.666992 20Z"
+                  fill="#F9F9F9"
+                />
+                <path
+                  opacity="0.4"
+                  d="M25.345 17.8984L22.7689 15.3223L19.5796 18.5116C18.9339 19.1571 18.5392 19.5517 18.2678 20.0375C18.1164 20.3084 17.9841 20.7194 17.8671 21.14C17.7467 21.5727 17.6281 22.0705 17.515 22.5457L17.5136 22.5515C17.4734 22.7204 17.5237 22.8981 17.6465 23.0209C17.7692 23.1436 17.9469 23.1939 18.1158 23.1537L18.1216 23.1523C18.5968 23.0392 19.0947 22.9207 19.5273 22.8003C19.9479 22.6832 20.3589 22.551 20.6298 22.3995C21.1156 22.1281 21.5102 21.7334 22.1558 21.0877L25.345 17.8984Z"
+                  fill="#B69265"
+                />
+                <path
+                  d="M20.667 13.5H20.6189C19.2809 13.5 18.2107 13.5 17.3709 13.6129C16.5023 13.7297 15.7833 13.9778 15.2141 14.5471C14.6448 15.1164 14.3967 15.8353 14.2799 16.7039C14.167 17.5437 14.167 18.6139 14.167 19.9519V20.0481C14.167 21.3861 14.167 22.4563 14.2799 23.2961C14.3967 24.1647 14.6448 24.8837 15.2141 25.4529C15.7833 26.0222 16.5023 26.2703 17.3709 26.3871C18.2107 26.5 19.2809 26.5 20.6189 26.5H20.7151C22.0531 26.5 23.1233 26.5 23.9631 26.3871C24.8317 26.2703 25.5506 26.0222 26.1199 25.4529C26.6892 24.8837 26.9373 24.1647 27.0541 23.2961C27.167 22.4563 27.167 21.3861 27.167 20.0481V20C27.167 19.641 26.876 19.35 26.517 19.35C26.158 19.35 25.867 19.641 25.867 20C25.867 21.3972 25.8656 22.3798 25.7657 23.1229C25.6683 23.8474 25.4881 24.2462 25.2007 24.5337C24.9132 24.8211 24.5143 25.0013 23.7899 25.0987C23.0468 25.1986 22.0642 25.2 20.667 25.2C19.2698 25.2 18.2872 25.1986 17.5441 25.0987C16.8196 25.0013 16.4208 24.8211 16.1333 24.5337C15.8459 24.2462 15.6657 23.8474 15.5683 23.1229C15.4684 22.3798 15.467 21.3972 15.467 20C15.467 18.6028 15.4684 17.6202 15.5683 16.8771C15.6657 16.1527 15.8459 15.7538 16.1333 15.4663C16.4208 15.1789 16.8196 14.9987 17.5441 14.9013C18.2872 14.8014 19.2698 14.8 20.667 14.8C21.026 14.8 21.317 14.509 21.317 14.15C21.317 13.791 21.026 13.5 20.667 13.5Z"
+                  fill="#B69265"
+                />
+                <path
+                  d="M24.0572 14.0335C24.7686 13.3222 25.922 13.3222 26.6333 14.0335C27.3447 14.7449 27.3447 15.8983 26.6333 16.6097L26.0523 17.1907L23.4762 14.6145L24.0572 14.0335Z"
+                  fill="#B69265"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
-      </router-link>
+      </div>
 
       <div class="user-info d-flex align-center ga-12">
         <div
@@ -106,7 +193,7 @@ const handleDelete = () => {
               />
             </svg>
 
-            <div>
+            <div @click="openMapDialog">
               <div class="text-body-2 text-medium-emphasis">الموقع</div>
               <div class="text-body-2 font-weight-medium">
                 {{ user.city }}
@@ -116,11 +203,26 @@ const handleDelete = () => {
         </div>
       </div>
 
-      <div class="d-flex justify-end mt-4">
-        <v-btn color="error" variant="text" @click="handleDelete">
-          حذف المستخدم
-        </v-btn>
-      </div>
+      <!-- Map Dialog -->
+      <v-dialog v-model="mapDialog" max-width="800">
+        <v-card>
+          <v-card-title class="d-flex justify-space-between align-center pa-4">
+            <span>موقع {{ name }}</span>
+            <v-btn icon @click="mapDialog = false">
+              <v-icon>mdi-close</v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pa-0">
+            <MapDisplay
+              :latitude="user?.latitude"
+              :longitude="user?.longitude"
+              :readonly="true"
+              height="500px"
+              @error="handleMapError"
+            />
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </v-card-text>
   </v-card>
 </template>

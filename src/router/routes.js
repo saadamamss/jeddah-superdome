@@ -23,7 +23,6 @@ import RatingPage from "@/pages/rating";
 import CompanyRatingPage from "@/pages/rating/company-rating";
 import ContractsPage from "@/pages/contracts";
 import ContractDetailsPage from "@/pages/contracts/contract_details";
-import UserDetailsPage from "@/pages/users/user-details";
 import NotFoundPage from "@/pages/NotFound";
 import ShiftsView from "@/views/shifts/ShiftsView.vue";
 import QuestionnairesPage from "@/pages/questionnaires/index.vue";
@@ -115,11 +114,6 @@ export default [
         meta: {
           // requiresAuth: true,
         },
-      },
-      {
-        path: "/users/user-details/:id",
-        name: "user-details",
-        component: UserDetailsPage,
       },
       {
         path: "/notes",

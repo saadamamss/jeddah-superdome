@@ -75,11 +75,12 @@
 .table-side {
   width: calc(100% - 280px);
 }
-thead {
-  tr {
-    background-color: #f2f4f7;
-    color: #667085;
-  }
+
+.bg-white {
+  background-color: #fff !important;
+}
+.v-table .v-data-table__th span {
+  font-weight: 400;
 }
 .mt-header-tabel {
   margin-top: 120px;
@@ -278,4 +279,23 @@ body {
     background: url(/imgs/bg.webp) no-repeat center;
     background-size: cover;
   }
+}
+
+.min-h-500 {
+  min-height: 500px;
+}
+
+.bg-gray {
+  // background-color: rgba(247, 247, 248, 1) !important;
+  background-color: red;
+}
+
+.icon-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(249, 249, 249, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

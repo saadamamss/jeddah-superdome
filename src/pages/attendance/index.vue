@@ -6,6 +6,7 @@ import { useRoute } from "vue-router";
 import dayjs from "dayjs";
 import { format } from "@core/utils/formatters";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
+import dataTable from "@/components/dataTable.vue";
 
 const appStore = useAppStore();
 const route = useRoute();
@@ -101,6 +102,8 @@ const attendanceItems = [
   { title: "محمد القحطاني", value: "mohamed" },
   { title: "عبدالله العتيبي", value: "abdullah" },
 ];
+
+const attendanceDataa = ref([]);
 
 const attendanceData = ref([
   {
@@ -258,6 +261,23 @@ const onClearDateFilter = () => {
   filters.created_at = undefined;
 };
 
+const handleTableUpdate = (options) => {
+  currentPage.value = options.page;
+  perPage.value = options.itemsPerPage;
+  // You can add additional logic here for sorting or filtering
+};
+
+const tableHeaders = [
+  { title: "الاسم", key: "name", sortable: false },
+  { title: "رقم الهوية", key: "id" },
+  { title: "الوردية", key: "shift" },
+  { title: "وقت الحضور", key: "checkIn" },
+  { title: "وقت الانصراف", key: "checkOut" },
+  { title: "أيام الغياب", key: "absenceDays" },
+  { title: "اسم مسؤول التحضير", key: "supervisor" },
+  { title: "تم التحضير بواسطة", key: "checkedBy" },
+];
+
 onMounted(() => {
   setTimeout(() => {
     isLoading.value = false;
@@ -267,24 +287,9 @@ onMounted(() => {
 
 <template>
   <div>
-    <v-row v-if="isLoading">
-      <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
-        <VCard elevation="0">
-          <v-card-text class="px-1 py-2">
-            <v-skeleton-loader
-              class="mx-auto"
-              elevation="0"
-              max-width="400"
-              type="list-item-two-line, table-heading"
-            ></v-skeleton-loader>
-          </v-card-text>
-        </VCard>
-      </v-col>
-    </v-row>
-
-    <div v-else>
-      <v-container fluid class="px-0 px-sm-4 px-xl-0 py-6 bg-light-white">
-        <div>
+    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-6 bg-light-white">
+      <div>
+        <div class="border-b pb-6">
           <div class="d-flex align-center gap-2 mb-6">
             <div class="d-flex align-center justify-space-between w-100">
               <h2 class="text-h6 font-weight-bold">سجل الحضور و الإنصراف</h2>
@@ -333,7 +338,7 @@ onMounted(() => {
                   min-width="92"
                   max-width="200"
                   :return-object="false"
-                  placeholder="المرحلة"
+                  placeholder="الحاله"
                   :loading="isGettingFilters"
                   item-title="name"
                   item-value="id"
@@ -345,7 +350,7 @@ onMounted(() => {
                   min-width="92"
                   max-width="200"
                   :return-object="false"
-                  placeholder="الباقة"
+                  placeholder="المحضر"
                   :loading="isGettingFilters"
                   item-title="name"
                   item-value="id"
@@ -357,7 +362,7 @@ onMounted(() => {
                   min-width="92"
                   max-width="200"
                   :return-object="false"
-                  placeholder="الحالة"
+                  placeholder="المتحضر"
                   :loading="isGettingFilters"
                   item-title="label"
                   item-value="value"
@@ -482,83 +487,132 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="d-flex gap-2 mb-6">
+          <div
+            class="d-flex gap-2 border px-2 py-1"
+            style="border-radius: 16px; max-width: fit-content"
+          >
             <v-btn
-              variant="tonal"
-              color="primary"
-              class="rounded-lg"
-              :class="{ 'bg-primary text-white': activeTab === 'daily' }"
-              @click="activeTab = 'daily'"
+              v-for="tab in [
+                { id: 'daily', label: 'الحضور اليومي' },
+                { id: 'Attended', label: 'جميع التحضيرات' },
+                { id: 'Absent', label: 'تنبيهات الغياب' },
+              ]"
+              :key="tab.id"
+              elevation="0"
+              class="rounded-lg font-weight-bold"
+              :class="{
+                'bg-light-gray text-primary': activeTab === tab.id,
+                'bg-white text-gray-1': activeTab !== tab.id,
+              }"
+              @click="activeTab = tab.id"
             >
-              الحضور اليومي
-            </v-btn>
-            <v-btn
-              variant="tonal"
-              color="primary"
-              class="rounded-lg"
-              :class="{ 'bg-primary text-white': activeTab === 'all' }"
-              @click="activeTab = 'all'"
-            >
-              جميع التحضيرات
-            </v-btn>
-            <v-btn
-              variant="tonal"
-              color="primary"
-              class="rounded-lg"
-              :class="{ 'bg-primary text-white': activeTab === 'absences' }"
-              @click="activeTab = 'absences'"
-            >
-              تنبيهات الغياب
+              {{ tab.label }}
             </v-btn>
           </div>
-
-          <v-card elevation="0" rounded="lg" class="pa-4">
-            <v-table>
-              <thead>
-                <tr style="background-color: transparent">
-                  <th>الاسم</th>
-                  <th>رقم الهوية</th>
-                  <th>الوردية</th>
-                  <th>وقت الحضور</th>
-                  <th>وقت الانصراف</th>
-                  <th>أيام الغياب</th>
-                  <th>اسم مسؤول التحضير</th>
-                  <th>تم التحضير بواسطة</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="item in attendanceData" :key="item.id">
-                  <td class="d-flex align-center gap-2">
-                    <v-avatar size="32" rounded="lg">
-                      <v-img src="/imgs/person.svg" />
-                    </v-avatar>
-                    <div>
-                      <div>{{ item.name }}</div>
-                      <div v-if="item.role" class="font-weight-medium text-sm">
-                        {{ item.role }}
-                      </div>
-                    </div>
-                  </td>
-                  <td>{{ item.id }}</td>
-                  <td>{{ item.shift }}</td>
-                  <td>{{ item.checkIn }}</td>
-                  <td>{{ item.checkOut }}</td>
-                  <td>{{ item.absenceDays }}</td>
-                  <td>{{ item.supervisor }}</td>
-                  <td>{{ item.checkedBy }}</td>
-                </tr>
-              </tbody>
-            </v-table>
-
-            <Pagination
-              :total-items="totalItems"
-              v-model:per-page="perPage"
-              v-model:page="currentPage"
-            />
-          </v-card>
         </div>
-      </v-container>
-    </div>
+        <v-card elevation="0" rounded="lg" class="">
+          <dataTable
+            v-if="attendanceDataa.lenght"
+            :items="attendanceDataa"
+            :loading="isLoading"
+            :page="currentPage"
+            :items-per-page="perPage"
+            :total-items="totalItems"
+            :headers="tableHeaders"
+            @update:options="handleTableUpdate"
+          >
+            <template #item.name="{ item }">
+              <div class="d-flex align-center gap-2">
+                <v-avatar size="32" rounded="lg">
+                  <v-img :src="'/imgs/person.svg'" />
+                </v-avatar>
+                <div>
+                  <div>{{ item.name }}</div>
+                  <div v-if="item.role" class="font-weight-medium text-sm">
+                    {{ item.role }}
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template #pagination>
+              <Pagination
+                :total-items="totalItems"
+                v-model:per-page="perPage"
+                v-model:page="currentPage"
+              />
+            </template>
+          </dataTable>
+
+          <div
+            v-else
+            class="d-flex flex-column align-center justify-center py-16 min-h-500"
+          >
+            <svg
+              width="128"
+              height="106"
+              viewBox="0 0 128 106"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M107.68 91.1789L107.679 91.1793C98.598 100.261 86.0233 105.75 72.1502 105.75C58.3779 105.75 45.8028 100.161 36.6205 91.1789C27.3387 81.9969 21.5502 69.2222 21.5502 55.05C21.5502 27.0051 44.2056 4.35 72.1502 4.35C100.095 4.35 122.75 27.105 122.75 55.05C122.75 69.2222 116.962 81.9969 107.68 91.1789Z"
+                fill="#FFF9EB"
+                stroke="#B69265"
+                stroke-width="0.2"
+              />
+              <path
+                d="M118.45 21.7508C120.714 21.7508 122.55 19.9151 122.55 17.6508C122.55 15.3864 120.714 13.5508 118.45 13.5508C116.185 13.5508 114.35 15.3864 114.35 17.6508C114.35 19.9151 116.185 21.7508 118.45 21.7508Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M124.45 5.75039C125.997 5.75039 127.25 4.49679 127.25 2.95039C127.25 1.40399 125.997 0.150391 124.45 0.150391C122.904 0.150391 121.65 1.40399 121.65 2.95039C121.65 4.49679 122.904 5.75039 124.45 5.75039Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M23.05 21.6508C24.5964 21.6508 25.85 20.3972 25.85 18.8508C25.85 17.3044 24.5964 16.0508 23.05 16.0508C21.5036 16.0508 20.25 17.3044 20.25 18.8508C20.25 20.3972 21.5036 21.6508 23.05 21.6508Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M5.95 75.65C8.82188 75.65 11.15 73.3219 11.15 70.45C11.15 67.5781 8.82188 65.25 5.95 65.25C3.07812 65.25 0.75 67.5781 0.75 70.45C0.75 73.3219 3.07812 75.65 5.95 75.65Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M107.75 28.4502V91.2502C98.6498 100.35 86.0498 105.85 72.1498 105.85C58.3498 105.85 45.7498 100.25 36.5498 91.2502V28.4502H107.75Z"
+                fill="white"
+              />
+              <path
+                d="M73.4074 60.5041L59.4775 46.5742L54.74 51.3118L68.6698 65.2417L73.4074 60.5041Z"
+                fill="#B69265"
+              />
+              <path
+                d="M84.8337 39.6497L64.0449 60.4385L68.7825 65.176L89.5712 44.3873L84.8337 39.6497Z"
+                fill="#B69265"
+              />
+              <path
+                d="M90.3502 73.75H53.9502V78.35H90.3502V73.75Z"
+                fill="#F3F1ED"
+              />
+              <path
+                d="M90.3502 83.8506H53.9502V88.4506H90.3502V83.8506Z"
+                fill="#F3F1ED"
+              />
+              <path
+                d="M81.4496 94.0508H62.8496V98.6508H81.4496V94.0508Z"
+                fill="#F3F1ED"
+              />
+            </svg>
+            <div class="text-h6 font-weight-medium mt-4">
+              لم يتم تسجيل أي حضور أو انصراف حتى الآن.
+            </div>
+            <div class="text-body-1 text-medium-emphasis">
+              بمجرد أن يبدأ المراقبون تسجيل حضورهم أو انصرافهم، ستظهر السجلات
+              هنا بشكل تلقائي.
+            </div>
+          </div>
+        </v-card>
+      </div>
+    </v-container>
   </div>
 </template>
 
@@ -718,5 +772,49 @@ onMounted(() => {
 
 .text-13 {
   font-size: 13px;
+}
+
+.bg-light-gray {
+  background-color: rgba(248, 249, 249, 1) !important;
+}
+.text-gray-1 {
+  color: rgba(124, 133, 139, 1) !important;
+  // color: #f00 !important;
+}
+
+:deep(.v-data-table) {
+  .v-table {
+    background: transparent;
+  }
+
+  .v-data-table-footer {
+    background: transparent;
+  }
+
+  .v-data-table__tr {
+    margin-bottom: 16px;
+    filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.05));
+    border-radius: 8px;
+  }
+
+  .v-data-table__td {
+    background: white !important;
+    height: 72px !important;
+
+    &:first-child {
+      border-top-right-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    &:last-child {
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+    }
+  }
+}
+
+:deep(.v-table > .v-table__wrapper > table) {
+  border-spacing: 0 16px !important;
+  border-collapse: separate !important;
 }
 </style>
