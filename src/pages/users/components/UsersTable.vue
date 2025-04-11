@@ -277,11 +277,4 @@ const openDelete = (item) => {
   font-size: 1.2rem;
   color: #000 !important;
 }
-
-thead {
-  tr {
-    background-color: #f2f4f7;
-    color: #667085;
-  }
-}
 </style>

@@ -75,11 +75,12 @@
 .table-side {
   width: calc(100% - 280px);
 }
-thead {
-  tr {
-    background-color: #f2f4f7;
-    color: #667085;
-  }
+
+.bg-white {
+  background-color: #fff !important;
+}
+.v-table .v-data-table__th span {
+  font-weight: 400;
 }
 .mt-header-tabel {
   margin-top: 120px;
@@ -278,4 +279,8 @@ body {
     background: url(/imgs/bg.webp) no-repeat center;
     background-size: cover;
   }
+}
+
+.min-h-500 {
+  min-height: 500px;
 }

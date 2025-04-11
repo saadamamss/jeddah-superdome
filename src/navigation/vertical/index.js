@@ -73,12 +73,12 @@ export default [
     icon: AttendanceIcon,
     permission: true,
   },
-  // {
-  //   title: "إدارة المستخدمين",
-  //   to: { name: "users" },
-  //   icon: UsersIcon,
-  //   permission: true,
-  // },
+  {
+    title: "إدارة المستخدمين",
+    to: { name: "users" },
+    icon: UsersIcon,
+    permission: true,
+  },
   // {
   //   title: "إدارة الأدوار والصلاحيات ",
   //   to: { name: "roles" },
