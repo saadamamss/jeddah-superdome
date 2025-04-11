@@ -566,9 +566,9 @@ onMounted(() => {
             color="primary"
             :loading="loading"
             @click="addUser"
-            class="bg-primary"
+            class="px-6 bg-primary text-white"
           >
-            إضافة
+            إضافة مستخدم
           </v-btn>
         </v-card-actions>
       </v-card>
