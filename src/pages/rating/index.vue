@@ -108,6 +108,7 @@ const exportData = async () => {
       {},
       {
         responseType: "blob", // Important to receive binary data
+        ...filters,
       }
     );
 
