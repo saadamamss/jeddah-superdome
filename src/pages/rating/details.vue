@@ -546,6 +546,35 @@ onMounted(() => {
                   cols="6"
                   md="4"
                   xl="3"
+                  v-if="rating?.location?.license_no"
+                  class="mb-4"
+                >
+                  <div>
+                    <div class="d-flex align-center ga-2">
+                      <img
+                        width="32"
+                        height="32"
+                        src="/imgs/icons/welcome.svg"
+                        alt="icon"
+                      />
+                      <h3
+                        class="text-body-2"
+                        style="font-weight: 300; color: #565a5d"
+                      >
+                        رقم تصريح السكن
+                      </h3>
+                    </div>
+                    <div class="w-100 ps-10">
+                      <span class="text-subtitle-2">{{
+                        rating.location.license_no
+                      }}</span>
+                    </div>
+                  </div>
+                </v-col>
+                <v-col
+                  cols="6"
+                  md="4"
+                  xl="3"
                   v-if="rating?.location?.delegate_phone"
                   class="mb-4"
                 >

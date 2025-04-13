@@ -95,9 +95,9 @@ const complaintOptions = ref([
 
 const statusItems = [
   { title: "الكل", value: "all" },
-  { title: "حاضر", value: "present" },
-  { title: "غائب", value: "absent" },
-  { title: "متأخر", value: "late" },
+  { title: "حاضر", value: "attendance" },
+  { title: "غائب", value: "absents" },
+  // { title: "متأخر", value: "late" },
 ];
 
 const attendanceItems = [
@@ -250,7 +250,6 @@ watch(
   () => dateFilter.value,
   (newValue) => {
     if (newValue) {
-      console.log("Date filter changed to:", formatDate(newValue));
       fetchAttendance();
     }
   }
@@ -278,8 +277,6 @@ const fetchAttendance = async () => {
         delete params[key];
       }
     });
-
-    console.log("Fetching attendance with params:", params);
 
     const response = await axios.get("attendance", { params });
 
@@ -368,10 +365,11 @@ const exportData = async () => {
     isExporting.value = true;
 
     const response = await axios.post(
-      "/attendance-export-excel",
+      `/attendance-export?tap=${filters.tap}`,
       {},
       {
         responseType: "blob", // Important to receive binary data
+        ...filters,
       }
     );
 
@@ -692,106 +690,122 @@ onMounted(() => {
           </div>
         </div>
       </v-card-title>
-      <v-card elevation="0" rounded="lg" class="">
-        <dataTable
-          v-if="attendanceDataa.length"
-          :items="attendanceDataa"
-          :loading="isLoading"
-          :page="currentPage"
-          :items-per-page="perPage"
-          :total-items="totalItems"
-          :headers="tableHeaders"
-          @update:options="handleTableUpdate"
-        >
-          <template #[`item.name`]="{ item }">
-            <div class="d-flex align-center gap-2">
-              <v-avatar size="32" rounded="lg">
-                <v-img :src="item.avatar || '/imgs/person.svg'" />
-              </v-avatar>
-              <div>
-                <div>{{ item.name }}</div>
-                <div v-if="item.role" class="font-weight-medium text-sm">
-                  {{ item.role }}
+      <v-card elevation="0" rounded="lg">
+        <v-row v-if="isLoading">
+          <v-col v-for="item in 9" :key="item" cols="6" sm="6" lg="4">
+            <v-card elevation="0">
+              <v-card-text class="px-1 py-2">
+                <v-skeleton-loader
+                  class="mx-auto"
+                  elevation="0"
+                  max-width="400"
+                  type="list-item-two-line, table-heading"
+                ></v-skeleton-loader>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+        <template v-else>
+          <dataTable
+            v-if="attendanceDataa.length"
+            :items="attendanceDataa"
+            :loading="isLoading"
+            :page="currentPage"
+            :items-per-page="perPage"
+            :total-items="totalItems"
+            :headers="tableHeaders"
+            @update:options="handleTableUpdate"
+          >
+            <template #[`item.name`]="{ item }">
+              <div class="d-flex align-center gap-2">
+                <v-avatar size="32" rounded="lg">
+                  <v-img :src="item.avatar || '/imgs/person.svg'" />
+                </v-avatar>
+                <div>
+                  <div>{{ item.name }}</div>
+                  <div v-if="item.role" class="font-weight-medium text-sm">
+                    {{ item.role }}
+                  </div>
                 </div>
               </div>
-            </div>
-          </template>
+            </template>
 
-          <template #pagination>
-            <Pagination
-              :total-items="totalItems"
-              v-model:per-page="perPage"
-              v-model:page="currentPage"
-            />
-          </template>
-        </dataTable>
+            <template #pagination>
+              <Pagination
+                :total-items="totalItems"
+                v-model:per-page="perPage"
+                v-model:page="currentPage"
+              />
+            </template>
+          </dataTable>
 
-        <div
-          v-else
-          class="d-flex flex-column align-center justify-center py-16 min-h-500"
-        >
-          <svg
-            width="128"
-            height="106"
-            viewBox="0 0 128 106"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
+          <div
+            v-else
+            class="d-flex flex-column align-center justify-center py-16 min-h-500"
           >
-            <path
-              d="M107.68 91.1789L107.679 91.1793C98.598 100.261 86.0233 105.75 72.1502 105.75C58.3779 105.75 45.8028 100.161 36.6205 91.1789C27.3387 81.9969 21.5502 69.2222 21.5502 55.05C21.5502 27.0051 44.2056 4.35 72.1502 4.35C100.095 4.35 122.75 27.105 122.75 55.05C122.75 69.2222 116.962 81.9969 107.68 91.1789Z"
-              fill="#FFF9EB"
-              stroke="#B69265"
-              stroke-width="0.2"
-            />
-            <path
-              d="M118.45 21.7508C120.714 21.7508 122.55 19.9151 122.55 17.6508C122.55 15.3864 120.714 13.5508 118.45 13.5508C116.185 13.5508 114.35 15.3864 114.35 17.6508C114.35 19.9151 116.185 21.7508 118.45 21.7508Z"
-              fill="#FFF9EB"
-            />
-            <path
-              d="M124.45 5.75039C125.997 5.75039 127.25 4.49679 127.25 2.95039C127.25 1.40399 125.997 0.150391 124.45 0.150391C122.904 0.150391 121.65 1.40399 121.65 2.95039C121.65 4.49679 122.904 5.75039 124.45 5.75039Z"
-              fill="#FFF9EB"
-            />
-            <path
-              d="M23.05 21.6508C24.5964 21.6508 25.85 20.3972 25.85 18.8508C25.85 17.3044 24.5964 16.0508 23.05 16.0508C21.5036 16.0508 20.25 17.3044 20.25 18.8508C20.25 20.3972 21.5036 21.6508 23.05 21.6508Z"
-              fill="#FFF9EB"
-            />
-            <path
-              d="M5.95 75.65C8.82188 75.65 11.15 73.3219 11.15 70.45C11.15 67.5781 8.82188 65.25 5.95 65.25C3.07812 65.25 0.75 67.5781 0.75 70.45C0.75 73.3219 3.07812 75.65 5.95 75.65Z"
-              fill="#FFF9EB"
-            />
-            <path
-              d="M107.75 28.4502V91.2502C98.6498 100.35 86.0498 105.85 72.1498 105.85C58.3498 105.85 45.7498 100.25 36.5498 91.2502V28.4502H107.75Z"
-              fill="white"
-            />
-            <path
-              d="M73.4074 60.5041L59.4775 46.5742L54.74 51.3118L68.6698 65.2417L73.4074 60.5041Z"
-              fill="#B69265"
-            />
-            <path
-              d="M84.8337 39.6497L64.0449 60.4385L68.7825 65.176L89.5712 44.3873L84.8337 39.6497Z"
-              fill="#B69265"
-            />
-            <path
-              d="M90.3502 73.75H53.9502V78.35H90.3502V73.75Z"
-              fill="#F3F1ED"
-            />
-            <path
-              d="M90.3502 83.8506H53.9502V88.4506H90.3502V83.8506Z"
-              fill="#F3F1ED"
-            />
-            <path
-              d="M81.4496 94.0508H62.8496V98.6508H81.4496V94.0508Z"
-              fill="#F3F1ED"
-            />
-          </svg>
-          <div class="text-h6 font-weight-medium mt-4">
-            لم يتم تسجيل أي حضور أو انصراف حتى الآن.
+            <svg
+              width="128"
+              height="106"
+              viewBox="0 0 128 106"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M107.68 91.1789L107.679 91.1793C98.598 100.261 86.0233 105.75 72.1502 105.75C58.3779 105.75 45.8028 100.161 36.6205 91.1789C27.3387 81.9969 21.5502 69.2222 21.5502 55.05C21.5502 27.0051 44.2056 4.35 72.1502 4.35C100.095 4.35 122.75 27.105 122.75 55.05C122.75 69.2222 116.962 81.9969 107.68 91.1789Z"
+                fill="#FFF9EB"
+                stroke="#B69265"
+                stroke-width="0.2"
+              />
+              <path
+                d="M118.45 21.7508C120.714 21.7508 122.55 19.9151 122.55 17.6508C122.55 15.3864 120.714 13.5508 118.45 13.5508C116.185 13.5508 114.35 15.3864 114.35 17.6508C114.35 19.9151 116.185 21.7508 118.45 21.7508Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M124.45 5.75039C125.997 5.75039 127.25 4.49679 127.25 2.95039C127.25 1.40399 125.997 0.150391 124.45 0.150391C122.904 0.150391 121.65 1.40399 121.65 2.95039C121.65 4.49679 122.904 5.75039 124.45 5.75039Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M23.05 21.6508C24.5964 21.6508 25.85 20.3972 25.85 18.8508C25.85 17.3044 24.5964 16.0508 23.05 16.0508C21.5036 16.0508 20.25 17.3044 20.25 18.8508C20.25 20.3972 21.5036 21.6508 23.05 21.6508Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M5.95 75.65C8.82188 75.65 11.15 73.3219 11.15 70.45C11.15 67.5781 8.82188 65.25 5.95 65.25C3.07812 65.25 0.75 67.5781 0.75 70.45C0.75 73.3219 3.07812 75.65 5.95 75.65Z"
+                fill="#FFF9EB"
+              />
+              <path
+                d="M107.75 28.4502V91.2502C98.6498 100.35 86.0498 105.85 72.1498 105.85C58.3498 105.85 45.7498 100.25 36.5498 91.2502V28.4502H107.75Z"
+                fill="white"
+              />
+              <path
+                d="M73.4074 60.5041L59.4775 46.5742L54.74 51.3118L68.6698 65.2417L73.4074 60.5041Z"
+                fill="#B69265"
+              />
+              <path
+                d="M84.8337 39.6497L64.0449 60.4385L68.7825 65.176L89.5712 44.3873L84.8337 39.6497Z"
+                fill="#B69265"
+              />
+              <path
+                d="M90.3502 73.75H53.9502V78.35H90.3502V73.75Z"
+                fill="#F3F1ED"
+              />
+              <path
+                d="M90.3502 83.8506H53.9502V88.4506H90.3502V83.8506Z"
+                fill="#F3F1ED"
+              />
+              <path
+                d="M81.4496 94.0508H62.8496V98.6508H81.4496V94.0508Z"
+                fill="#F3F1ED"
+              />
+            </svg>
+            <div class="text-h6 font-weight-medium mt-4">
+              لم يتم تسجيل أي حضور أو انصراف حتى الآن.
+            </div>
+            <div class="text-body-1 text-medium-emphasis">
+              بمجرد أن يبدأ المراقبون تسجيل حضورهم أو انصرافهم، ستظهر السجلات
+              هنا بشكل تلقائي.
+            </div>
           </div>
-          <div class="text-body-1 text-medium-emphasis">
-            بمجرد أن يبدأ المراقبون تسجيل حضورهم أو انصرافهم، ستظهر السجلات هنا
-            بشكل تلقائي.
-          </div>
-        </div>
+        </template>
       </v-card>
     </VCard>
   </v-container>

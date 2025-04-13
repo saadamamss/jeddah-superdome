@@ -599,20 +599,32 @@ const exportData = async () => {
   try {
     isExporting.value = true;
 
-    const response = await axios.post("/locations-export", {
-      responseType: "blob", // Important: ensures binary data is handled correctly
-    });
+    const response = await axios.post(
+      "/locations-export",
+      {},
+      {
+        responseType: "blob", // Important to receive binary data
+        ...filters,
+      }
+    );
 
-    const blob = new Blob([response.data], {
-      type: "application/vnd.ms-excel",
-    });
+    const url = window.URL.createObjectURL(new Blob([response.data]));
 
-    const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.setAttribute("download", "locations-report.xml");
+
+    // Optional: Get file name from headers
+    const disposition = response.headers["content-disposition"];
+    let fileName = "locations.xlsx";
+    if (disposition && disposition.includes("filename=")) {
+      fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
+    }
+
+    link.setAttribute("download", fileName);
     document.body.appendChild(link);
     link.click();
+
+    // Clean up
     link.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
