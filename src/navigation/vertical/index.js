@@ -13,12 +13,12 @@ import QuestionnairesIcon from "./icons/Questionnaires";
 import AttendanceIcon from "./icons/Attendance";
 
 export default [
-  // {
-  //   title: "الصفحة الرئيسية",
-  //   to: { name: "home" },
-  //   icon: HomeIcon,
-  //   permission: true,
-  // },
+  {
+    title: "الصفحة الرئيسية",
+    to: { name: "home" },
+    icon: HomeIcon,
+    permission: true,
+  },
   {
     title: "إدارة المواقع",
     to: { name: "sites" },
@@ -31,12 +31,12 @@ export default [
   //   icon: CompanyIcon,
   //   permission: true,
   // },
-  // {
-  //   title: "⁠⁠إدارة الفرق الميدانية",
-  //   to: { name: "teams" },
-  //   icon: TeamIcon,
-  //   permission: true,
-  // },
+  {
+    title: "⁠⁠إدارة الفرق الميدانية",
+    to: { name: "teams" },
+    icon: TeamIcon,
+    permission: true,
+  },
   {
     title: "⁠⁠إدارة التقييمات",
     to: { name: "rating" },

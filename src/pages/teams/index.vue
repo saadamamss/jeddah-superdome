@@ -14,6 +14,8 @@ const dialog = ref(false);
 const loading = ref(false);
 const totalItems = ref(0);
 const teams = ref([]);
+const supervisors = ref([]);
+const fieldTeamMembers = ref([]);
 
 // Fetch teams with pagination and search
 const fetchTeams = async () => {
@@ -25,18 +27,18 @@ const fetchTeams = async () => {
       search: search.value,
     });
 
-    const response = await axios.get(
-      `/data-operations/teams?${queryParams.toString()}`
-    );
+    const response = await axios.get(`/teams?${queryParams.toString()}`);
     if (response.data?.data) {
       teams.value = response.data.data.map((team) => ({
         teamId: team.id,
-        location: team.location,
-        teamAvatars: team.members.map((member) => ({
-          name: member.name,
-          avatar: member.avatar || "https://i.pravatar.cc/150",
+        location: team.title,
+        teamAvatars: team.inspectors.map((inspector) => ({
+          name: `${inspector.firstname} ${inspector.lastname}`,
+          avatar: inspector.avatar_url || "https://i.pravatar.cc/150",
         })),
-        supervisor: team.supervisor,
+        supervisor: `${team.supervisor.firstname} ${team.supervisor.lastname}`,
+        shift: team.shift?.name,
+        locationsCount: team.locations_count,
       }));
       totalItems.value = response.data.pagination?.i_total_objects || 0;
       perPage.value = response.data.pagination?.i_per_page || perPage.value;
@@ -69,11 +71,45 @@ watch([currentPage, perPage], () => {
   fetchTeams();
 });
 
+// Fetch supervisors and inspectors for the team creation form
+const fetchSupervisorsAndInspectors = async () => {
+  try {
+    const [supervisorsResponse, inspectorsResponse] = await Promise.all([
+      axios.get("/users?role=SUPERVISOR"),
+      axios.get("/users?role=INSPECTOR"),
+    ]);
+
+    if (supervisorsResponse.data?.data) {
+      supervisors.value = supervisorsResponse.data.data.map((supervisor) => ({
+        title: `${supervisor.firstname} ${supervisor.lastname}`,
+        value: supervisor.id,
+      }));
+    }
+
+    if (inspectorsResponse.data?.data) {
+      fieldTeamMembers.value = inspectorsResponse.data.data.map(
+        (inspector) => ({
+          title: `${inspector.firstname} ${inspector.lastname}`,
+          value: inspector.id,
+          avatar: inspector.avatar_url || "https://i.pravatar.cc/150",
+        })
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات المستخدمين",
+      color: "error",
+    });
+  }
+};
+
 // Form data and options
 const formModel = ref({
   location: null,
   fieldSupervisor: null,
   fieldTeam: [],
+  shift: null,
 });
 
 const locations = [
@@ -82,39 +118,17 @@ const locations = [
   { title: "موقع 3", value: "location3" },
 ];
 
-const supervisors = [
-  { title: "أحمد محمد", value: "ahmed" },
-  { title: "محمد علي", value: "mohammed" },
-  { title: "عبدالله خالد", value: "abdullah" },
-];
-
-const fieldTeamMembers = [
-  {
-    title: "علي الحسين",
-    value: "ali",
-    avatar: "https://i.pravatar.cc/150?img=1",
-  },
-  {
-    title: "سارة نصر",
-    value: "sara",
-    avatar: "https://i.pravatar.cc/150?img=2",
-  },
-  {
-    title: "أحمد حسين",
-    value: "ahmed",
-    avatar: "https://i.pravatar.cc/150?img=3",
-  },
-  {
-    title: "عبدالرحمن صالح",
-    value: "abdulrahman",
-    avatar: "https://i.pravatar.cc/150?img=4",
-  },
+const shifts = [
+  { title: "07:00 - 15:00", value: 1 },
+  { title: "15:00 - 23:00", value: 2 },
+  { title: "23:00 - 07:00", value: 3 },
 ];
 
 const handleSubmit = async () => {
   if (
     !formModel.value.location ||
     !formModel.value.fieldSupervisor ||
+    !formModel.value.shift ||
     formModel.value.fieldTeam.length === 0
   ) {
     appStore.showSnackbar({
@@ -126,10 +140,11 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
-    await axios.post("/data-operations/teams", {
-      location: formModel.value.location,
-      supervisor: formModel.value.fieldSupervisor,
-      members: formModel.value.fieldTeam,
+    await axios.post("/teams", {
+      title: formModel.value.location,
+      supervisor_id: formModel.value.fieldSupervisor,
+      shift_id: formModel.value.shift,
+      inspector_ids: formModel.value.fieldTeam,
     });
 
     appStore.showSnackbar({
@@ -155,10 +170,12 @@ const closeDialog = () => {
     location: null,
     fieldSupervisor: null,
     fieldTeam: [],
+    shift: null,
   };
 };
 
 const addNewTeam = () => {
+  fetchSupervisorsAndInspectors();
   dialog.value = true;
 };
 
@@ -272,9 +289,12 @@ onMounted(() => {
                   class="pa-3"
                 >
                   <TeamWidget
+                    :id="team.teamId"
                     :title="team.location"
                     :team-members="team.teamAvatars"
                     :supervisor="team.supervisor"
+                    :shift="team.shift"
+                    :locations-count="team.locationsCount"
                   />
                 </v-col>
               </v-row>
@@ -373,6 +393,21 @@ onMounted(() => {
                     </v-list-item>
                   </template>
                 </v-select>
+              </div>
+
+              <div class="mb-4">
+                <label class="text-subtitle-2 mb-2 d-block">التحويل</label>
+                <v-select
+                  v-model="formModel.shift"
+                  :items="shifts"
+                  item-title="title"
+                  item-value="value"
+                  variant="outlined"
+                  density="comfortable"
+                  placeholder="اختر التحويل"
+                  hide-details
+                  class="rounded-lg bg-grey-lighten-4"
+                />
               </div>
 
               <div class="d-flex justify-end mt-6">
