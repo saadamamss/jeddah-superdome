@@ -1,12 +1,13 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
-import { ref, computed, onMounted, reactive } from "vue";
+import { ref, computed, onMounted, reactive, watch } from "vue";
 import { useRoute } from "vue-router";
 import dayjs from "dayjs";
 import { format } from "@core/utils/formatters";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import dataTable from "@/components/dataTable.vue";
+import axios from "@/plugins/axios";
 
 const appStore = useAppStore();
 const route = useRoute();
@@ -33,6 +34,8 @@ const totalItems = ref(20);
 const isExporting = ref(false);
 const isGettingFilters = ref(false);
 const isDatepickerMenu = ref(false);
+const attendanceDataa = ref([]);
+const debouncedSearch = ref(null);
 
 const siteTypes = [
   { title: "موقع سكني", value: "residential" },
@@ -103,90 +106,14 @@ const attendanceItems = [
   { title: "عبدالله العتيبي", value: "abdullah" },
 ];
 
-const attendanceDataa = ref([]);
-
-const attendanceData = ref([
-  {
-    id: "6768 9987 998",
-    name: "عبدالله القحطاني",
-    role: "مراقب",
-    avatar: "/avatars/1.png",
-    shift: "1A",
-    checkIn: "09:12 ص",
-    checkOut: "09:12 م",
-    absenceDays: "1",
-    supervisor: "محمد القحطاني",
-    checkedBy: "محمد القحطاني",
-  },
-  {
-    id: "6768 9987 998",
-    name: "عبدالله القحطاني",
-    role: "مشرف",
-    avatar: "/avatars/2.png",
-    shift: "1A",
-    checkIn: "09:12 ص",
-    checkOut: "09:12 م",
-    absenceDays: "3",
-    supervisor: "محمد القحطاني",
-    checkedBy: "محمد القحطاني",
-  },
-  {
-    id: "6768 9987 998",
-    name: "عبدالله القحطاني",
-    role: "مشرف",
-    avatar: "/avatars/3.png",
-    shift: "1A",
-    checkIn: "09:12 ص",
-    checkOut: "09:12 م",
-    absenceDays: "4",
-    supervisor: "محمد القحطاني",
-    checkedBy: "محمد القحطاني",
-  },
-  {
-    id: "6768 9987 998",
-    name: "عبدالله القحطاني",
-    role: "مشرف",
-    avatar: "/avatars/4.png",
-    shift: "1A",
-    checkIn: "09:12 ص",
-    checkOut: "09:12 م",
-    absenceDays: "2",
-    supervisor: "محمد القحطاني",
-    checkedBy: "محمد القحطاني",
-  },
-  {
-    id: "6768 9987 998",
-    name: "عبدالله القحطاني",
-    role: "مراقب",
-    avatar: "/avatars/5.png",
-    shift: "1A",
-    checkIn: "09:12 ص",
-    checkOut: "09:12 م",
-    absenceDays: "3",
-    supervisor: "محمد القحطاني",
-    checkedBy: "محمد القحطاني",
-  },
-  {
-    id: "6768 9987 998",
-    name: "عبدالله القحطاني",
-    role: "مراقب",
-    avatar: "/avatars/6.png",
-    shift: "1A",
-    checkIn: "09:12 ص",
-    checkOut: "09:12 م",
-    absenceDays: "3",
-    supervisor: "محمد القحطاني",
-    checkedBy: "محمد القحطاني",
-  },
-]);
-
 const filters = reactive({
-  location_type_id: "1",
+  location_type_id: "",
   search: "",
   status: undefined,
   created_at: undefined,
-  imtithal_phase_id: undefined,
-  contract_id: undefined,
+  user_id: undefined,
+  attendance_by_user_id: undefined,
+  tap: "daily",
 });
 
 const phases = [
@@ -209,7 +136,23 @@ const statusOptions = [
   { id: 3, label: "مرفوض", value: "REJECTED" },
 ];
 
+// Helper function to format date for API
 const formatDate = (date) => {
+  if (!date) return "";
+
+  // Create a date object with timezone handling
+  const dateObj = new Date(date);
+
+  // Format to YYYY-MM-DD without adding extra day
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const day = String(dateObj.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+// Function to display formatted date in UI (doesn't need day adjustment)
+const displayFormattedDate = (date) => {
   if (!date) return "";
   return dayjs(date).format("YYYY-MM-DD");
 };
@@ -243,10 +186,12 @@ const addNewLocation = () => {
 };
 
 const resetFilters = () => {
-  dateFilter.value = null;
-  statusFilter.value = null;
-  attendanceFilter.value = null;
-  departureFilter.value = null;
+  filters.created_at = undefined;
+  filters.status = undefined;
+  filters.user_id = undefined;
+  filters.attendance_by_user_id = undefined;
+  filters.search = "";
+  fetchAttendance();
 };
 
 const closeFilterMenu = () => {
@@ -254,11 +199,12 @@ const closeFilterMenu = () => {
 };
 
 const applyFilters = () => {
-  // Apply filters logic here
+  fetchAttendance();
 };
 
 const onClearDateFilter = () => {
   filters.created_at = undefined;
+  fetchAttendance(); // Trigger data refresh when clearing the date filter
 };
 
 const handleTableUpdate = (options) => {
@@ -269,7 +215,7 @@ const handleTableUpdate = (options) => {
 
 const tableHeaders = [
   { title: "الاسم", key: "name", sortable: false },
-  { title: "رقم الهوية", key: "id" },
+  { title: "رقم الهوية", key: "id_number" },
   { title: "الوردية", key: "shift" },
   { title: "وقت الحضور", key: "checkIn" },
   { title: "وقت الانصراف", key: "checkOut" },
@@ -278,10 +224,189 @@ const tableHeaders = [
   { title: "تم التحضير بواسطة", key: "checkedBy" },
 ];
 
-onMounted(() => {
-  setTimeout(() => {
+// Watch for changes in currentPage or perPage
+watch([currentPage, perPage], () => {
+  fetchAttendance();
+});
+
+// Watch for filter changes
+watch(
+  () => [
+    filters.status,
+    filters.user_id,
+    filters.attendance_by_user_id,
+    filters.tap,
+    filters.search,
+    filters.created_at,
+  ],
+  () => {
+    fetchAttendance();
+  },
+  { deep: true }
+);
+
+// Separate watch for date filter to handle date-specific logic
+watch(
+  () => dateFilter.value,
+  (newValue) => {
+    if (newValue) {
+      console.log("Date filter changed to:", formatDate(newValue));
+      fetchAttendance();
+    }
+  }
+);
+
+const fetchAttendance = async () => {
+  try {
+    isLoading.value = true;
+
+    // Prepare query parameters with formatted date
+    const params = {
+      per_page: perPage.value,
+      page: currentPage.value,
+      ...filters,
+    };
+
+    // Format the created_at date properly if it exists
+    if (params.created_at) {
+      params.created_at = formatDate(params.created_at);
+    }
+
+    // Remove undefined values
+    Object.keys(params).forEach((key) => {
+      if (params[key] === undefined) {
+        delete params[key];
+      }
+    });
+
+    console.log("Fetching attendance with params:", params);
+
+    const response = await axios.get("attendance", { params });
+
+    if (response.data?.status?.success) {
+      // Map API response to expected format for the table
+      attendanceDataa.value = response.data.data.map((item) => ({
+        id: item.id,
+        name: `${item.user.firstname} ${item.user.lastname}`,
+        role:
+          item.user.role.title === "INSPECTOR"
+            ? "مراقب"
+            : item.user.role.title === "SUPERVISOR"
+            ? "مشرف"
+            : item.user.role.title,
+        id_number: item.user.sa_id,
+        shift: item.shift?.name || "",
+        checkIn: item.attendance_datetime
+          ? formatTime(item.attendance_datetime)
+          : "-",
+        checkOut: item.departure_datetime
+          ? formatTime(item.departure_datetime)
+          : "-",
+        absenceDays: item.absence_days.toString(),
+        supervisor: item.supervisor
+          ? `${item.supervisor.firstname} ${item.supervisor.lastname}`
+          : "-",
+        checkedBy: item.attendance_by
+          ? `${item.attendance_by.firstname} ${item.attendance_by.lastname}`
+          : "-",
+        avatar: item.user.avatar_url || "/imgs/person.svg",
+        raw: item, // Store the raw data for reference if needed
+      }));
+
+      // Handle pagination data
+      if (response.data.pagination) {
+        totalItems.value = response.data.pagination.i_total_objects || 0;
+        perPage.value = response.data.pagination.i_per_page || perPage.value;
+        currentPage.value =
+          response.data.pagination.i_current_page || currentPage.value;
+      } else {
+        totalItems.value =
+          response.data.meta?.total || response.data.data.length;
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching attendance:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء جلب البيانات",
+      color: "error",
+    });
+  } finally {
     isLoading.value = false;
-  }, 1000);
+  }
+};
+
+// Helper function to format time from datetime
+const formatTime = (datetime) => {
+  if (!datetime) return "-";
+
+  const date = new Date(datetime);
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+
+  // Arabic format with AM/PM
+  const suffix = hours >= 12 ? "م" : "ص";
+  const displayHours = hours % 12 || 12;
+
+  return `${displayHours}:${formattedMinutes} ${suffix}`;
+};
+
+// Handle search input with debounce
+watch(
+  () => filters.search,
+  (newValue) => {
+    if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+    debouncedSearch.value = setTimeout(() => {
+      currentPage.value = 1; // Reset to first page when searching
+      fetchAttendance();
+    }, 500); // 500ms debounce
+  }
+);
+
+const exportData = async () => {
+  try {
+    isExporting.value = true;
+
+    const response = await axios.post(
+      "/attendance-export-excel",
+      {},
+      {
+        responseType: "blob", // Important to receive binary data
+      }
+    );
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+
+    const link = document.createElement("a");
+    link.href = url;
+
+    // Optional: Get file name from headers
+    const disposition = response.headers["content-disposition"];
+    let fileName = "سجل-الحضور-والانصراف.xlsx";
+    if (disposition && disposition.includes("filename=")) {
+      fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
+    }
+
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Download failed:", error);
+    appStore.showSnackbar({
+      message: "فشل تصدير البيانات",
+      color: "error",
+    });
+  } finally {
+    isExporting.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchAttendance();
 });
 </script>
 
@@ -376,13 +501,13 @@ onMounted(() => {
 
                 <CustomVSelect
                   v-model="filters.status"
-                  :items="statusOptions"
+                  :items="statusItems"
                   min-width="92"
                   max-width="200"
                   :return-object="false"
                   placeholder="الحالة"
                   :loading="isGettingFilters"
-                  item-title="label"
+                  item-title="title"
                   item-value="value"
                 />
 
@@ -419,7 +544,11 @@ onMounted(() => {
                 >
                   <template v-slot:activator="{ props }">
                     <v-text-field
-                      :value="format(filters.created_at, 'YYYY-MM-DD')"
+                      :value="
+                        filters.created_at
+                          ? displayFormattedDate(filters.created_at)
+                          : ''
+                      "
                       placeholder="التاريخ"
                       v-bind="props"
                       min-width="130"
@@ -433,49 +562,59 @@ onMounted(() => {
                       @click:clear="onClearDateFilter"
                     >
                       <template #append-inner>
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 20 20"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            opacity="0.4"
-                            fill-rule="evenodd"
-                            clip-rule="evenodd"
-                            d="M10.8573 1.66602H9.14269C7.51912 1.66599 6.20951 1.66597 5.17944 1.81569C4.10445 1.97193 3.214 2.30586 2.51502 3.06152C1.82458 3.80794 1.52732 4.74328 1.3868 5.87323C1.24997 6.97347 1.24998 8.37774 1.25 10.1442V10.6878C1.24998 12.4543 1.24997 13.8586 1.3868 14.9588C1.52732 16.0888 1.82458 17.0241 2.51502 17.7705C3.214 18.5262 4.10445 18.8601 5.17944 19.0163C6.20952 19.1661 7.51911 19.166 9.14269 19.166H10.8573C12.4809 19.166 13.7905 19.1661 14.8206 19.0163C15.8955 18.8601 16.786 18.5262 17.485 17.7705C18.1754 17.0241 18.4727 16.0888 18.6132 14.9588C18.75 13.8586 18.75 12.4543 18.75 10.6878V10.1443C18.75 8.37775 18.75 6.97347 18.6132 5.87323C18.4727 4.74328 18.1754 3.80794 17.485 3.06152C16.786 2.30586 15.8955 1.97193 14.8206 1.81569C13.7905 1.66597 12.4809 1.66599 10.8573 1.66602ZM3.74819 7.49935C3.366 7.49935 3.17491 7.49935 3.05321 7.61949C2.93151 7.73962 2.92906 7.92829 2.92417 8.30561C2.91689 8.86658 2.91667 9.4945 2.91667 10.2021V10.63C2.91667 12.4674 2.91819 13.7678 3.04073 14.7531C3.16106 15.7207 3.38552 16.2572 3.73852 16.6388C4.08297 17.0112 4.55392 17.2413 5.41917 17.367C6.31548 17.4973 7.50354 17.4994 9.20833 17.4994H10.7917C12.4965 17.4994 13.6845 17.4973 14.5808 17.367C15.4461 17.2413 15.917 17.0112 16.2615 16.6388C16.6145 16.2572 16.8389 15.7207 16.9593 14.7531C17.0818 13.7678 17.0833 12.4674 17.0833 10.63V10.2021C17.0833 9.4945 17.0831 8.86658 17.0758 8.30561C17.0709 7.92829 17.0685 7.73962 16.9468 7.61949C16.8251 7.49935 16.634 7.49935 16.2518 7.49935H3.74819Z"
-                            fill="#9EA1A3"
-                          />
-                          <path
-                            d="M5.00033 0.833008C5.46056 0.833008 5.83366 1.2061 5.83366 1.66634V1.74278C5.60426 1.76197 5.38639 1.78598 5.17977 1.81601C4.8216 1.86807 4.48393 1.93985 4.16699 2.04038V1.66634C4.16699 1.2061 4.54009 0.833008 5.00033 0.833008Z"
-                            fill="#9EA1A3"
-                          />
-                          <path
-                            d="M14.8209 1.81601C15.179 1.86807 15.5167 1.93985 15.8337 2.04038V1.66634C15.8337 1.2061 15.4606 0.833008 15.0003 0.833008C14.5401 0.833008 14.167 1.2061 14.167 1.66634V1.74278C14.3964 1.76197 14.6143 1.78598 14.8209 1.81601Z"
-                            fill="#9EA1A3"
-                          />
-                          <path
-                            d="M6.66699 9.79134C6.0917 9.79134 5.62533 10.2577 5.62533 10.833C5.62533 11.4083 6.0917 11.8747 6.66699 11.8747H6.67447C7.24977 11.8747 7.71614 11.4083 7.71614 10.833C7.71614 10.2577 7.24977 9.79134 6.67447 9.79134H6.66699Z"
-                            fill="#9EA1A3"
-                          />
-                          <path
-                            d="M9.99659 9.79134C9.42129 9.79134 8.95492 10.2577 8.95492 10.833C8.95492 11.4083 9.42129 11.8747 9.99659 11.8747H10.0041C10.5794 11.8747 11.0457 11.4083 11.0457 10.833C11.0457 10.2577 10.5794 9.79134 10.0041 9.79134H9.99659Z"
-                            fill="#9EA1A3"
-                          />
-                          <path
-                            d="M13.3262 9.79134C12.7509 9.79134 12.2845 10.2577 12.2845 10.833C12.2845 11.4083 12.7509 11.8747 13.3262 11.8747H13.3337C13.909 11.8747 14.3753 11.4083 14.3753 10.833C14.3753 10.2577 13.909 9.79134 13.3337 9.79134H13.3262Z"
-                            fill="#9EA1A3"
-                          />
-                          <path
-                            d="M6.66699 13.1247C6.0917 13.1247 5.62533 13.591 5.62533 14.1663C5.62533 14.7416 6.0917 15.208 6.66699 15.208H6.67447C7.24977 15.208 7.71614 14.7416 7.71614 14.1663C7.71614 13.591 7.24977 13.1247 6.67447 13.1247H6.66699Z"
-                            fill="#9EA1A3"
-                          />
-                          <path
-                            d="M9.99659 13.1247C9.42129 13.1247 8.95492 13.591 8.95492 14.1663C8.95492 14.7416 9.42129 15.208 9.99659 15.208H10.0041C10.5794 15.208 11.0457 14.7416 11.0457 14.1663C11.0457 13.591 10.5794 13.1247 10.0041 13.1247H9.99659Z"
-                            fill="#9EA1A3"
-                          />
-                        </svg>
+                        <template v-if="filters.created_at">
+                          <v-icon
+                            @click="onClearDateFilter"
+                            color="#9EA1A3"
+                            size="small"
+                            >mdi-close-circle</v-icon
+                          >
+                        </template>
+                        <template v-else>
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              opacity="0.4"
+                              fill-rule="evenodd"
+                              clip-rule="evenodd"
+                              d="M10.8573 1.66602H9.14269C7.51912 1.66599 6.20951 1.66597 5.17944 1.81569C4.10445 1.97193 3.214 2.30586 2.51502 3.06152C1.82458 3.80794 1.52732 4.74328 1.3868 5.87323C1.24997 6.97347 1.24998 8.37774 1.25 10.1442V10.6878C1.24998 12.4543 1.24997 13.8586 1.3868 14.9588C1.52732 16.0888 1.82458 17.0241 2.51502 17.7705C3.214 18.5262 4.10445 18.8601 5.17944 19.0163C6.20952 19.1661 7.51911 19.166 9.14269 19.166H10.8573C12.4809 19.166 13.7905 19.1661 14.8206 19.0163C15.8955 18.8601 16.786 18.5262 17.485 17.7705C18.1754 17.0241 18.4727 16.0888 18.6132 14.9588C18.75 13.8586 18.75 12.4543 18.75 10.6878V10.1443C18.75 8.37775 18.75 6.97347 18.6132 5.87323C18.4727 4.74328 18.1754 3.80794 17.485 3.06152C16.786 2.30586 15.8955 1.97193 14.8206 1.81569C13.7905 1.66597 12.4809 1.66599 10.8573 1.66602ZM3.74819 7.49935C3.366 7.49935 3.17491 7.49935 3.05321 7.61949C2.93151 7.73962 2.92906 7.92829 2.92417 8.30561C2.91689 8.86658 2.91667 9.4945 2.91667 10.2021V10.63C2.91667 12.4674 2.91819 13.7678 3.04073 14.7531C3.16106 15.7207 3.38552 16.2572 3.73852 16.6388C4.08297 17.0112 4.55392 17.2413 5.41917 17.367C6.31548 17.4973 7.50354 17.4994 9.20833 17.4994H10.7917C12.4965 17.4994 13.6845 17.4973 14.5808 17.367C15.4461 17.2413 15.917 17.0112 16.2615 16.6388C16.6145 16.2572 16.8389 15.7207 16.9593 14.7531C17.0818 13.7678 17.0833 12.4674 17.0833 10.63V10.2021C17.0833 9.4945 17.0831 8.86658 17.0758 8.30561C17.0709 7.92829 17.0685 7.73962 16.9468 7.61949C16.8251 7.49935 16.634 7.49935 16.2518 7.49935H3.74819Z"
+                              fill="#9EA1A3"
+                            />
+                            <path
+                              d="M5.00033 0.833008C5.46056 0.833008 5.83366 1.2061 5.83366 1.66634V1.74278C5.60426 1.76197 5.38639 1.78598 5.17977 1.81601C4.8216 1.86807 4.48393 1.93985 4.16699 2.04038V1.66634C4.16699 1.2061 4.54009 0.833008 5.00033 0.833008Z"
+                              fill="#9EA1A3"
+                            />
+                            <path
+                              d="M14.8209 1.81601C15.179 1.86807 15.5167 1.93985 15.8337 2.04038V1.66634C15.8337 1.2061 15.4606 0.833008 15.0003 0.833008C14.5401 0.833008 14.167 1.2061 14.167 1.66634V1.74278C14.3964 1.76197 14.6143 1.78598 14.8209 1.81601Z"
+                              fill="#9EA1A3"
+                            />
+                            <path
+                              d="M6.66699 9.79134C6.0917 9.79134 5.62533 10.2577 5.62533 10.833C5.62533 11.4083 6.0917 11.8747 6.66699 11.8747H6.67447C7.24977 11.8747 7.71614 11.4083 7.71614 10.833C7.71614 10.2577 7.24977 9.79134 6.67447 9.79134H6.66699Z"
+                              fill="#9EA1A3"
+                            />
+                            <path
+                              d="M9.99659 9.79134C9.42129 9.79134 8.95492 10.2577 8.95492 10.833C8.95492 11.4083 9.42129 11.8747 9.99659 11.8747H10.0041C10.5794 11.8747 11.0457 11.4083 11.0457 10.833C11.0457 10.2577 10.5794 9.79134 10.0041 9.79134H9.99659Z"
+                              fill="#9EA1A3"
+                            />
+                            <path
+                              d="M13.3262 9.79134C12.7509 9.79134 12.2845 10.2577 12.2845 10.833C12.2845 11.4083 12.7509 11.8747 13.3262 11.8747H13.3337C13.909 11.8747 14.3753 11.4083 14.3753 10.833C14.3753 10.2577 13.909 9.79134 13.3337 9.79134H13.3262Z"
+                              fill="#9EA1A3"
+                            />
+                            <path
+                              d="M6.66699 13.1247C6.0917 13.1247 5.62533 13.591 5.62533 14.1663C5.62533 14.7416 6.0917 15.208 6.66699 15.208H6.67447C7.24977 15.208 7.71614 14.7416 7.71614 14.1663C7.71614 13.591 7.24977 13.1247 6.67447 13.1247H6.66699Z"
+                              fill="#9EA1A3"
+                            />
+                            <path
+                              d="M9.99659 13.1247C9.42129 13.1247 8.95492 13.591 8.95492 14.1663C8.95492 14.7416 9.42129 15.208 9.99659 15.208H10.0041C10.5794 15.208 11.0457 14.7416 11.0457 14.1663C11.0457 13.591 10.5794 13.1247 10.0041 13.1247H9.99659Z"
+                              fill="#9EA1A3"
+                            />
+                          </svg>
+                        </template>
                       </template>
                     </v-text-field>
                   </template>
@@ -536,17 +675,17 @@ onMounted(() => {
             <v-btn
               v-for="tab in [
                 { id: 'daily', label: 'الحضور اليومي' },
-                { id: 'Attended', label: 'جميع التحضيرات' },
-                { id: 'Absent', label: 'تنبيهات الغياب' },
+                { id: 'all', label: 'جميع التحضيرات' },
+                { id: 'absents', label: 'تنبيهات الغياب' },
               ]"
               :key="tab.id"
               elevation="0"
               class="rounded-lg font-weight-bold"
               :class="{
-                'bg-light-gray text-primary': activeTab === tab.id,
-                'bg-white text-gray-1': activeTab !== tab.id,
+                'bg-light-gray text-primary': filters.tap === tab.id,
+                'bg-white text-gray-1': filters.tap !== tab.id,
               }"
-              @click="activeTab = tab.id"
+              @click="filters.tap = tab.id"
             >
               {{ tab.label }}
             </v-btn>
@@ -555,7 +694,7 @@ onMounted(() => {
       </v-card-title>
       <v-card elevation="0" rounded="lg" class="">
         <dataTable
-          v-if="attendanceDataa.lenght"
+          v-if="attendanceDataa.length"
           :items="attendanceDataa"
           :loading="isLoading"
           :page="currentPage"
@@ -564,10 +703,10 @@ onMounted(() => {
           :headers="tableHeaders"
           @update:options="handleTableUpdate"
         >
-          <template #item.name="{ item }">
+          <template #[`item.name`]="{ item }">
             <div class="d-flex align-center gap-2">
               <v-avatar size="32" rounded="lg">
-                <v-img :src="'/imgs/person.svg'" />
+                <v-img :src="item.avatar || '/imgs/person.svg'" />
               </v-avatar>
               <div>
                 <div>{{ item.name }}</div>

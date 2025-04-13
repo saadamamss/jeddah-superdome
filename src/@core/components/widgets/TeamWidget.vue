@@ -1,7 +1,9 @@
 <script setup>
 import AvatarGroup from "@/@core/components/shared/AvatarGroup";
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const props = defineProps({
   id: {
     type: [Number, String],
@@ -9,9 +11,21 @@ const props = defineProps({
   },
   title: "",
   companiesCount: 0,
+  locationsCount: {
+    type: Number,
+    default: 0,
+  },
+  shift: {
+    type: String,
+    default: "",
+  },
   supervisor: {
-    type: Object,
+    type: [Object, String],
     default: () => ({}),
+  },
+  teamMembers: {
+    type: Array,
+    default: () => [],
   },
   inspectors: {
     type: Array,
@@ -23,12 +37,18 @@ const fallbackAvatar = "https://placehold.co/400";
 
 // Format supervisor name
 const supervisorName = computed(() => {
+  if (typeof props.supervisor === "string") return props.supervisor;
   if (!props.supervisor) return "";
   return `${props.supervisor.firstname} ${props.supervisor.lastname}`;
 });
 
 // Format team members (supervisor + inspectors) for AvatarGroup
 const teamMembers = computed(() => {
+  // If teamMembers are directly provided, use them
+  if (props.teamMembers && props.teamMembers.length) {
+    return props.teamMembers;
+  }
+
   const members = [];
 
   // Add supervisor if available
@@ -37,6 +57,7 @@ const teamMembers = computed(() => {
       id: props.supervisor.id,
       name: supervisorName.value,
       avatar:
+        props.supervisor.avatar_url ||
         props.supervisor.avatar ||
         props.supervisor.personal_image ||
         fallbackAvatar,
@@ -49,7 +70,11 @@ const teamMembers = computed(() => {
       members.push({
         id: inspector.id,
         name: `${inspector.firstname} ${inspector.lastname}`,
-        avatar: inspector.avatar || inspector.personal_image || fallbackAvatar,
+        avatar:
+          inspector.avatar_url ||
+          inspector.avatar ||
+          inspector.personal_image ||
+          fallbackAvatar,
       });
     });
   }
@@ -64,12 +89,21 @@ const avatars = computed(() =>
     avatar: member.avatar,
   }))
 );
+
+// Navigate to team management page
+const navigateToTeamManagement = () => {
+  if (props.id) {
+    router.push({ name: "team-management", params: { id: props.id } });
+  }
+};
 </script>
 
 <template>
   <VCard
-    class="rounded-lg"
+    class="rounded-lg cursor-pointer"
     style="box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)"
+    @click="navigateToTeamManagement"
+    :class="{ 'opacity-75': !id }"
   >
     <v-card-text class="pa-3 pa-sm-4">
       <div class="d-flex justify-space-between align-center ga-1">
@@ -109,73 +143,69 @@ const avatars = computed(() =>
             </svg>
           </span>
           <span style="color: #75797c">
-            <span>{{ companiesCount }}</span>
-            <span> شركة</span>
+            <span>{{ locationsCount || companiesCount }}</span>
+            <span> موقع</span>
           </span>
         </div>
       </div>
-      <VDivider class="my-5" />
+
+      <VDivider class="my-3" />
 
       <!-- Team Members Section -->
-      <div class="team-members mb-3" v-if="supervisor && supervisor.id">
+      <div class="team-members">
+        <!-- Supervisor Section -->
         <div class="d-flex align-center mb-2">
           <span class="text-subtitle-2 font-weight-medium me-2">المشرف:</span>
           <span class="text-body-2">{{ supervisorName }}</span>
         </div>
 
+        <!-- Shift Section if available -->
+        <div class="d-flex align-center mb-2" v-if="shift">
+          <span class="text-subtitle-2 font-weight-medium me-2">الفترة:</span>
+          <span class="text-body-2">{{ shift }}</span>
+        </div>
+
+        <!-- Inspectors Section -->
         <div
-          class="d-flex align-center mt-2"
-          v-if="inspectors && inspectors.length"
+          class="d-flex flex-column mt-2"
+          v-if="teamMembers && teamMembers.length"
         >
-          <span class="text-subtitle-2 font-weight-medium me-2">المفتشين:</span>
-          <div class="d-flex flex-wrap">
-            <span
-              v-for="(inspector, index) in inspectors"
-              :key="inspector.id"
-              class="text-body-2 me-2"
+          <div class="d-flex flex-wrap mt-1 position-relative">
+            <div
+              v-for="(member, index) in teamMembers.slice(0, 5)"
+              :key="index"
+              class="position-relative"
+              style="margin-left: -10px"
             >
-              {{ inspector.firstname }} {{ inspector.lastname
-              }}{{ index < inspectors.length - 1 ? "،" : "" }}
+              <v-avatar size="30" class="border-2 border-white">
+                <v-img
+                  :src="member.avatar_url || 'https://placehold.co/600x400'"
+                  :alt="member.name"
+                  width="30"
+                  height="30"
+                  cover
+                >
+                  <template v-slot:placeholder>
+                    <div class="d-flex align-center justify-center fill-height">
+                      <v-icon
+                        icon="mdi-account"
+                        color="grey-lighten-1"
+                        size="20"
+                      />
+                    </div>
+                  </template>
+                </v-img>
+              </v-avatar>
+            </div>
+            <span
+              v-if="teamMembers.length > 5"
+              class="text-body-2 font-weight-medium ms-2 d-flex align-center ms-4"
+            >
+              +{{ teamMembers.length - 5 }}
             </span>
           </div>
         </div>
       </div>
-
-      <!-- <div class="d-flex align-center justify-space-between ga-4">
-        <AvatarGroup :avatars="avatars" :size="32" />
-        <v-btn
-          size="small"
-          elevation="0"
-          class="btn-card-link px-3 text-primary rounded-xl"
-        >
-          <router-link
-            :to="`/teams/team-management/${props.id || 'details'}`"
-            class="d-flex align-center ga-2"
-          >
-            <span class="font-weight-bold">عرض</span>
-
-            <svg
-              width="1.1rem"
-              height="1.1rem"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                opacity="0.4"
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M1.99973 7.9998C1.99973 7.63161 2.29821 7.33313 2.6664 7.33313L13.3331 7.33313C13.7013 7.33313 13.9997 7.63161 13.9997 7.9998C13.9997 8.36799 13.7013 8.66646 13.3331 8.66646L2.6664 8.66646C2.29821 8.66646 1.99973 8.36799 1.99973 7.9998Z"
-                fill="#B69265"
-              />
-              <path
-                d="M3.35137 7.99988C3.41358 8.10306 3.54397 8.28847 3.68655 8.44984C3.97038 8.77106 4.36153 9.13798 4.76987 9.49251C5.17489 9.84416 5.58187 10.1708 5.88878 10.4103C6.04189 10.5298 6.3061 10.7294 6.39486 10.7964C6.69128 11.0148 6.75459 11.4321 6.53627 11.7285C6.31793 12.025 5.9006 12.0883 5.60413 11.87L5.60166 11.8681C5.5054 11.7954 5.22632 11.5846 5.06848 11.4614C4.7504 11.2132 4.32404 10.8712 3.89573 10.4993C3.47073 10.1303 3.02855 9.71881 2.68738 9.33269C2.51747 9.14039 2.35851 8.93868 2.23842 8.73948C2.12936 8.55858 1.99948 8.29535 1.99947 7.9999C1.99948 7.70446 2.12936 7.44118 2.23842 7.26028C2.35851 7.06107 2.51747 6.85936 2.68738 6.66707C3.02855 6.28095 3.47073 5.86944 3.89573 5.50044C4.32404 5.12857 4.7504 4.78656 5.06848 4.53832C5.22632 4.41515 5.50522 4.2045 5.60147 4.1318L5.60413 4.12979C5.9006 3.91145 6.31793 3.97479 6.53627 4.27125C6.75459 4.5677 6.69128 4.985 6.39486 5.20335C6.3061 5.27039 6.04189 5.46998 5.88878 5.58946C5.58187 5.82898 5.17489 6.15559 4.76987 6.50725C4.36153 6.86177 3.97038 7.2287 3.68655 7.54992C3.54397 7.71129 3.41358 7.8967 3.35137 7.99988Z"
-                fill="#B69265"
-              />
-            </svg>
-          </router-link>
-        </v-btn>
-      </div> -->
     </v-card-text>
   </VCard>
 </template>
