@@ -1,7 +1,9 @@
 <script setup>
 import AvatarGroup from "@/@core/components/shared/AvatarGroup";
 import { computed } from "vue";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const props = defineProps({
   id: {
     type: [Number, String],
@@ -87,12 +89,21 @@ const avatars = computed(() =>
     avatar: member.avatar,
   }))
 );
+
+// Navigate to team management page
+const navigateToTeamManagement = () => {
+  if (props.id) {
+    router.push({ name: "team-management", params: { id: props.id } });
+  }
+};
 </script>
 
 <template>
   <VCard
-    class="rounded-lg"
+    class="rounded-lg cursor-pointer"
     style="box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)"
+    @click="navigateToTeamManagement"
+    :class="{ 'opacity-75': !id }"
   >
     <v-card-text class="pa-3 pa-sm-4">
       <div class="d-flex justify-space-between align-center ga-1">
@@ -159,25 +170,38 @@ const avatars = computed(() =>
           class="d-flex flex-column mt-2"
           v-if="teamMembers && teamMembers.length"
         >
-          <div class="d-flex">
-            <span class="text-subtitle-2 font-weight-medium me-2"
-              >المفتشين:</span
-            >
-          </div>
-          <div class="d-flex flex-wrap mt-1">
-            <span
+          <div class="d-flex flex-wrap mt-1 position-relative">
+            <div
               v-for="(member, index) in teamMembers.slice(0, 5)"
               :key="index"
-              class="text-body-2 me-2"
+              class="position-relative"
+              style="margin-left: -10px"
             >
-              {{ member.name
-              }}{{ index < Math.min(teamMembers.length - 1, 4) ? "،" : "" }}
-            </span>
+              <v-avatar size="30" class="border-2 border-white">
+                <v-img
+                  :src="member.avatar_url || 'https://placehold.co/600x400'"
+                  :alt="member.name"
+                  width="30"
+                  height="30"
+                  cover
+                >
+                  <template v-slot:placeholder>
+                    <div class="d-flex align-center justify-center fill-height">
+                      <v-icon
+                        icon="mdi-account"
+                        color="grey-lighten-1"
+                        size="20"
+                      />
+                    </div>
+                  </template>
+                </v-img>
+              </v-avatar>
+            </div>
             <span
               v-if="teamMembers.length > 5"
-              class="text-body-2 font-weight-medium"
+              class="text-body-2 font-weight-medium ms-2 d-flex align-center ms-4"
             >
-              و {{ teamMembers.length - 5 }} آخرين
+              +{{ teamMembers.length - 5 }}
             </span>
           </div>
         </div>

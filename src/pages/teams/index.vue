@@ -16,16 +16,46 @@ const totalItems = ref(0);
 const teams = ref([]);
 const supervisors = ref([]);
 const fieldTeamMembers = ref([]);
+const zones = ref([]);
+const shiftsData = ref([]);
+const filterDialog = ref(false);
+
+// Filter form data
+const filterForm = ref({
+  supervisor_id: null,
+  inspector_ids: [],
+});
 
 // Fetch teams with pagination and search
 const fetchTeams = async () => {
   try {
     isLoading.value = true;
-    const queryParams = new URLSearchParams({
-      page: currentPage.value.toString(),
-      per_page: perPage.value.toString(),
-      search: search.value,
-    });
+    const queryParams = new URLSearchParams();
+
+    // Only add parameters that have values
+    queryParams.append("page", currentPage.value.toString());
+    queryParams.append("per_page", perPage.value.toString());
+
+    if (search.value) {
+      queryParams.append("search", search.value);
+    }
+
+    // Add filter parameters if they exist and have values
+    if (filterForm.value.supervisor_id) {
+      queryParams.append(
+        "supervisor_id",
+        filterForm.value.supervisor_id.toString()
+      );
+    }
+
+    if (
+      filterForm.value.inspector_ids &&
+      filterForm.value.inspector_ids.length > 0
+    ) {
+      filterForm.value.inspector_ids.forEach((id) => {
+        queryParams.append("inspector_ids[]", id.toString());
+      });
+    }
 
     const response = await axios.get(`/teams?${queryParams.toString()}`);
     if (response.data?.data) {
@@ -71,12 +101,12 @@ watch([currentPage, perPage], () => {
   fetchTeams();
 });
 
-// Fetch supervisors and inspectors for the team creation form
+// Fetch supervisors and inspectors for the team creation form and filter
 const fetchSupervisorsAndInspectors = async () => {
   try {
     const [supervisorsResponse, inspectorsResponse] = await Promise.all([
-      axios.get("/users?role=SUPERVISOR"),
-      axios.get("/users?role=INSPECTOR"),
+      axios.get("/users?role_id=2"),
+      axios.get("/users?role_id=3"),
     ]);
 
     if (supervisorsResponse.data?.data) {
@@ -104,32 +134,75 @@ const fetchSupervisorsAndInspectors = async () => {
   }
 };
 
+// Fetch zones for the team creation form
+const fetchZones = async () => {
+  try {
+    const response = await axios.get("/zones?page=1");
+    if (response.data?.data) {
+      zones.value = response.data.data.map((zone) => ({
+        title: zone.name || zone.title,
+        value: zone.id,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching zones:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات المناطق",
+      color: "error",
+    });
+  }
+};
+
+// Fetch shifts for the team creation form
+const fetchShifts = async () => {
+  try {
+    const response = await axios.get("/shifts?page=1");
+    if (response.data?.data) {
+      shiftsData.value = response.data.data.map((shift) => ({
+        title: shift.name || shift.title,
+        value: shift.id,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching shifts:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات المناوبات",
+      color: "error",
+    });
+  }
+};
+
 // Form data and options
 const formModel = ref({
-  location: null,
-  fieldSupervisor: null,
-  fieldTeam: [],
-  shift: null,
+  zone_id: null,
+  supervisor_id: null,
+  inspector_ids: [],
+  shift_id: null,
 });
 
-const locations = [
-  { title: "موقع 1", value: "location1" },
-  { title: "موقع 2", value: "location2" },
-  { title: "موقع 3", value: "location3" },
-];
+// Apply filter function
+const applyFilter = () => {
+  currentPage.value = 1;
+  fetchTeams();
+  filterDialog.value = false;
+};
 
-const shifts = [
-  { title: "07:00 - 15:00", value: 1 },
-  { title: "15:00 - 23:00", value: 2 },
-  { title: "23:00 - 07:00", value: 3 },
-];
+// Reset filter function
+const resetFilter = () => {
+  filterForm.value = {
+    supervisor_id: null,
+    inspector_ids: [],
+  };
+  fetchTeams();
+  filterDialog.value = false;
+};
 
 const handleSubmit = async () => {
   if (
-    !formModel.value.location ||
-    !formModel.value.fieldSupervisor ||
-    !formModel.value.shift ||
-    formModel.value.fieldTeam.length === 0
+    !formModel.value.zone_id ||
+    !formModel.value.supervisor_id ||
+    !formModel.value.shift_id ||
+    formModel.value.inspector_ids.length === 0
   ) {
     appStore.showSnackbar({
       message: "يرجى ملء جميع الحقول المطلوبة",
@@ -141,10 +214,10 @@ const handleSubmit = async () => {
   loading.value = true;
   try {
     await axios.post("/teams", {
-      title: formModel.value.location,
-      supervisor_id: formModel.value.fieldSupervisor,
-      shift_id: formModel.value.shift,
-      inspector_ids: formModel.value.fieldTeam,
+      zone_id: formModel.value.zone_id,
+      supervisor_id: formModel.value.supervisor_id,
+      shift_id: formModel.value.shift_id,
+      inspector_ids: formModel.value.inspector_ids,
     });
 
     appStore.showSnackbar({
@@ -153,6 +226,7 @@ const handleSubmit = async () => {
     });
     dialog.value = false;
     fetchTeams(); // Refresh teams list
+    resetForm();
   } catch (error) {
     console.error("Error creating team:", error);
     appStore.showSnackbar({
@@ -164,19 +238,30 @@ const handleSubmit = async () => {
   }
 };
 
+const resetForm = () => {
+  formModel.value = {
+    zone_id: null,
+    supervisor_id: null,
+    inspector_ids: [],
+    shift_id: null,
+  };
+};
+
 const closeDialog = () => {
   dialog.value = false;
-  formModel.value = {
-    location: null,
-    fieldSupervisor: null,
-    fieldTeam: [],
-    shift: null,
-  };
+  resetForm();
 };
 
 const addNewTeam = () => {
   fetchSupervisorsAndInspectors();
+  fetchZones();
+  fetchShifts();
   dialog.value = true;
+};
+
+const openFilterDialog = () => {
+  fetchSupervisorsAndInspectors();
+  filterDialog.value = true;
 };
 
 onMounted(() => {
@@ -187,22 +272,7 @@ onMounted(() => {
 <template>
   <div>
     <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
-      <v-row v-if="isLoading">
-        <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
-          <VCard elevation="0">
-            <v-card-text class="px-1 py-2">
-              <v-skeleton-loader
-                class="mx-auto"
-                elevation="0"
-                max-width="400"
-                type="list-item-two-line, table-heading"
-              ></v-skeleton-loader>
-            </v-card-text>
-          </VCard>
-        </v-col>
-      </v-row>
-
-      <div v-else>
+      <div>
         <v-container fluid class="mt-٠ px-0 rounded-lg">
           <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
             <v-card-title class="pt-4 pb-6">
@@ -250,7 +320,12 @@ onMounted(() => {
                     </template>
                   </v-text-field>
 
-                  <VBtn color="default" class="btn-icon border" elevation="0">
+                  <VBtn
+                    color="default"
+                    class="btn-icon border"
+                    elevation="0"
+                    @click="openFilterDialog"
+                  >
                     <svg
                       width="1.3rem"
                       height="1.3rem"
@@ -278,7 +353,22 @@ onMounted(() => {
                 </div>
               </div>
 
-              <v-row class="mt-3">
+              <v-row v-if="isLoading">
+                <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
+                  <VCard elevation="0">
+                    <v-card-text class="px-1 py-2">
+                      <v-skeleton-loader
+                        class="mx-auto"
+                        elevation="0"
+                        max-width="400"
+                        type="list-item-two-line, table-heading"
+                      ></v-skeleton-loader>
+                    </v-card-text>
+                  </VCard>
+                </v-col>
+              </v-row>
+
+              <v-row v-else class="mt-3">
                 <v-col
                   v-for="team in teams"
                   :key="team.teamId"
@@ -326,8 +416,8 @@ onMounted(() => {
               <div class="mb-4">
                 <label class="text-subtitle-2 mb-2 d-block">المواقع</label>
                 <v-select
-                  v-model="formModel.location"
-                  :items="locations"
+                  v-model="formModel.zone_id"
+                  :items="zones"
                   variant="outlined"
                   density="comfortable"
                   placeholder="اختر الموقع"
@@ -341,7 +431,7 @@ onMounted(() => {
                   >المشرف الميداني</label
                 >
                 <v-select
-                  v-model="formModel.fieldSupervisor"
+                  v-model="formModel.supervisor_id"
                   :items="supervisors"
                   variant="outlined"
                   density="comfortable"
@@ -356,7 +446,7 @@ onMounted(() => {
                   >فريق المراقبين الميدانيون</label
                 >
                 <v-select
-                  v-model="formModel.fieldTeam"
+                  v-model="formModel.inspector_ids"
                   :items="fieldTeamMembers"
                   item-title="title"
                   item-value="value"
@@ -398,8 +488,8 @@ onMounted(() => {
               <div class="mb-4">
                 <label class="text-subtitle-2 mb-2 d-block">التحويل</label>
                 <v-select
-                  v-model="formModel.shift"
-                  :items="shifts"
+                  v-model="formModel.shift_id"
+                  :items="shiftsData"
                   item-title="title"
                   item-value="value"
                   variant="outlined"
@@ -415,7 +505,7 @@ onMounted(() => {
                   variant="text"
                   color="grey-darken-1"
                   class="me-4"
-                  @click="dialog = false"
+                  @click="closeDialog"
                 >
                   إلغاء
                 </v-btn>
@@ -429,6 +519,94 @@ onMounted(() => {
                 </v-btn>
               </div>
             </v-form>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <!-- Filter Dialog -->
+      <v-dialog v-model="filterDialog" width="500" class="filter-dialog">
+        <v-card class="rounded-lg">
+          <v-card-text class="pa-4">
+            <div class="border-b mb-4">
+              <div class="d-flex justify-space-between align-center">
+                <h2 class="text-h6 font-weight-bold">فلترة الفرق</h2>
+                <v-btn icon @click="filterDialog = false">
+                  <v-icon>mdi-close</v-icon>
+                </v-btn>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block"
+                >المشرف الميداني</label
+              >
+              <v-select
+                v-model="filterForm.supervisor_id"
+                :items="supervisors"
+                variant="outlined"
+                density="comfortable"
+                placeholder="اختر المشرف"
+                hide-details
+                clearable
+                class="rounded-lg bg-grey-lighten-4 px-2"
+              />
+            </div>
+
+            <div class="mb-4">
+              <label class="text-subtitle-2 mb-2 d-block">
+                المراقبين الميدانيين
+              </label>
+              <v-select
+                v-model="filterForm.inspector_ids"
+                :items="fieldTeamMembers"
+                item-title="title"
+                item-value="value"
+                variant="outlined"
+                density="comfortable"
+                placeholder="اختر المراقبين"
+                multiple
+                hide-details
+                clearable
+                class="rounded-lg bg-grey-lighten-4"
+              >
+                <template v-slot:selection="{ item }">
+                  <div class="d-flex align-center ga-2 ms-n2">
+                    <v-avatar size="32" class="">
+                      <v-img :src="item.raw.avatar" :alt="item.title"></v-img>
+                    </v-avatar>
+                    <span class="text-subtitle-2">{{ item.title }}</span>
+                  </div>
+                </template>
+
+                <template v-slot:item="{ item, props }">
+                  <v-list-item
+                    v-bind="props"
+                    :title="item.title"
+                    class="field-team-item"
+                  >
+                    <template v-slot:prepend>
+                      <v-avatar size="32" class="me-3">
+                        <v-img :src="item.raw.avatar" :alt="item.title"></v-img>
+                      </v-avatar>
+                    </template>
+                  </v-list-item>
+                </template>
+              </v-select>
+            </div>
+
+            <div class="d-flex justify-end mt-6">
+              <v-btn
+                variant="text"
+                color="grey-darken-1"
+                class="me-4"
+                @click="resetFilter"
+              >
+                إعادة ضبط
+              </v-btn>
+              <v-btn color="#B69265" class="text-white" @click="applyFilter">
+                تطبيق
+              </v-btn>
+            </div>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -460,7 +638,8 @@ onMounted(() => {
   }
 }
 
-.add-team-dialog {
+.add-team-dialog,
+.filter-dialog {
   :deep(.v-card) {
     background-color: white;
   }

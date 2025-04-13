@@ -7,9 +7,11 @@ import supervisorCard from "@/@core/components/widgets/supervisorCard.vue";
 import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
+import axios from "@/plugins/axios";
 import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 
+const appStore = useAppStore();
 const isLoading = ref(true);
 const route = useRoute();
 const perPage = ref(6);
@@ -23,6 +25,116 @@ const housingPermitNumber = ref("");
 const authorizedContactNumber = ref("");
 const selectedCompany = ref(null);
 const activeTab = ref("all");
+const teamData = ref(null);
+const teamMembers = ref([]);
+const shiftsData = ref([]);
+const supervisors = ref([]);
+const fieldTeamMembers = ref([]);
+const zones = ref([]);
+
+// Form data and options
+const formModel = ref({
+  zone_id: null,
+  supervisor_id: null,
+  inspector_ids: [],
+  shift_id: null,
+});
+
+// API functions
+const fetchTeamData = async () => {
+  try {
+    isLoading.value = true;
+    const response = await axios.get("/teams/2");
+    teamData.value = response.data;
+
+    // Extract team members and shifts from the response if available
+    if (teamData.value?.data) {
+      teamMembers.value = teamData.value.data.inspectors || [];
+      shiftsData.value = teamData.value.data.shifts || [];
+    }
+
+    console.log("Team data fetched:", teamData.value);
+  } catch (error) {
+    console.error("Error fetching team data:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات الفريق",
+      color: "error",
+    });
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Fetch supervisors and inspectors for the team creation form
+const fetchSupervisorsAndInspectors = async () => {
+  try {
+    const [supervisorsResponse, inspectorsResponse] = await Promise.all([
+      axios.get("/users?role_id=2"),
+      axios.get("/users?role_id=3"),
+    ]);
+
+    if (supervisorsResponse.data?.data) {
+      supervisors.value = supervisorsResponse.data.data.map((supervisor) => ({
+        title: `${supervisor.firstname} ${supervisor.lastname}`,
+        value: supervisor.id,
+      }));
+    }
+
+    if (inspectorsResponse.data?.data) {
+      fieldTeamMembers.value = inspectorsResponse.data.data.map(
+        (inspector) => ({
+          title: `${inspector.firstname} ${inspector.lastname}`,
+          value: inspector.id,
+          avatar: inspector.avatar_url || "https://i.pravatar.cc/150",
+        })
+      );
+    }
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات المستخدمين",
+      color: "error",
+    });
+  }
+};
+
+// Fetch zones for the team creation form
+const fetchZones = async () => {
+  try {
+    const response = await axios.get("/zones?page=1");
+    if (response.data?.data) {
+      zones.value = response.data.data.map((zone) => ({
+        title: zone.name || zone.title,
+        value: zone.id,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching zones:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات المناطق",
+      color: "error",
+    });
+  }
+};
+
+// Fetch shifts for the team creation form
+const fetchShifts = async () => {
+  try {
+    const response = await axios.get("/shifts?page=1");
+    if (response.data?.data) {
+      shiftsData.value = response.data.data.map((shift) => ({
+        title: shift.name || shift.title,
+        value: shift.id,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching shifts:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء جلب بيانات المناوبات",
+      color: "error",
+    });
+  }
+};
 
 const siteTypes = [
   { title: "موقع سكني", value: "residential" },
@@ -76,27 +188,58 @@ const complaintOptions = ref([
 ]);
 
 const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
-  dialogStep.value = 1;
-};
+  if (
+    !formModel.value.zone_id ||
+    !formModel.value.supervisor_id ||
+    !formModel.value.shift_id ||
+    formModel.value.inspector_ids.length === 0
+  ) {
+    appStore.showSnackbar({
+      message: "يرجى ملء جميع الحقول المطلوبة",
+      color: "error",
+    });
+    return;
+  }
 
-const nextStep = () => {
-  if (siteType.value) {
-    dialogStep.value = 2;
+  loading.value = true;
+  try {
+    await axios.post("/teams", {
+      zone_id: formModel.value.zone_id,
+      supervisor_id: formModel.value.supervisor_id,
+      shift_id: formModel.value.shift_id,
+      inspector_ids: formModel.value.inspector_ids,
+    });
+
+    appStore.showSnackbar({
+      message: "تم إضافة الفريق بنجاح",
+      color: "success",
+    });
+    dialog.value = false;
+    fetchTeamData(); // Refresh team data
+    resetForm();
+  } catch (error) {
+    console.error("Error creating team:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء إضافة الفريق",
+      color: "error",
+    });
+  } finally {
+    loading.value = false;
   }
 };
 
-const prevStep = () => {
-  dialogStep.value = 1;
+const resetForm = () => {
+  formModel.value = {
+    zone_id: null,
+    supervisor_id: null,
+    inspector_ids: [],
+    shift_id: null,
+  };
 };
 
 const closeDialog = () => {
   dialog.value = false;
-  dialogStep.value = 1;
+  resetForm();
 };
 
 const addNewLocation = () => {
@@ -104,7 +247,9 @@ const addNewLocation = () => {
 };
 
 const addNewTeam = () => {
-  // Add your team creation logic here
+  fetchSupervisorsAndInspectors();
+  fetchZones();
+  fetchShifts();
   dialog.value = true;
 };
 
@@ -126,9 +271,7 @@ const breadcrumbItems = computed(() =>
 );
 
 onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 100);
+  fetchTeamData();
 });
 </script>
 
@@ -475,34 +618,126 @@ onMounted(() => {
                 v-model:page="currentPage"
               />
 
-              <!-- Add Site Modal -->
+              <!-- Add Team Modal -->
               <v-dialog v-model="dialog" width="500" class="add-site-dialog">
                 <v-card class="rounded-lg">
                   <v-card-text class="pa-4">
-                    <h2 class="text-h6 font-weight-bold">
-                      {{
-                        dialogStep === 1 ? "اختر نوع الموقع" : "إضافة موقع جديد"
-                      }}
-                    </h2>
-                    <p class="card-gray-text border-b pb-3">
-                      حدد تفاصيل الموقع الجديد
-                    </p>
+                    <div class="border-b mb-4">
+                      <div class="d-flex justify-space-between align-center">
+                        <h2 class="text-h6 font-weight-bold">
+                          إدارة الفرق الميدانية
+                        </h2>
+                        <v-btn icon @click="closeDialog">
+                          <v-icon>mdi-close</v-icon>
+                        </v-btn>
+                      </div>
+                      <p class="text-subtitle-1 text-medium-emphasis mb-2">
+                        حدد تفاصيل الفريق الميداني
+                      </p>
+                    </div>
 
-                    <!-- Step 1: Select Site Type -->
-                    <v-form v-if="dialogStep === 1" @submit.prevent="nextStep">
+                    <v-form @submit.prevent="handleSubmit">
+                      <!-- Zone/Location -->
                       <div class="mb-4">
                         <label class="text-subtitle-2 mb-2 d-block"
-                          >نوع الموقع</label
+                          >المواقع</label
                         >
                         <v-select
-                          v-model="siteType"
-                          :items="siteTypes"
+                          v-model="formModel.zone_id"
+                          :items="zones"
+                          item-title="title"
+                          item-value="value"
                           variant="outlined"
                           density="comfortable"
-                          placeholder="اختر نوع الموقع"
+                          placeholder="اختر الموقع"
+                          hide-details
+                          class="rounded-lg bg-grey-lighten-4 px-2"
+                        />
+                      </div>
+
+                      <!-- Supervisor -->
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >المشرف الميداني</label
+                        >
+                        <v-select
+                          v-model="formModel.supervisor_id"
+                          :items="supervisors"
+                          item-title="title"
+                          item-value="value"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="اختر المشرف"
+                          hide-details
+                          class="rounded-lg bg-grey-lighten-4 px-2"
+                        />
+                      </div>
+
+                      <!-- Team Members -->
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >فريق المراقبين الميدانيون</label
+                        >
+                        <v-select
+                          v-model="formModel.inspector_ids"
+                          :items="fieldTeamMembers"
+                          item-title="title"
+                          item-value="value"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="اختر الفريق"
+                          multiple
                           hide-details
                           class="rounded-lg bg-grey-lighten-4"
-                          required
+                        >
+                          <template v-slot:selection="{ item }">
+                            <div class="d-flex align-center ga-2 ms-n2">
+                              <v-avatar size="32" class="">
+                                <v-img
+                                  :src="item.raw.avatar"
+                                  :alt="item.title"
+                                ></v-img>
+                              </v-avatar>
+                              <span class="text-subtitle-2">{{
+                                item.title
+                              }}</span>
+                            </div>
+                          </template>
+
+                          <template v-slot:item="{ item, props }">
+                            <v-list-item
+                              v-bind="props"
+                              :title="item.title"
+                              class="field-team-item"
+                            >
+                              <template v-slot:prepend>
+                                <v-avatar size="32" class="me-3">
+                                  <v-img
+                                    :src="item.raw.avatar"
+                                    :alt="item.title"
+                                  ></v-img>
+                                </v-avatar>
+                              </template>
+                            </v-list-item>
+                          </template>
+                        </v-select>
+                      </div>
+
+                      <!-- Shift -->
+                      <div class="mb-4">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >التحويل</label
+                        >
+                        <v-select
+                          v-model="formModel.shift_id"
+                          :items="shiftsData"
+                          item-title="title"
+                          item-value="value"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="اختر التحويل"
+                          hide-details
+                          class="rounded-lg bg-grey-lighten-4 px-2"
                         />
                       </div>
 
@@ -515,105 +750,6 @@ onMounted(() => {
                           @click="closeDialog"
                         >
                           إلغاء
-                        </v-btn>
-                        <v-btn
-                          color="#B69265"
-                          class="text-white px-6"
-                          type="submit"
-                        >
-                          التالي
-                        </v-btn>
-                      </div>
-                    </v-form>
-
-                    <!-- Step 2: Fill Details -->
-                    <v-form v-else @submit.prevent="handleSubmit">
-                      <!-- Housing Permit Number -->
-                      <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >رقم تصريح السكن</label
-                        >
-                        <v-text-field
-                          v-model="housingPermitNumber"
-                          variant="outlined"
-                          density="comfortable"
-                          placeholder="رقم تصريح السكن"
-                          hide-details
-                          class="rounded-lg bg-grey-lighten-4"
-                          required
-                        />
-                      </div>
-
-                      <!-- Authorized Contact Number -->
-                      <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >رقم تواصل المفوض</label
-                        >
-                        <div class="d-flex">
-                          <v-text-field
-                            v-model="authorizedContactNumber"
-                            variant="outlined"
-                            density="comfortable"
-                            placeholder="00"
-                            hide-details
-                            class="rounded-lg bg-grey-lighten-4 flex-grow-1"
-                            required
-                          />
-                          <v-select
-                            value="+966"
-                            :items="[
-                              { title: '+966', value: '+966' },
-                              { title: '+964', value: '+964' },
-                              { title: '+965', value: '+965' },
-                            ]"
-                            variant="outlined"
-                            density="comfortable"
-                            hide-details
-                            class="country-code-select ms-2 rounded-lg bg-grey-lighten-4"
-                            style="max-width: 110px"
-                          />
-                        </div>
-                      </div>
-
-                      <!-- Companies -->
-                      <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >الشركات</label
-                        >
-                        <v-select
-                          v-model="selectedCompany"
-                          :items="companies"
-                          variant="outlined"
-                          density="comfortable"
-                          placeholder="اختر الشركات"
-                          hide-details
-                          class="rounded-lg bg-grey-lighten-4"
-                          required
-                        />
-                      </div>
-
-                      <!-- Map -->
-                      <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >الاحداثيات</label
-                        >
-                        <div
-                          class="map-container rounded-lg overflow-hidden"
-                          style="height: 100px"
-                        >
-                          map
-                        </div>
-                      </div>
-
-                      <!-- Action Buttons -->
-                      <div class="d-flex justify-end mt-6">
-                        <v-btn
-                          variant="text"
-                          color="grey-darken-1"
-                          class="me-4"
-                          @click="prevStep"
-                        >
-                          رجوع
                         </v-btn>
                         <v-btn
                           color="#B69265"
@@ -764,5 +900,39 @@ onMounted(() => {
 
 .text-13 {
   font-size: 13px;
+}
+
+.field-team-item {
+  padding: 8px;
+  border-radius: 8px;
+  margin: 4px 0;
+
+  &:hover {
+    background-color: rgba(182, 146, 101, 0.05);
+  }
+
+  &.v-list-item--active {
+    background-color: rgba(182, 146, 101, 0.1);
+  }
+}
+
+:deep(.v-select) {
+  .v-field__input {
+    padding-top: 0;
+    padding-bottom: 0;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+  }
+
+  .v-field__placeholder {
+    transform: translateY(0) !important;
+    padding: 0 6px;
+    margin-top: 6px;
+  }
+
+  .v-field__field {
+    padding-top: 0 !important;
+  }
 }
 </style>
