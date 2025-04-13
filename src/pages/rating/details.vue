@@ -685,7 +685,7 @@ onMounted(() => {
                               <div
                                 class="pa-2 rounded-pill text-center"
                                 :style="`${
-                                  question.answer?.answer != 0
+                                  question.answer?.answer == 1
                                     ? 'background-color: #4e9158;color: white;'
                                     : 'background-color: #F9F9F9;color: black;'
                                 }`"
