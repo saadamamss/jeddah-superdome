@@ -1,0 +1,16 @@
+<template>
+  <v-autocomplete
+    item-title="label"
+    item-value="value"
+    hide-details
+    hide-no-data
+    return-object
+    min-width="150"
+    open-on-clear
+    variant="filled"
+    bg-color="#22201E"
+    class="custom-select"
+    clearable
+  >
+  </v-autocomplete>
+</template>
