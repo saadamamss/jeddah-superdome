@@ -100,19 +100,24 @@ const navigateToTeamManagement = () => {
 
 <template>
   <VCard
-    class="rounded-lg cursor-pointer"
+    class="rounded-lg"
     style="box-shadow: 0px 4px 44px 4px rgba(0, 0, 0, 0.04)"
-    @click="navigateToTeamManagement"
     :class="{ 'opacity-75': !id }"
   >
     <v-card-text class="pa-3 pa-sm-4">
       <div class="d-flex justify-space-between align-center ga-1">
         <div>
-          <span
-            class="text-lg text-black text-truncate"
-            style="max-width: 200px; display: inline-block"
-            >{{ title }}</span
-          >
+          <h2 style="max-width: 200px; display: inline-block">
+            <RouterLink
+              :to="{
+                name: 'team-management',
+                params: { id },
+              }"
+              class="text-h6 text-black text-truncate"
+            >
+              {{ title }}
+            </RouterLink>
+          </h2>
         </div>
         <div class="d-flex align-center ga-2">
           <span>
@@ -166,44 +171,72 @@ const navigateToTeamManagement = () => {
         </div>
 
         <!-- Inspectors Section -->
-        <div
-          class="d-flex flex-column mt-2"
-          v-if="teamMembers && teamMembers.length"
-        >
-          <div class="d-flex flex-wrap mt-1 position-relative">
-            <div
-              v-for="(member, index) in teamMembers.slice(0, 5)"
-              :key="index"
-              class="position-relative"
-              style="margin-left: -10px"
-            >
-              <v-avatar size="30" class="border-2 border-white">
-                <v-img
-                  :src="member.avatar_url || 'https://placehold.co/600x400'"
-                  :alt="member.name"
-                  width="30"
-                  height="30"
-                  cover
-                >
-                  <template v-slot:placeholder>
-                    <div class="d-flex align-center justify-center fill-height">
-                      <v-icon
-                        icon="mdi-account"
-                        color="grey-lighten-1"
-                        size="20"
-                      />
-                    </div>
-                  </template>
-                </v-img>
-              </v-avatar>
+        <div class="d-flex align-center justify-space-between">
+          <div
+            class="d-flex flex-column mt-2"
+            v-if="teamMembers && teamMembers.length"
+          >
+            <div class="d-flex flex-wrap mt-1 position-relative">
+              <div
+                v-for="(member, index) in teamMembers.slice(0, 5)"
+                :key="index"
+                class="position-relative"
+                style="margin-left: -10px"
+              >
+                <v-avatar size="30" class="border-2 border-white">
+                  <v-img
+                    :src="member.avatar_url || 'https://placehold.co/600x400'"
+                    :alt="member.name"
+                    width="30"
+                    height="30"
+                    cover
+                  >
+                    <template v-slot:placeholder>
+                      <div
+                        class="d-flex align-center justify-center fill-height"
+                      >
+                        <v-icon
+                          icon="mdi-account"
+                          color="grey-lighten-1"
+                          size="20"
+                        />
+                      </div>
+                    </template>
+                  </v-img>
+                </v-avatar>
+              </div>
+              <span
+                v-if="teamMembers.length > 5"
+                class="text-body-2 font-weight-medium ms-2 d-flex align-center ms-4"
+              >
+                +{{ teamMembers.length - 5 }}
+              </span>
             </div>
-            <span
-              v-if="teamMembers.length > 5"
-              class="text-body-2 font-weight-medium ms-2 d-flex align-center ms-4"
-            >
-              +{{ teamMembers.length - 5 }}
-            </span>
           </div>
+          <v-btn
+            size="small"
+            elevation="0"
+            class="btn-card-link px-3 text-primary rounded-xl"
+            :to="{
+              name: 'team-management',
+              params: { id },
+            }"
+          >
+            <span class="font-weight-bold">عرض</span>
+            <svg
+              style="rotate: 180deg"
+              width="1.1rem"
+              height="1.1rem"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6.38 12.2867C6.28667 12.2867 6.19333 12.2533 6.12 12.18C5.97333 12.0333 5.97333 11.7867 6.12 11.64L9.75333 8.00668L6.12 4.37334C5.97333 4.22668 5.97333 3.98001 6.12 3.83334C6.26667 3.68668 6.51333 3.68668 6.66 3.83334L10.6133 7.78668C10.76 7.93334 10.76 8.18001 10.6133 8.32668L6.66 12.28C6.56667 12.2533 6.47333 12.2867 6.38 12.2867Z"
+                fill="#B69265"
+              />
+            </svg>
+          </v-btn>
         </div>
       </div>
     </v-card-text>
