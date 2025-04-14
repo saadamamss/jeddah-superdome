@@ -18,7 +18,7 @@ const loading = ref(false);
 const users = ref([]);
 const totalUsers = ref(0);
 const userDialog = ref(false);
-const editUserDialog = ref(false);
+const isEditingDialog = ref(false);
 const selectedUser = ref(null);
 const deleteDialog = ref(false);
 const userToDelete = ref(null);
@@ -29,8 +29,8 @@ const userStatistics = ref(null);
 // Form data for new user
 const newUserForm = ref({
   firstname: "",
-  secondname: "",
-  thirdname: "",
+  // secondname: "",
+  // thirdname: "",
   lastname: "",
   email: "",
   phone: "",
@@ -42,14 +42,14 @@ const newUserForm = ref({
   gender: "",
   nationality: "",
   sa_id: "",
-  personal_image: "",
+  // personal_image: "",
 });
 
 // Form data for edit user
 const editUserForm = ref({
   firstname: "",
-  secondname: "",
-  thirdname: "",
+  // secondname: "",
+  // thirdname: "",
   lastname: "",
   email: "",
   phone: "",
@@ -59,7 +59,7 @@ const editUserForm = ref({
   gender: "",
   nationality: "",
   sa_id: "",
-  personal_image: "",
+  // personal_image: "",
 });
 
 // Filter form data
@@ -230,7 +230,7 @@ const updateUser = async () => {
         message: "تم تحديث بيانات المستخدم بنجاح",
         color: "success",
       });
-      editUserDialog.value = false;
+      isEditingDialog.value = false;
       await fetchUsers();
     }
   } catch (error) {
@@ -283,8 +283,8 @@ const deleteUser = async () => {
 const resetNewUserForm = () => {
   newUserForm.value = {
     firstname: "",
-    secondname: "",
-    thirdname: "",
+    // secondname: "",
+    // thirdname: "",
     lastname: "",
     email: "",
     phone: "",
@@ -305,8 +305,8 @@ const countryCode = ref("+966");
 const populateEditForm = (user) => {
   editUserForm.value = {
     firstname: user.firstname || "",
-    secondname: user.secondname || "",
-    thirdname: user.thirdname || "",
+    // secondname: user.secondname || "",
+    // thirdname: user.thirdname || "",
     lastname: user.lastname || "",
     email: user.email || "",
     phone: user.phone || "",
@@ -316,7 +316,7 @@ const populateEditForm = (user) => {
     gender: user.gender || "",
     nationality: user.nationality || "",
     sa_id: user.sa_id || "",
-    personal_image: user.personal_image || "",
+    // personal_image: user.personal_image || "",
   };
 };
 
@@ -536,14 +536,14 @@ onMounted(() => {
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12">
+              <!-- <v-col cols="12">
                 <label class="mb-2 d-block">الاسم الثاني</label>
                 <v-text-field v-model="newUserForm.secondname"></v-text-field>
-              </v-col>
-              <v-col cols="12">
+              </v-col> -->
+              <!-- <v-col cols="12">
                 <label class="mb-2 d-block">الاسم الثالث</label>
                 <v-text-field v-model="newUserForm.thirdname"></v-text-field>
-              </v-col>
+              </v-col> -->
               <v-col cols="12">
                 <label class="mb-2 d-block">اسم العائلة</label>
                 <v-text-field
@@ -686,7 +686,7 @@ onMounted(() => {
     </v-dialog>
 
     <!-- Edit User Dialog -->
-    <v-dialog v-model="editUserDialog" max-width="600px">
+    <v-dialog v-model="isEditingDialog" max-width="600px">
       <v-card class="pa-4">
         <v-card-title class="text-h5 mb-4">تعديل بيانات المستخدم</v-card-title>
         <v-card-text>
@@ -699,18 +699,18 @@ onMounted(() => {
                   required
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6">
+              <!-- <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="editUserForm.secondname"
                   label="الاسم الثاني"
                 ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6">
+              </v-col> -->
+              <!-- <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="editUserForm.thirdname"
                   label="الاسم الثالث"
                 ></v-text-field>
-              </v-col>
+              </v-col> -->
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="editUserForm.lastname"
@@ -785,7 +785,7 @@ onMounted(() => {
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" variant="text" @click="editUserDialog = false">
+          <v-btn color="error" variant="text" @click="isEditingDialog = false">
             إلغاء
           </v-btn>
           <v-btn
