@@ -44,7 +44,7 @@ const formModel = ref({
 const fetchTeamData = async () => {
   try {
     isLoading.value = true;
-    const response = await axios.get("/teams/2");
+    const response = await axios.get(`/teams/${route.params.id}`);
     teamData.value = response.data;
 
     // Extract team members and shifts from the response if available
