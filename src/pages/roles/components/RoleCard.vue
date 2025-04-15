@@ -3,52 +3,25 @@ import AvatarGroup from "@/@core/components/shared/AvatarGroup";
 import { computed } from "vue";
 
 const props = defineProps({
-  title: "",
-  companiesCount: 0,
-  teamMembers: {
-    type: Array,
-    default: () => [
-      {
-        id: 1,
-        name: "عبدالله قحطاني",
-        avatar: "/imgs/person.svg",
-      },
-      {
-        id: 2,
-        name: "أحمد علي",
-        avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
-      },
-      {
-        id: 3,
-        name: "عبدالله قحطاني",
-        avatar: "/imgs/person.svg",
-      },
-      {
-        id: 1,
-        name: "عبدالله قحطاني",
-        avatar: "/imgs/person.svg",
-      },
-      {
-        id: 2,
-        name: "أحمد علي",
-        avatar: "https://avatars0.githubusercontent.com/u/9064066?v=4&s=460",
-      },
-      {
-        id: 3,
-        name: "عبدالله قحطاني",
-        avatar: "/imgs/person.svg",
-      },
-    ],
+  role: {
+    type: Object,
+    required: true,
+    default: () => ({
+      id: 0,
+      name: "",
+      users: [],
+      permissions: [],
+    }),
   },
 });
 
-const emit = defineEmits(["delete-role"]);
+const emit = defineEmits(["delete-role", "edit-role"]);
 
-// Map teamMembers to the format expected by AvatarGroup
+// Map users to the format expected by AvatarGroup
 const avatars = computed(() =>
-  props.teamMembers.map((member) => ({
-    name: member.name,
-    avatar: member.avatar,
+  (props.role.users || []).map((user) => ({
+    name: user.name,
+    avatar: user.avatar || "/imgs/person.svg",
   }))
 );
 </script>
@@ -61,10 +34,10 @@ const avatars = computed(() =>
     <v-card-text class="pa-3 pa-sm-4">
       <div class="d-flex justify-space-between align-center ga-2">
         <div>
-          <h2 class="text-lg">مراقب ميداني</h2>
+          <h2 class="text-lg">{{ role.name }}</h2>
         </div>
         <div class="d-flex align-center ga-2">
-          <v-btn icon variant="text">
+          <v-btn icon variant="text" @click="emit('edit-role', role)">
             <svg
               width="1rem"
               height="1rem"
@@ -77,20 +50,10 @@ const avatars = computed(() =>
                 d="M2.17757 14.6418L2.36423 14.6467C3.73612 14.6826 4.42207 14.7005 5.04603 14.4568C5.66998 14.2131 6.16923 13.7322 7.16773 12.7705L7.16774 12.7705L13.104 7.05293L9.00065 3.00098L3.1936 9.29731C2.38694 10.1713 1.98361 10.6083 1.74979 11.1465C1.51597 11.6846 1.46932 12.2833 1.37604 13.4807L1.35804 13.7118C1.32489 14.1372 1.30832 14.3499 1.42971 14.4877C1.5511 14.6254 1.75992 14.6309 2.17757 14.6418Z"
                 fill="#B69265"
               />
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M10.1366 1.19686C10.9263 0.727184 11.9003 0.712466 12.7035 1.15838C13.0367 1.34336 13.3406 1.65402 13.7926 2.11603L13.9153 2.24141C14.3688 2.70443 14.6724 3.01432 14.8526 3.35309C15.285 4.16583 15.2709 5.14903 14.8152 5.9487C14.6252 6.28202 14.3128 6.58274 13.8462 7.03187L7.43378 13.2081C6.51321 14.0951 5.94581 14.6418 5.22786 14.9222C4.50887 15.203 3.72709 15.1824 2.46229 15.1491L2.13765 15.1406C1.95229 15.1358 1.7649 15.131 1.61019 15.1052C1.4325 15.0755 1.22146 15.0074 1.05449 14.8179C0.88902 14.6301 0.846558 14.4134 0.836622 14.2351C0.827837 14.0775 0.842593 13.8886 0.857423 13.6989L0.884701 13.3487C0.970889 12.2403 1.02358 11.5627 1.29113 10.9469C1.55902 10.3303 2.01668 9.83458 2.76339 9.0258L9.0757 2.18672C9.51426 1.71125 9.80901 1.39169 10.1366 1.19686ZM12.2181 2.03268C11.7263 1.75962 11.1318 1.76846 10.6478 2.05634C10.4622 2.16671 10.2719 2.36516 9.75047 2.93007L9.69609 2.98899L13.0843 6.37724L13.0899 6.37187C13.6423 5.83983 13.8374 5.64481 13.9464 5.45355C14.2322 4.952 14.2412 4.33297 13.9698 3.82278C13.8663 3.62818 13.6768 3.42728 13.14 2.87893C12.6025 2.32987 12.4066 2.13735 12.2181 2.03268ZM3.56095 9.63611L9.01731 3.72441L12.364 7.07108L6.8208 12.4101C5.79244 13.4005 5.37324 13.7919 4.86404 13.9907C4.35595 14.1892 3.79037 14.1835 2.37722 14.1465L2.19056 14.1417C2.08422 14.1389 1.99999 14.1366 1.92766 14.1329C1.89019 14.1309 1.85937 14.1287 1.83383 14.1262C1.8341 14.046 1.84224 13.9327 1.85645 13.7503L1.87445 13.5193C1.97036 12.2882 2.0156 11.7889 2.2083 11.3454C2.40063 10.9027 2.73155 10.5347 3.56095 9.63611Z"
-                fill="#B69265"
-              />
-              <path
-                d="M9.33398 14.1673C9.05784 14.1673 8.83398 14.3912 8.83398 14.6673C8.83398 14.9435 9.05784 15.1673 9.33398 15.1673H14.6673C14.9435 15.1673 15.1673 14.9435 15.1673 14.6673C15.1673 14.3912 14.9435 14.1673 14.6673 14.1673H9.33398Z"
-                fill="#B69265"
-              />
             </svg>
           </v-btn>
           <v-btn
-            @click="emit('delete-role', 1)"
+            @click="emit('delete-role', role.id)"
             icon
             variant="text"
             style="background-color: #faeeeb"
@@ -120,6 +83,12 @@ const avatars = computed(() =>
       <VDivider class="my-5" />
       <div class="d-flex align-center justify-space-between ga-4">
         <AvatarGroup :avatars="avatars" :size="32" />
+        <div
+          v-if="role.permissions && role.permissions.length"
+          class="text-caption text-grey"
+        >
+          {{ role.permissions.length }} صلاحية
+        </div>
       </div>
     </v-card-text>
   </VCard>
