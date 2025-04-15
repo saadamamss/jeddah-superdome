@@ -35,6 +35,12 @@ const zones = ref([]);
 const teamZones = ref([]);
 const mapDialog = ref(false);
 const name = ref("");
+const inspectorsPagination = ref({
+  totalItems: 0,
+  itemsPerPage: 15,
+  currentPage: 1,
+  totalPages: 1,
+});
 
 // Form data and options
 const formModel = ref({
@@ -48,7 +54,12 @@ const formModel = ref({
 const fetchTeamData = async () => {
   try {
     isLoading.value = true;
-    const response = await axios.get(`/teams/${route.params.id}`);
+    const response = await axios.get(`/teams/${route.params.id}`, {
+      params: {
+        page: inspectorsPagination.value.currentPage,
+        per_page: inspectorsPagination.value.itemsPerPage,
+      },
+    });
     teamData.value = response.data;
 
     // Extract team members and shifts from the response if available
@@ -56,6 +67,17 @@ const fetchTeamData = async () => {
       teamMembers.value = teamData.value.data.inspectors || [];
       teamZones.value = teamData.value.data.zones || [];
       shiftsData.value = teamData.value.data.shifts || [];
+
+      // Update pagination data
+      if (teamData.value.data.inspectors_pagination) {
+        const paginationData = teamData.value.data.inspectors_pagination;
+        inspectorsPagination.value = {
+          totalItems: paginationData.i_total_objects,
+          itemsPerPage: paginationData.i_per_page,
+          currentPage: paginationData.i_current_page,
+          totalPages: paginationData.i_total_pages,
+        };
+      }
     }
 
     console.log("Team data fetched:", teamData.value);
@@ -323,6 +345,13 @@ const handleMapError = (error) => {
     message: "حدث خطأ أثناء تحميل الخريطة",
     color: "error",
   });
+};
+
+const handlePageSizeChange = async (newSize) => {
+  // Reset to page 1 when changing page size
+  inspectorsPagination.value.currentPage = 1;
+  inspectorsPagination.value.itemsPerPage = newSize;
+  await fetchTeamData();
 };
 
 onMounted(() => {
@@ -678,9 +707,11 @@ onMounted(() => {
               <!-- pagination -->
               <Pagination
                 v-if="teamMembers.length > 0"
-                :total-items="teamMembers.length"
-                v-model:per-page="perPage"
-                v-model:page="currentPage"
+                :total-items="inspectorsPagination.totalItems"
+                v-model:per-page="inspectorsPagination.itemsPerPage"
+                v-model:page="inspectorsPagination.currentPage"
+                @update:page="fetchTeamData"
+                @update:per-page="handlePageSizeChange"
               />
 
               <!-- Add Team Modal -->

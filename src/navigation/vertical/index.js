@@ -86,12 +86,12 @@ export default [
     icon: UsersIcon,
     permission: true,
   },
-  // {
-  //   title: "إدارة الأدوار والصلاحيات ",
-  //   to: { name: "roles" },
-  //   icon: RolesIcon,
-  //   permission: true,
-  // },
+  {
+    title: "إدارة الأدوار والصلاحيات ",
+    to: { name: "roles" },
+    icon: RolesIcon,
+    permission: true,
+  },
   // {
   //   title: "اداره الورديات",
   //   to: { name: "shifts" },
