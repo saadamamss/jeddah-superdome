@@ -11,6 +11,7 @@ import CompanyIcon from "./icons/Company";
 import ShiftsIcon from "./icons/Shifts";
 import QuestionnairesIcon from "./icons/Questionnaires";
 import AttendanceIcon from "./icons/Attendance";
+import IntegrationIcon from "./icons/Integration";
 
 export default [
   {
@@ -65,6 +66,12 @@ export default [
     title: "⁠⁠إدارة الملاحظات",
     to: { name: "notes" },
     icon: NotesIcon,
+    permission: true,
+  },
+  {
+    title: "إدارة التكاملات",
+    to: { name: "integrations" },
+    icon: IntegrationIcon,
     permission: true,
   },
   {

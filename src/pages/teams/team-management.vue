@@ -364,16 +364,17 @@ onMounted(() => {
                 <div class="pa-3 shadow-md rounded-lg">
                   <div class="text-h6 font-weight-bold mb-4">المشرف</div>
 
+                  {{}}
                   <!-- Supervisor Card -->
                   <div
-                    v-if="teamData?.data?.supervisor"
+                    v-if="teamData?.data.team.supervisor"
                     class="bg-white mt-4 rounded-lg pa-4"
                   >
                     <div class="d-flex align-items-center gap-3">
                       <v-avatar size="56">
                         <v-img
                           :src="
-                            teamData.data.supervisor.avatar_url ||
+                            teamData?.data.team.supervisor.avatar_url ||
                             'https://placehold.co/400'
                           "
                           alt="Supervisor"
@@ -381,11 +382,11 @@ onMounted(() => {
                       </v-avatar>
                       <div>
                         <h3 class="text-h6 mb-0">
-                          {{ teamData.data.supervisor.firstname }}
-                          {{ teamData.data.supervisor.lastname }}
+                          {{ teamData?.data.team.supervisor.firstname }}
+                          {{ teamData?.data.team.supervisor.lastname }}
                         </h3>
                         <p class="text-body-2 text-medium-emphasis mb-0">
-                          {{ teamData.data.supervisor.role.title }}
+                          {{ teamData?.data.team.supervisor.role.title }}
                         </p>
                       </div>
                     </div>
@@ -427,7 +428,7 @@ onMounted(() => {
                               رقم الهوية
                             </div>
                             <div class="text-body-2 font-weight-medium">
-                              {{ teamData.data.supervisor.sa_id }}
+                              {{ teamData?.data.team.supervisor.sa_id }}
                             </div>
                           </div>
                         </div>
@@ -463,16 +464,16 @@ onMounted(() => {
 
                           <div>
                             <div class="text-body-2 text-medium-emphasis">
-                              عدد المساكن المسندة
+                              عدد المساكن المسنده
                             </div>
                             <div class="text-body-2 font-weight-medium">
-                              {{ teamData.data.supervisor.builds || "-" }}
+                              {{ teamData?.data.team.locations_count || "-" }}
                             </div>
                           </div>
                         </div>
 
                         <!-- map -->
-                        <div class="d-flex justify-space-between align-center">
+                        <!-- <div class="d-flex justify-space-between align-center">
                           <div
                             class="d-flex align-start gap-2 cursor-pointer"
                             @click="openMapDialog"
@@ -520,7 +521,7 @@ onMounted(() => {
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </div> -->
 
                         <!-- Shift Information -->
                         <div class="d-flex align-center gap-2">
@@ -557,7 +558,7 @@ onMounted(() => {
                               نوبة العمل
                             </div>
                             <div class="text-body-2 font-weight-medium">
-                              ----
+                              {{ teamData?.data.team.shift.name || "-" }}
                             </div>
                           </div>
                         </div>
@@ -580,8 +581,8 @@ onMounted(() => {
                   </v-card-title>
                   <v-card-text class="pa-0">
                     <MapDisplay
-                      :latitude="teamData?.data?.supervisor?.latitude"
-                      :longitude="teamData?.data?.supervisor?.longitude"
+                      :latitude="teamData?.data.team.supervisor?.latitude"
+                      :longitude="teamData?.data.team.supervisor?.longitude"
                       :readonly="true"
                       height="500px"
                       @error="handleMapError"
