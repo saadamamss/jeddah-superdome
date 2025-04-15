@@ -219,6 +219,7 @@ const tableHeaders = [
   { title: "الوردية", key: "shift" },
   { title: "وقت الحضور", key: "checkIn" },
   { title: "وقت الانصراف", key: "checkOut" },
+  { title: "أيام الحضور", key: "attendanceDays" },
   { title: "أيام الغياب", key: "absenceDays" },
   { title: "اسم مسؤول التحضير", key: "supervisor" },
   { title: "تم التحضير بواسطة", key: "checkedBy" },
@@ -299,7 +300,9 @@ const fetchAttendance = async () => {
         checkOut: item.departure_datetime
           ? formatTime(item.departure_datetime)
           : "-",
-        absenceDays: item.absence_days.toString(),
+        attendanceDays: item.attendance_days?.toString(),
+        absenceDays: item.absence_days?.toString(),
+
         supervisor: item.supervisor
           ? `${item.supervisor.firstname} ${item.supervisor.lastname}`
           : "-",
