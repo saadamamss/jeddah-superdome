@@ -45,24 +45,24 @@ export default [
     icon: RatingIcon,
     permission: true,
   },
-  {
-    title: "إدارة الباقات (التعاقدات)",
-    to: { name: "contracts" },
-    icon: ContractsIcon,
-    permission: true,
-  },
+  // {
+  //   title: "إدارة الباقات (التعاقدات)",
+  //   to: { name: "contracts" },
+  //   icon: ContractsIcon,
+  //   permission: true,
+  // },
   {
     title: "إدارة الاستبيانات",
     to: { name: "questionnaires" },
     icon: QuestionnairesIcon,
     permission: true,
   },
-  {
-    title: "إدارة التنبيهات",
-    to: { name: "notifications" },
-    icon: NotificationIcon,
-    permission: true,
-  },
+  // {
+  //   title: "إدارة التنبيهات",
+  //   to: { name: "notifications" },
+  //   icon: NotificationIcon,
+  //   permission: true,
+  // },
   // {
   //   title: "⁠⁠إدارة المراحل",
   //   to: { name: "main-sectors" },

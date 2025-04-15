@@ -150,4 +150,9 @@ body pre {
 body .v-btn--variant-outlined {
   border-color: #e9ebec;
 }
+
+.text-subtitle-2,
+.whitespace-wrap {
+  white-space: normal !important;
+}
 </style>

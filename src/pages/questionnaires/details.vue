@@ -146,19 +146,19 @@ onMounted(() => {
 
                     <div class="d-flex justify-space-between mb-4">
                       <div class="d-flex flex-column ga-1">
-                        <span class="text-caption text-medium-emphasis"
+                        <!-- <span class="text-caption text-medium-emphasis"
                           >تاريخ الإنشاء</span
                         >
                         <span class="text-body-2" dir="rtl">
                           {{ formatDate(questionnaire.created_at) }}
-                        </span>
+                        </span> -->
                       </div>
                       <div class="d-flex flex-column ga-1">
-                        <span class="text-caption text-medium-emphasis"
-                          >آخر تحديث</span
+                        <span class="text-sm text-medium-emphasis"
+                          >المجموع الكلي للاستبانة</span
                         >
                         <span class="text-body-2" dir="rtl">
-                          {{ formatDate(questionnaire.updated_at) }}
+                          {{ questionnaire.questionnaire_weight }}
                         </span>
                       </div>
                     </div>

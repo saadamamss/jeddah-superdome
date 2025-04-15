@@ -139,7 +139,7 @@ onMounted(() => {
               إدارة الأدوار والصلاحيات
             </h2>
             <div class="d-flex align-center ga-2">
-              <v-text-field
+              <!-- <v-text-field
                 v-model="search"
                 label="البحث عن دور..."
                 rounded="lg"
@@ -169,7 +169,7 @@ onMounted(() => {
                     />
                   </svg>
                 </template>
-              </v-text-field>
+              </v-text-field> -->
 
               <VBtn
                 height="48"
