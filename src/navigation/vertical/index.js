@@ -12,6 +12,7 @@ import ShiftsIcon from "./icons/Shifts";
 import QuestionnairesIcon from "./icons/Questionnaires";
 import AttendanceIcon from "./icons/Attendance";
 import IntegrationIcon from "./icons/Integration";
+import NotificationIcon from "./icons/Notification";
 
 export default [
   {
@@ -44,16 +45,22 @@ export default [
     icon: RatingIcon,
     permission: true,
   },
-  // {
-  //   title: "إدارة الباقات (التعاقدات)",
-  //   to: { name: "contracts" },
-  //   icon: ContractsIcon,
-  //   permission: true,
-  // },
+  {
+    title: "إدارة الباقات (التعاقدات)",
+    to: { name: "contracts" },
+    icon: ContractsIcon,
+    permission: true,
+  },
   {
     title: "إدارة الاستبيانات",
     to: { name: "questionnaires" },
     icon: QuestionnairesIcon,
+    permission: true,
+  },
+  {
+    title: "إدارة التنبيهات",
+    to: { name: "notifications" },
+    icon: NotificationIcon,
     permission: true,
   },
   // {
@@ -86,12 +93,12 @@ export default [
     icon: UsersIcon,
     permission: true,
   },
-  // {
-  //   title: "إدارة الأدوار والصلاحيات ",
-  //   to: { name: "roles" },
-  //   icon: RolesIcon,
-  //   permission: true,
-  // },
+  {
+    title: "إدارة الأدوار والصلاحيات ",
+    to: { name: "roles" },
+    icon: RolesIcon,
+    permission: true,
+  },
   // {
   //   title: "اداره الورديات",
   //   to: { name: "shifts" },

@@ -1,18 +1,81 @@
 <script setup>
-const emit = defineEmits(["close"]);
+import { useAppStore } from "@/stores/app";
+import { ref, watch } from "vue";
+
+const props = defineProps({
+  modelValue: Boolean,
+  currentRoleId: {
+    type: Number,
+    default: null,
+  },
+});
+
+const emit = defineEmits(["close", "update:modelValue", "delete"]);
+const isDeleting = ref(false);
+const dialogVisible = ref(false);
+const appStore = useAppStore();
+
+watch(
+  () => props.modelValue,
+  (val) => {
+    dialogVisible.value = val;
+  }
+);
+
+const updateDialog = (val) => {
+  dialogVisible.value = val;
+  emit("update:modelValue", val);
+};
 
 const closeDialog = () => {
   emit("close");
+  updateDialog(false);
+};
+
+const handleDelete = () => {
+  if (!props.currentRoleId) {
+    appStore.showSnackbar({
+      message: "لم يتم تحديد دور للحذف",
+      color: "error",
+    });
+    return;
+  }
+
+  isDeleting.value = true;
+
+  try {
+    emit("delete", props.currentRoleId);
+  } catch (error) {
+    console.error("Error in delete handler:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء محاولة حذف الدور",
+      color: "error",
+    });
+  } finally {
+    isDeleting.value = false;
+    closeDialog();
+  }
 };
 </script>
 
 <template>
-  <v-dialog width="625">
+  <v-dialog
+    :model-value="modelValue"
+    @update:model-value="updateDialog"
+    width="625"
+    persistent
+  >
     <v-card class="py-4 px-2" rounded="lg">
       <v-card-title class="px-4 border-b pb-4 font-weight-bold">
         <div class="w-100 d-flex align-center justify-space-between">
           <h2 class="mb-0 text-h6 font-weight-bold">رسالة تاكيد</h2>
-          <v-btn icon variant="text" color="black" @click="closeDialog">
+          <v-btn
+            icon
+            variant="text"
+            color="black"
+            @click="closeDialog"
+            :disabled="isDeleting"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </div>
@@ -59,8 +122,8 @@ const closeDialog = () => {
             </div>
             <h2 class="text-xl mb-4">هل أنت متأكد من حذف هذا الدور؟</h2>
             <p style="max-width: 500px" class="mx-auto">
-              لا يمكن حذف هذا الدور لأنه مرتبط بمستخدمين نشطين. يرجى نقل
-              المستخدمين إلى دور آخر قبل المتابعة.
+              لا يمكن التراجع عن هذه العملية. سيتم حذف جميع البيانات المرتبطة
+              بهذا الدور.
             </p>
           </v-col>
         </v-row>
@@ -72,10 +135,13 @@ const closeDialog = () => {
             <v-btn
               variant="text"
               rounded="pill"
-              color="black"
+              color="error"
               size="large"
-              style="background-color: #f8f9f9"
+              style="background-color: #faeeeb"
               block
+              @click="handleDelete"
+              :loading="isDeleting"
+              :disabled="isDeleting"
             >
               <span class="d-inline-block px-4">حذف</span>
             </v-btn>
@@ -88,6 +154,7 @@ const closeDialog = () => {
               variant="elevated"
               rounded="pill"
               block
+              :disabled="isDeleting"
             >
               <span class="d-inline-block px-4">إلغاء </span>
             </v-btn>
