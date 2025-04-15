@@ -12,6 +12,7 @@ import ShiftsIcon from "./icons/Shifts";
 import QuestionnairesIcon from "./icons/Questionnaires";
 import AttendanceIcon from "./icons/Attendance";
 import IntegrationIcon from "./icons/Integration";
+import NotificationIcon from "./icons/Notification";
 
 export default [
   {
@@ -54,6 +55,12 @@ export default [
     title: "إدارة الاستبيانات",
     to: { name: "questionnaires" },
     icon: QuestionnairesIcon,
+    permission: true,
+  },
+  {
+    title: "إدارة التنبيهات",
+    to: { name: "notifications" },
+    icon: NotificationIcon,
     permission: true,
   },
   // {
