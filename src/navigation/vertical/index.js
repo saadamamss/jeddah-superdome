@@ -44,12 +44,12 @@ export default [
     icon: RatingIcon,
     permission: true,
   },
-  // {
-  //   title: "إدارة الباقات (التعاقدات)",
-  //   to: { name: "contracts" },
-  //   icon: ContractsIcon,
-  //   permission: true,
-  // },
+  {
+    title: "إدارة الباقات (التعاقدات)",
+    to: { name: "contracts" },
+    icon: ContractsIcon,
+    permission: true,
+  },
   {
     title: "إدارة الاستبيانات",
     to: { name: "questionnaires" },
