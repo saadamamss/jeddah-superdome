@@ -59,6 +59,9 @@ const handleTableUpdate = (options) => {
 </template>
 
 <style lang="scss" scoped>
+table {
+  padding-inline: 10px !important;
+}
 :deep(.v-data-table) {
   .v-table {
     background: transparent;

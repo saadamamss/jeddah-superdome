@@ -41,7 +41,6 @@
         <div class="">
           <v-chip
             :color="getStatusColor(status)"
-            :text-color="status === 'PENDING' ? 'default' : 'white'"
             size="small"
             class="font-weight-medium"
           >
