@@ -2,7 +2,6 @@
 import { ref, computed, onMounted, watch } from "vue";
 import axios from "@/plugins/axios";
 import { useAppStore } from "@/stores/app";
-import dayjs from "dayjs";
 import Pagination from "@/@core/components/Pagination";
 import dataTable from "@/components/dataTable.vue";
 import { format } from "@core/utils/formatters";
@@ -58,42 +57,39 @@ const filteredData = computed(() => {
   });
 });
 
-const pageCount = computed(() => Math.ceil(totalRecords.value / perPage.value));
-
-const from = computed(() => (currentPage.value - 1) * perPage.value + 1);
-const to = computed(() =>
-  Math.min(currentPage.value * perPage.value, totalRecords.value)
-);
-
-const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value;
-  const end = start + perPage.value;
-  return filteredData.value.slice(start, end);
+const pagination = reactive({
+  per_page: 12,
+  page: 1,
+  total: 0,
+  items_on_page: 0,
 });
 
-// Format date using dayjs
-const formatDate = (date) => {
-  if (!date) return "";
-  return dayjs(date).format("YYYY-MM-DD HH:mm");
-};
+watch(
+  () => [pagination.page, pagination.per_page],
+  () => {
+    fetchNotifications();
+  }
+);
 
 // Methods
 const fetchNotifications = async () => {
   try {
     isLoading.value = true;
     const params = {
-      page: currentPage.value,
-      per_page: perPage.value,
+      page: pagination.page,
+      per_page: pagination.per_page,
       search: search.value || undefined,
     };
 
     const response = await axios.get("/notifications", { params });
     if (response.data?.status?.success) {
       notifications.value = response.data.data;
-      totalRecords.value = response.data.pagination.i_total_objects;
-      totalPages.value = response.data.pagination.i_total_pages;
-      currentPage.value = response.data.pagination.i_current_page;
-      perPage.value = response.data.pagination.i_per_page;
+      const itemPagination = response.data?.pagination || {};
+
+      pagination.page = itemPagination.i_current_page;
+      pagination.per_page = itemPagination.i_per_page;
+      pagination.total = itemPagination.i_total_objects;
+      pagination.items_on_page = itemPagination.items_on_page;
     }
   } catch (error) {
     console.error("Error fetching notifications:", error);
@@ -191,7 +187,7 @@ const handleTableUpdate = (options) => {
   if (options?.itemsPerPage) {
     perPage.value = options.itemsPerPage;
   }
-  fetchNotifications();
+  debouncedSearch();
 };
 
 const getRoleIcon = (role) => {
@@ -242,26 +238,11 @@ const confirmDelete = async () => {
   }
 };
 
-const viewNotification = (item) => {
-  // Implement view action
-  console.log("View notification:", item);
-};
-
-const editNotification = (item) => {
-  // Implement edit action
-  console.log("Edit notification:", item);
-};
-
-const onImageError = (event) => {
-  // The error template will automatically show instead
-  console.log("Image failed to load:", event);
-};
-
 // Update search handler with debounce
 const debouncedSearch = useDebounceFn(() => {
   currentPage.value = 1; // Reset to first page on search
   fetchNotifications();
-}, 300);
+}, 500);
 
 // Watch for search changes
 watch(search, () => {
@@ -365,7 +346,21 @@ onMounted(async () => {
         </div>
       </v-card-title>
 
-      <v-card elevation="0" rounded="lg">
+      <v-row v-if="isLoading">
+        <v-col v-for="item in 9" :key="item" cols="6" sm="6" lg="4">
+          <v-card elevation="0">
+            <v-card-text class="px-1 py-2">
+              <v-skeleton-loader
+                class="mx-auto"
+                elevation="0"
+                max-width="400"
+                type="list-item-two-line, table-heading"
+              ></v-skeleton-loader>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-card v-else elevation="0" rounded="lg">
         <dataTable
           v-if="notifications.length"
           :items="notifications"
@@ -374,7 +369,6 @@ onMounted(async () => {
           :items-per-page="perPage"
           :total-items="totalRecords"
           :headers="tableHeaders"
-          @update:options="handleTableUpdate"
         >
           <template #[`item.title`]="{ item }">
             <div class="d-flex align-center gap-2">
@@ -470,16 +464,12 @@ onMounted(async () => {
           </template>
 
           <template #pagination>
-            <div class="d-flex align-center justify-space-between px-4 py-2">
-              <span class="text-caption text-medium-emphasis">
-                تم عرض {{ notifications.length }} من {{ totalRecords }} تنبيه
-              </span>
+            <div class="mb-4">
               <Pagination
-                v-model:page="currentPage"
-                v-model:per-page="perPage"
-                :total-items="totalRecords"
-                :total-pages="totalPages"
-                @update:page="handleTableUpdate"
+                v-if="pagination && pagination.total"
+                :total-items="pagination.total"
+                v-model:per-page="pagination.per_page"
+                v-model:page="pagination.page"
               />
             </div>
           </template>

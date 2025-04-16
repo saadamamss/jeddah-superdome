@@ -130,6 +130,47 @@ onMounted(() => {
 <template>
   <div>
     <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+      <div class="mb-2">
+        <v-breadcrumbs
+          divider=">"
+          :items="[
+            {
+              title: 'الرئيسية',
+              disabled: false,
+              to: '/',
+            },
+            {
+              title: '⁠⁠إدارة الأدوار والصلاحيات',
+              disabled: true,
+            },
+          ]"
+        >
+          <template v-slot:prepend>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5.62519 16.0419H14.3752C15.2957 16.0419 16.0419 15.2957 16.0419 14.3752V8.12519L10.0002 3.95853L3.95853 8.12519V14.3752C3.95853 15.2957 4.70472 16.0419 5.62519 16.0419Z"
+                stroke="#25343E"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M8.12468 13.1244C8.12468 12.2039 8.87088 11.4577 9.79135 11.4577H10.208C11.1285 11.4577 11.8747 12.2039 11.8747 13.1244V16.0411H8.12468V13.1244Z"
+                stroke="#25343E"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+        </v-breadcrumbs>
+      </div>
       <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
         <v-card-title class="pt-4 pb-6">
           <div
