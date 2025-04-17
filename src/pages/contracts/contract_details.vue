@@ -2,10 +2,10 @@
 import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAppStore } from "@/stores/app";
-// import axios from "@/plugins/axios";
 import axiosIns from "@/plugins/axios";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+import { hasPermission } from "@core/utils/helpers";
 
 const route = useRoute();
 const router = useRouter();
@@ -192,6 +192,7 @@ onMounted(() => {
             </div>
             <div class="d-flex align-center ga-2">
               <v-btn
+                v-if="hasPermission('contracts.edit')"
                 color="primary"
                 class="rounded-lg"
                 :loading="isSaving"
@@ -219,69 +220,69 @@ onMounted(() => {
                   <h3 class="text-h6 font-weight-bold mb-4">
                     المعلومات الأساسية
                   </h3>
-                  <v-card variant="outlined" class="rounded-lg">
-                    <v-card-text>
-                      <v-form @submit.prevent="updateContract">
-                        <div class="d-flex flex-column ga-4">
-                          <!-- Contract Name -->
-                          <div class="form-group">
-                            <label class="text-subtitle-2 mb-2 d-block"
-                              >اسم الباقة</label
-                            >
-                            <v-text-field
-                              v-model="editForm.name"
-                              variant="outlined"
-                              density="comfortable"
-                              placeholder="اسم الباقة"
-                              hide-details
-                              class="rounded-lg bg-grey-lighten-4"
-                              required
-                            />
-                          </div>
 
-                          <!-- Created At -->
-                          <div class="form-group">
-                            <label class="text-subtitle-2 mb-2 d-block"
-                              >تاريخ الإنشاء</label
-                            >
-                            <Datepicker
-                              v-model="editForm.created_at"
-                              :max-date="new Date()"
-                              format="dd MMM yyyy"
-                              locale="ar"
-                              :enable-time-picker="false"
-                              auto-apply
-                              text-input
-                              :placeholder="'اختر التاريخ'"
-                              :clearable="false"
-                              class="date-picker-custom"
-                              :rtl="true"
-                            />
-                          </div>
+                  <v-form @submit.prevent="updateContract">
+                    <div class="d-flex flex-column ga-4">
+                      <!-- Contract Name -->
+                      <div class="form-group">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >اسم الباقة</label
+                        >
+                        <v-text-field
+                          v-model="editForm.name"
+                          variant="outlined"
+                          density="comfortable"
+                          placeholder="اسم الباقة"
+                          hide-details
+                          class="rounded-lg bg-grey-lighten-4"
+                          required
+                          :readonly="!hasPermission('contracts.edit')"
+                        />
+                      </div>
 
-                          <!-- Updated At -->
-                          <div class="form-group">
-                            <label class="text-subtitle-2 mb-2 d-block"
-                              >آخر تحديث</label
-                            >
-                            <Datepicker
-                              v-model="editForm.updated_at"
-                              :max-date="new Date()"
-                              format="dd MMM yyyy"
-                              locale="ar"
-                              :enable-time-picker="false"
-                              auto-apply
-                              text-input
-                              :placeholder="'اختر التاريخ'"
-                              :clearable="false"
-                              class="date-picker-custom"
-                              :rtl="true"
-                            />
-                          </div>
-                        </div>
-                      </v-form>
-                    </v-card-text>
-                  </v-card>
+                      <!-- Created At -->
+                      <div class="form-group">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >تاريخ الإنشاء</label
+                        >
+                        <Datepicker
+                          v-model="editForm.created_at"
+                          :max-date="new Date()"
+                          format="dd MMM yyyy"
+                          locale="ar"
+                          :enable-time-picker="false"
+                          auto-apply
+                          text-input
+                          :placeholder="'اختر التاريخ'"
+                          :clearable="false"
+                          class="date-picker-custom"
+                          :rtl="true"
+                          :disabled="!hasPermission('contracts.edit')"
+                        />
+                      </div>
+
+                      <!-- Updated At -->
+                      <div class="form-group">
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >آخر تحديث</label
+                        >
+                        <Datepicker
+                          v-model="editForm.updated_at"
+                          :max-date="new Date()"
+                          format="dd MMM yyyy"
+                          locale="ar"
+                          :enable-time-picker="false"
+                          auto-apply
+                          text-input
+                          :placeholder="'اختر التاريخ'"
+                          :clearable="false"
+                          class="date-picker-custom"
+                          :rtl="true"
+                          :disabled="!hasPermission('contracts.edit')"
+                        />
+                      </div>
+                    </div>
+                  </v-form>
                 </div>
               </v-col>
             </v-row>

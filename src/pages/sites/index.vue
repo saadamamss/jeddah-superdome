@@ -1,14 +1,13 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
-import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
+// import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import Pagination from "@/@core/components/Pagination";
 import SiteCard from "@/@core/components/widgets/SiteCard.vue";
 import CorrectSiteCard from "@/@core/components/widgets/CorrectSiteCard.vue";
-import { ref, watch, onMounted, computed } from "vue";
 import axios from "@/plugins/axios";
-import { useAuthStore } from "@/stores/Auth";
 import LocationPicker from "@/components/maps/LocationPicker.vue";
+import { hasPermission } from "@core/utils/helpers";
 
 const isLoading = ref(true);
 const isExporting = ref(false);
@@ -17,10 +16,6 @@ const currentPage = ref(1);
 const search = ref("");
 const loading = ref(false);
 const filterMenu = ref(false);
-const siteType = ref("السكن");
-const housingPermitNumber = ref("");
-const authorizedContactNumber = ref("");
-const selectedCompany = ref(null);
 const activeTab = ref("all");
 const sites = ref([]);
 const totalItems = ref(0);
@@ -917,6 +912,7 @@ const exportData = async () => {
 
                   <!-- Add New Site Button -->
                   <v-btn
+                    v-if="hasPermission('locations.create')"
                     color="primary"
                     class="me-4"
                     prepend-icon="mdi-plus"
@@ -932,6 +928,7 @@ const exportData = async () => {
               <div class="tabs-container mb-6 border-b-0">
                 <div class="d-flex">
                   <div
+                    v-if="hasPermission('locations.view')"
                     class="tab-item px-4 py-2"
                     :class="{ active: activeTab === 'all' }"
                     @click="activeTab = 'all'"
@@ -939,6 +936,7 @@ const exportData = async () => {
                     جميع المواقع
                   </div>
                   <div
+                    v-if="hasPermission('location_corrections.view')"
                     class="tab-item px-4 py-2"
                     :class="{ active: activeTab === 'correction' }"
                     @click="activeTab = 'correction'"
@@ -1021,6 +1019,7 @@ const exportData = async () => {
                     v-if="activeTab === 'correction'"
                     :site-id="site.id"
                     :data="site"
+                    :can-update="hasPermission('location_corrections.edit')"
                   />
                 </v-col>
                 <v-col

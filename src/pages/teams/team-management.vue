@@ -2,15 +2,16 @@
 // pagination added
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
-import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
-import supervisorCard from "@/@core/components/widgets/supervisorCard.vue";
-import UserWidget from "@/@core/components/widgets/UserWidget.vue";
+// import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
+// import supervisorCard from "@/@core/components/widgets/supervisorCard.vue";
+// import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 import inspectorsCard from "@/@core/components/widgets/inspectorsCard.vue";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import axios from "@/plugins/axios";
 import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
+import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
@@ -393,7 +394,6 @@ onMounted(() => {
                 <div class="pa-3 shadow-md rounded-lg">
                   <div class="text-h6 font-weight-bold mb-4">المشرف</div>
 
-                  {{}}
                   <!-- Supervisor Card -->
                   <div
                     v-if="teamData?.data.team.supervisor"
@@ -667,6 +667,7 @@ onMounted(() => {
                     </v-text-field>
 
                     <VBtn
+                      v-if="hasPermission('teams.create')"
                       color="primary"
                       height="40"
                       class="rounded-lg"

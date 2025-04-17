@@ -11,6 +11,7 @@ import { createRouter, createWebHistory } from "vue-router/auto";
 
 import routes from "./routes";
 import { authService } from "@/services/auth.service";
+import { hasPermission } from "@core/utils/helpers";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +25,14 @@ const router = createRouter({
 // Global Navigation Guard
 router.beforeEach((to, from, next) => {
   const isAuthenticated = authService.isAuthenticated();
+
+  if (
+    to.meta.requiresPermission &&
+    !hasPermission(to.meta.requiresPermission)
+  ) {
+    next({ name: "NotFound" });
+    return;
+  }
 
   if (to.meta.requiresAuth && !isAuthenticated) {
     next("/auth/login");

@@ -4,15 +4,16 @@ import { ref, watch, onMounted } from "vue";
 import axios from "@/plugins/axios";
 import Pagination from "@/@core/components/Pagination";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
+import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
+import MapDisplay from "@/components/maps/MapDisplay.vue";
+
 import { format } from "@core/utils/formatters";
 import { printElement, exportData } from "@core/utils/helpers";
-import { toast } from "vue3-toastify";
 
 const router = useRouter();
 const route = useRoute();
 
 const isLoading = ref(true);
-
 const isGettingFilters = ref(false);
 const ratings = ref([]);
 const phases = ref([]);
@@ -34,6 +35,27 @@ const pagination = reactive({
   total: 0,
   items_on_page: 0,
 });
+
+const mapDialog = ref(false);
+const currentRating = ref(null);
+const displayMapDialog = (rating) => {
+  rating.latitude = rating?.location?.latitude
+    ? parseFloat(rating.location.latitude)
+    : null;
+  rating.longitude = rating?.location?.longitude
+    ? parseFloat(rating.location.longitude)
+    : null;
+
+  if (rating.latitude && rating.longitude) {
+    currentRating.value = rating;
+    mapDialog.value = true;
+  }
+};
+
+const hideMapDialog = () => {
+  currentRating.value = null;
+  mapDialog.value = false;
+};
 
 const onClearDateFilter = () => {
   filters.created_at = undefined;
@@ -68,7 +90,6 @@ const fetchRatings = async () => {
 
 watch(
   () => [
-    filters.location_type_id,
     filters.status,
     filters.created_at,
     filters.imtithal_phase_id,
@@ -84,7 +105,9 @@ watch(
 watch(
   () => [filters.location_type_id],
   (locationType) => {
+    pagination.page = 1;
     router.push({ query: { ...route.query, location_type: locationType } });
+    fetchRatings();
   }
 );
 
@@ -132,10 +155,10 @@ const exportRatingAnswersData = async () => {
 const getFiltersUtilities = async () => {
   try {
     isGettingFilters.value = true;
-    const phasesResponse = await axios.get("/phases?page=-1");
+    const phasesResponse = await axios.get("/phases?per_page=1000");
     phases.value = phasesResponse?.data?.data || [];
 
-    const contractsResponse = await axios.get("/contracts?page=-1");
+    const contractsResponse = await axios.get("/contracts?per_page=1000");
     contracts.value = contractsResponse?.data?.data || [];
   } catch (error) {
     console.error("Error fetching ratings:", error);
@@ -287,7 +310,7 @@ onMounted(() => {
                 item-value="id"
               />
 
-              <CustomVSelect
+              <CustomVAutocomplete
                 v-model="filters.contract_id"
                 :items="contracts"
                 min-width="140"
@@ -498,6 +521,7 @@ onMounted(() => {
                     </div>
                     <div class="d-flex align-center gap-3">
                       <VBtn
+                        @click="displayMapDialog(rating)"
                         variant="outlined"
                         icon
                         elevation="0"
@@ -586,9 +610,58 @@ onMounted(() => {
                             المراقب
                           </h3>
                         </div>
-                        <div class="w-100 ps-10">
+                        <div class="d-flex ga-1 w-100 ps-10">
                           <span class="text-subtitle-2">{{
                             rating.rating_by?.firstname
+                          }}</span>
+                          <span class="text-subtitle-2">{{
+                            rating.rating_by?.lastname
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/welcome.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم هوية المراقب
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.rating_by?.sa_id
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/welcome.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم جوال المراقب
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.rating_by?.phone
                           }}</span>
                         </div>
                       </div>
@@ -901,6 +974,31 @@ onMounted(() => {
         </v-card-text>
       </v-card>
     </v-container>
+
+    <!-- Map Dialog -->
+    <v-dialog v-model="mapDialog" max-width="800">
+      <v-card>
+        <v-card-title class="d-flex justify-space-between align-center pa-4">
+          <span class="font-weight-bold d-flex align-center ga-2 text-dark">
+            <span>التقييم</span>
+            <span dir="ltr" class="d-flex"
+              ><span> #</span><span>{{ currentRating?.id }}</span></span
+            >
+          </span>
+          <v-btn icon @click="hideMapDialog()">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="pa-0">
+          <MapDisplay
+            :latitude="currentRating?.latitude"
+            :longitude="currentRating?.longitude"
+            :readonly="true"
+            height="500px"
+          />
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 

@@ -49,7 +49,8 @@ export default [
         name: "sites",
         component: SitesPage,
         meta: {
-          requiresAuth: false,
+          requiresAuth: true,
+          requiresPermission: "locations.view",
         },
       },
       {
@@ -58,55 +59,68 @@ export default [
         component: HousingDetailsPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: "locations.view",
         },
       },
       {
         path: "/sites/company-details",
         name: "company-details",
         component: CompanyDetailsPage,
+        meta: {
+          requiresAuth: true,
+          requiresPermission: "locations.view",
+        },
       },
-      {
-        path: "/rating_details",
-        name: "add-rate",
-        component: AddRatePage,
-      },
+
       {
         path: "/teams",
         name: "teams",
         component: TeamsPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
+          requiresPermission: "teams.view",
         },
       },
       {
         path: "/teams/team-management/:id",
         name: "team-management",
         component: TeamManagementPage,
+        meta: {
+          requiresAuth: true,
+          requiresPermission: "teams.view",
+        },
       },
       {
         path: "/main-sectors",
         name: "main-sectors",
         component: MainSectorsPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
         },
       },
       {
         path: "/main-sectors/details/:id",
         name: "phase-details",
         component: PhaseDetailsPage,
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: "/main-sectors/add-sectors",
         name: "add-sectors",
         component: AddSectorsPage,
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: "/roles",
         name: "roles",
         component: RolesPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
+          requiresPermission: "permissions.view",
         },
       },
       {
@@ -114,7 +128,8 @@ export default [
         name: "users",
         component: UsersPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
+          requiresPermission: "users.view",
         },
       },
       {
@@ -122,7 +137,7 @@ export default [
         name: "notes",
         component: NotesPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
         },
       },
       {
@@ -137,36 +152,60 @@ export default [
         path: "/notes/add",
         name: "add-note",
         component: AddNotePage,
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: "/notes/edit/:id",
         name: "edit-note",
         component: EditNotePage,
+        meta: {
+          requiresAuth: true,
+        },
       },
       {
         path: "/rating",
         name: "rating",
         component: RatingPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
+          requiresPermission: "ratings.view",
         },
       },
       {
         path: "/rating/details/:id",
         name: "rating-details",
         component: () => import("@/pages/rating/details.vue"),
+        meta: {
+          requiresAuth: true,
+          requiresPermission: "ratings.view",
+        },
       },
-      {
-        path: "/rating/company-rating/:id",
-        name: "company-rating",
-        component: CompanyRatingPage,
-      },
+      // {
+      //   path: "/rating/company-rating/:id",
+      //   name: "company-rating",
+      //   component: CompanyRatingPage,
+      //   meta: {
+      //     requiresAuth: true,
+      //     requiresPermission: "ratings.view",
+      //   },
+      // },
+      // {
+      //   path: "/rating_details",
+      //   name: "add-rate",
+      //   component: AddRatePage,
+      //   meta: {
+      //     requiresAuth: true,
+      //   },
+      // },
       {
         path: "/contracts",
         name: "contracts",
         component: ContractsPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
+          requiresPermission: "contracts.view",
         },
       },
       {
@@ -174,7 +213,7 @@ export default [
         name: "contract-details",
         component: ContractDetailsPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
         },
       },
       {
@@ -182,7 +221,8 @@ export default [
         name: "questionnaires",
         component: QuestionnairesPage,
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
+          requiresPermission: "questionnaires.view",
         },
       },
       {
@@ -190,7 +230,8 @@ export default [
         name: "questionnaire-details",
         component: () => import("@/pages/questionnaires/details.vue"),
         meta: {
-          // requiresAuth: true,
+          requiresAuth: true,
+          requiresPermission: "questionnaires.view",
         },
       },
       {
@@ -217,6 +258,7 @@ export default [
         component: ShiftsView,
         meta: {
           requiresAuth: true,
+          requiresPermission: "shifts.view",
         },
       },
       {
@@ -241,6 +283,7 @@ export default [
         component: NotificationsPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: "admin_notifications.view",
         },
       },
       // {

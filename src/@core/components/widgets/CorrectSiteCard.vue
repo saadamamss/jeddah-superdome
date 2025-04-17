@@ -1,101 +1,3 @@
-<template>
-  <v-card elevation="0" class="site-card rounded-lg">
-    <v-card-text class="pa-4">
-      <!-- Status Header -->
-      <div class="status-header mb-4">
-        <div class="d-flex align-center justify-space-between w-100">
-          <!-- Status Badge -->
-          <div class="status-badge d-flex align-center gap-2">
-            <div class="status-icon">
-              <v-icon
-                v-if="data.status === 'approved'"
-                color="success"
-                size="20"
-              >
-                mdi-check-circle
-              </v-icon>
-              <v-icon
-                v-else-if="data.status === 'rejected'"
-                color="error"
-                size="20"
-              >
-                mdi-close-circle
-              </v-icon>
-              <v-icon v-else color="warning" size="20">
-                mdi-clock-outline
-              </v-icon>
-            </div>
-            <span class="status-text" :class="statusTextClass">
-              {{ statusText }}
-            </span>
-            <span class="camp-number">{{ data.camp_number }}</span>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="action-buttons d-flex gap-2">
-            <!-- Show Approve button if status is rejected or pending -->
-            <v-btn
-              v-if="['rejected', 'pending'].includes(data.status)"
-              color="success"
-              variant="outlined"
-              size="small"
-              class="text-none font-weight-medium px-4 rounded-pill"
-              @click="handleApprove"
-              :loading="loading"
-            >
-              <span class="me-2">
-                {{ data.status === "rejected" ? "تراجع عن الرفض" : "اعتماد" }}
-              </span>
-              <v-icon size="small">mdi-check</v-icon>
-            </v-btn>
-
-            <!-- Show Reject button if status is approved or pending -->
-            <v-btn
-              v-if="['approved', 'pending'].includes(data.status)"
-              color="error"
-              variant="outlined"
-              size="small"
-              class="text-none font-weight-medium px-4 rounded-pill"
-              @click="handleReject"
-              :loading="loading"
-            >
-              <span class="me-2">
-                {{ data.status === "approved" ? "تراجع عن الاعتماد" : "رفض" }}
-              </span>
-              <v-icon size="small">mdi-close</v-icon>
-            </v-btn>
-          </div>
-        </div>
-      </div>
-
-      <!-- Info Grid -->
-      <div class="site-info">
-        <div class="info-grid">
-          <template v-for="(item, index) in infoItems" :key="`info-${index}`">
-            <div class="info-item" :data-full-width="item.fullWidth">
-              <div class="info-label">
-                <v-icon v-if="!item.customIcon" size="small" color="primary">{{
-                  item.icon
-                }}</v-icon>
-                <span
-                  v-else
-                  v-html="item.customIcon"
-                  class="custom-icon"
-                ></span>
-                <span>{{ item.label }}</span>
-              </div>
-              <div class="info-value">{{ item.value }}</div>
-              <div v-if="item.subValue" class="info-sub-value">
-                {{ item.subValue }}
-              </div>
-            </div>
-          </template>
-        </div>
-      </div>
-    </v-card-text>
-  </v-card>
-</template>
-
 <script setup>
 import { defineProps, defineEmits, computed, ref } from "vue";
 import axios from "@/plugins/axios";
@@ -122,6 +24,10 @@ const props = defineProps({
     },
   },
   loading: {
+    type: Boolean,
+    default: false,
+  },
+  canUpdate: {
     type: Boolean,
     default: false,
   },
@@ -266,6 +172,104 @@ const infoItems = computed(() => [
   },
 ]);
 </script>
+
+<template>
+  <v-card elevation="0" class="site-card rounded-lg">
+    <v-card-text class="pa-4">
+      <!-- Status Header -->
+      <div class="status-header mb-4">
+        <div class="d-flex align-center justify-space-between w-100">
+          <!-- Status Badge -->
+          <div class="status-badge d-flex align-center gap-2">
+            <div class="status-icon">
+              <v-icon
+                v-if="data.status === 'approved'"
+                color="success"
+                size="20"
+              >
+                mdi-check-circle
+              </v-icon>
+              <v-icon
+                v-else-if="data.status === 'rejected'"
+                color="error"
+                size="20"
+              >
+                mdi-close-circle
+              </v-icon>
+              <v-icon v-else color="warning" size="20">
+                mdi-clock-outline
+              </v-icon>
+            </div>
+            <span class="status-text" :class="statusTextClass">
+              {{ statusText }}
+            </span>
+            <span class="camp-number">{{ data.camp_number }}</span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div v-if="canUpdate" class="action-buttons d-flex gap-2">
+            <!-- Show Approve button if status is rejected or pending -->
+            <v-btn
+              v-if="['rejected', 'pending'].includes(data.status)"
+              color="success"
+              variant="outlined"
+              size="small"
+              class="text-none font-weight-medium px-4 rounded-pill"
+              @click="handleApprove"
+              :loading="loading"
+            >
+              <span class="me-2">
+                {{ data.status === "rejected" ? "تراجع عن الرفض" : "اعتماد" }}
+              </span>
+              <v-icon size="small">mdi-check</v-icon>
+            </v-btn>
+
+            <!-- Show Reject button if status is approved or pending -->
+            <v-btn
+              v-if="['approved', 'pending'].includes(data.status)"
+              color="error"
+              variant="outlined"
+              size="small"
+              class="text-none font-weight-medium px-4 rounded-pill"
+              @click="handleReject"
+              :loading="loading"
+            >
+              <span class="me-2">
+                {{ data.status === "approved" ? "تراجع عن الاعتماد" : "رفض" }}
+              </span>
+              <v-icon size="small">mdi-close</v-icon>
+            </v-btn>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="site-info">
+        <div class="info-grid">
+          <template v-for="(item, index) in infoItems" :key="`info-${index}`">
+            <div class="info-item" :data-full-width="item.fullWidth">
+              <div class="info-label">
+                <v-icon v-if="!item.customIcon" size="small" color="primary">{{
+                  item.icon
+                }}</v-icon>
+                <span
+                  v-else
+                  v-html="item.customIcon"
+                  class="custom-icon"
+                ></span>
+                <span>{{ item.label }}</span>
+              </div>
+              <div class="info-value">{{ item.value }}</div>
+              <div v-if="item.subValue" class="info-sub-value">
+                {{ item.subValue }}
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </v-card-text>
+  </v-card>
+</template>
 
 <style lang="scss" scoped>
 .site-card {

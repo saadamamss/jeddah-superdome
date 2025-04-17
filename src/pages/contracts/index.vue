@@ -2,8 +2,8 @@
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import contractWidget from "@/@core/components/widgets/contractWidget.vue";
-import { ref, onMounted, watch } from "vue";
 import axios from "@/plugins/axios";
+import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
 const filterToggle = ref(0);
@@ -156,7 +156,6 @@ const fetchContracts = async () => {
     }
 
     const response = await axios.get(`contracts?${params.toString()}`);
-    console.log("API Response:", response.data);
 
     if (response.data?.status?.success) {
       contracts.value = response.data.data;
@@ -324,6 +323,7 @@ onMounted(() => {
               </v-text-field>
 
               <VBtn
+                v-if="hasPermission('contracts.view')"
                 height="48"
                 elevation="0"
                 class="rounded-lg"

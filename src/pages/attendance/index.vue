@@ -1,97 +1,23 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
-import { ref, computed, onMounted, reactive, watch } from "vue";
-import { useRoute } from "vue-router";
 import dayjs from "dayjs";
-import { format } from "@core/utils/formatters";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import dataTable from "@/components/dataTable.vue";
 import axios from "@/plugins/axios";
+import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
 
 const appStore = useAppStore();
-const route = useRoute();
-const filterToggle = ref(0);
-const dateRange = ref();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
-const search = ref("");
-const dialog = ref(false);
-const dialogStep = ref(1);
-const loading = ref(false);
-const siteType = ref("السكن");
-const housingPermitNumber = ref("");
-const authorizedContactNumber = ref("");
-const selectedCompany = ref(null);
-const activeTab = ref("daily");
-const timeFilter = ref("today");
-const statusFilter = ref("all");
 const dateFilter = ref(null);
-const attendanceFilter = ref(null);
-const departureFilter = ref(null);
 const totalItems = ref(20);
 const isExporting = ref(false);
 const isGettingFilters = ref(false);
 const isDatepickerMenu = ref(false);
 const attendanceDataa = ref([]);
 const debouncedSearch = ref(null);
-
-const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
-];
-
-const companies = [
-  { title: "شركة رواف منى", value: "rawaf" },
-  { title: "شركة الخليج", value: "gulf" },
-];
-
-const sites = ref([
-  {
-    siteId: "6127782187",
-    authorizationNumber: "231 3456 567",
-    status: "معتمد",
-  },
-  {
-    siteId: "6127782188",
-    authorizationNumber: "231 3456 568",
-    status: "مرفوض",
-  },
-  {
-    siteId: "6127782189",
-    authorizationNumber: "231 3456 569",
-    status: "مرفوض",
-  },
-  {
-    siteId: "6127782190",
-    authorizationNumber: "231 3456 570",
-    status: "معتمد",
-  },
-]);
-
-const violationOptions = ref([
-  {
-    name: "series-1",
-    data: [30, 40, 35, 50, 49, 60, 70],
-  },
-]);
-
-const complaintOptions = ref([
-  {
-    name: "Gold medals",
-    data: [148, 113, 104, 71, 77],
-  },
-  {
-    name: "Silver medals",
-    data: [113, 122, 98, 88, 72],
-  },
-  {
-    name: "Bronze medals",
-    data: [124, 95, 65, 91, 76],
-  },
-]);
 
 const statusItems = [
   { title: "الكل", value: "all" },
@@ -100,13 +26,9 @@ const statusItems = [
   // { title: "متأخر", value: "late" },
 ];
 
-const attendanceItems = [
-  { title: "الكل", value: "all" },
-  { title: "محمد القحطاني", value: "mohamed" },
-  { title: "عبدالله العتيبي", value: "abdullah" },
-];
-
 const filters = reactive({
+  user_id: undefined,
+  attendance_by_user_id: undefined,
   location_type_id: "",
   search: "",
   status: undefined,
@@ -115,26 +37,6 @@ const filters = reactive({
   attendance_by_user_id: undefined,
   tap: "daily",
 });
-
-const phases = [
-  { id: 1, name: "المرحلة الأولى" },
-  { id: 2, name: "المرحلة الثانية" },
-  { id: 3, name: "المرحلة الثالثة" },
-  { id: 4, name: "المرحلة الرابعة" },
-];
-
-const contracts = [
-  { id: 1, name: "باقة أساسية" },
-  { id: 2, name: "باقة متقدمة" },
-  { id: 3, name: "باقة احترافية" },
-  { id: 4, name: "باقة مخصصة" },
-];
-
-const statusOptions = [
-  { id: 1, label: "قيد المراجعة", value: "PENDING" },
-  { id: 2, label: "معتمد", value: "APPROVED" },
-  { id: 3, label: "مرفوض", value: "REJECTED" },
-];
 
 // Helper function to format date for API
 const formatDate = (date) => {
@@ -155,51 +57,6 @@ const formatDate = (date) => {
 const displayFormattedDate = (date) => {
   if (!date) return "";
   return dayjs(date).format("YYYY-MM-DD");
-};
-
-const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
-  dialogStep.value = 1;
-};
-
-const nextStep = () => {
-  if (siteType.value) {
-    dialogStep.value = 2;
-  }
-};
-
-const prevStep = () => {
-  dialogStep.value = 1;
-};
-
-const closeDialog = () => {
-  dialog.value = false;
-  dialogStep.value = 1;
-};
-
-const addNewLocation = () => {
-  dialog.value = true;
-};
-
-const resetFilters = () => {
-  filters.created_at = undefined;
-  filters.status = undefined;
-  filters.user_id = undefined;
-  filters.attendance_by_user_id = undefined;
-  filters.search = "";
-  fetchAttendance();
-};
-
-const closeFilterMenu = () => {
-  // Close menu logic here
-};
-
-const applyFilters = () => {
-  fetchAttendance();
 };
 
 const onClearDateFilter = () => {
@@ -406,8 +263,41 @@ const exportData = async () => {
   }
 };
 
+const isGettingUtilities = ref(false);
+const userObservers = ref([]);
+const userOperators = ref([]);
+const getUserObservers = async () => {
+  return await axios.get(`/users?role_id=0&per_page=1000`);
+};
+const getUserOperators = async () => {
+  return await axios.get(`/users?role_id=3&per_page=1000`);
+};
+const getUtilities = async () => {
+  try {
+    isGettingUtilities.value = true;
+    const [observers, operators] = await Promise.all([
+      getUserObservers(),
+      getUserOperators(),
+    ]);
+
+    userObservers.value = (observers?.data?.data || []).map((item) => ({
+      id: item.id,
+      name: `${item.firstname} ${item.lastname}`,
+    }));
+    userOperators.value = (operators?.data?.data || []).map((item) => ({
+      id: item.id,
+      name: `${item.firstname} ${item.lastname}`,
+    }));
+  } catch (error) {
+    console.error("Error fetching ratings:", error);
+  } finally {
+    isGettingUtilities.value = false;
+  }
+};
+
 onMounted(() => {
   fetchAttendance();
+  getUtilities();
 });
 </script>
 
@@ -455,14 +345,16 @@ onMounted(() => {
       </v-breadcrumbs>
     </div>
 
-    <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
-      <v-card-title class="pt-4 pb-6">
+    <VCard elevation="0" class="rounded-lg px-2 px-sm-4 bg-light-white">
+      <v-card-title class="px-2 pt-4 pb-6">
         <div class="border-b pb-6">
-          <div class="d-flex align-center gap-2 mb-6">
-            <div class="d-flex align-center justify-space-between w-100">
+          <div class="d-flex align-center gap-4 mb-6">
+            <div
+              class="d-flex align-start justify-space-between gap-4 flex-wrap w-100"
+            >
               <h2 class="text-h6 font-weight-bold">سجل الحضور و الإنصراف</h2>
 
-              <div class="align-center ga-4 flex-wrap d-flex">
+              <div class="align-center ga-2 flex-wrap d-flex">
                 <v-text-field
                   v-model="filters.search"
                   label="البحث"
@@ -471,7 +363,7 @@ onMounted(() => {
                   height="46"
                   class="bg-white"
                   style="
-                    width: 280px;
+                    width: 260px;
                     max-width: 100%;
                     color: #929a9f !important;
                     border-radius: 1rem;
@@ -503,8 +395,8 @@ onMounted(() => {
                 <CustomVSelect
                   v-model="filters.status"
                   :items="statusItems"
-                  min-width="92"
-                  max-width="200"
+                  min-width="160"
+                  max-width="170"
                   :return-object="false"
                   placeholder="الحالة"
                   :loading="isGettingFilters"
@@ -512,11 +404,11 @@ onMounted(() => {
                   item-value="value"
                 />
 
-                <CustomVSelect
-                  v-model="filters.contract_id"
-                  :items="contracts"
-                  min-width="92"
-                  max-width="200"
+                <CustomVAutocomplete
+                  v-model="filters.attendance_by_user_id"
+                  :items="userObservers"
+                  min-width="160"
+                  max-width="170"
                   :return-object="false"
                   placeholder="المحضر"
                   :loading="isGettingFilters"
@@ -524,11 +416,11 @@ onMounted(() => {
                   item-value="id"
                 />
 
-                <CustomVSelect
-                  v-model="filters.imtithal_phase_id"
-                  :items="phases"
-                  min-width="92"
-                  max-width="200"
+                <CustomVAutocomplete
+                  v-model="filters.user_id"
+                  :items="userOperators"
+                  min-width="160"
+                  max-width="170"
                   :return-object="false"
                   placeholder="المتحضر"
                   :loading="isGettingFilters"
@@ -553,6 +445,7 @@ onMounted(() => {
                       placeholder="التاريخ"
                       v-bind="props"
                       min-width="130"
+                      max-width="170"
                       height="50"
                       hide-details
                       hide-no-data
@@ -688,7 +581,7 @@ onMounted(() => {
               }"
               @click="filters.tap = tab.id"
             >
-              {{ tab.label }}
+              <span class="responsive-text">{{ tab.label }}</span>
             </v-btn>
           </div>
         </div>

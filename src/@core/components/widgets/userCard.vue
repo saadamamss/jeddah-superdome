@@ -10,6 +10,14 @@ const props = defineProps({
     type: Function,
     default: () => {},
   },
+  canEdit: {
+    type: Boolean,
+    default: false,
+  },
+  canDelete: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const mapDialog = ref(false);
@@ -32,16 +40,20 @@ const handleEdit = () => {
   <v-card elevation="0" class="user-card rounded-lg">
     <v-card-text class="pa-4">
       <div class="border-b mb-4 border-color-light-white pb-4 cursor-pointer">
-        <div class="d-flex align-center gap-1 justify-space-between">
+        <div class="d-flex align-start gap-1 justify-space-between">
           <div class="d-flex align-start flex-column">
             <UserWidget :user="user" class="pa-0" />
 
-            <div class="font-weight-medium ms-12" style="font-size: 12px">
+            <span class="font-weight-medium ms-12" style="font-size: 12px">
               {{ user.role.title }}
-            </div>
+            </span>
           </div>
           <div class="d-flex gap-2">
-            <button @click="handleDelete" class="icon-container">
+            <button
+              v-if="canDelete"
+              @click="handleDelete"
+              class="icon-container"
+            >
               <svg
                 width="24"
                 height="14"
@@ -86,7 +98,7 @@ const handleEdit = () => {
                 />
               </svg>
             </button>
-            <button @click="handleEdit">
+            <button v-if="canEdit" @click="handleEdit">
               <svg
                 width="41"
                 height="40"

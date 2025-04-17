@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
 import axios from "@/plugins/axios";
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import dataTable from "@/components/dataTable.vue";
 import { format } from "@core/utils/formatters";
 import { useDebounceFn } from "@vueuse/core";
+import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
 const isLoading = ref(false);
@@ -29,7 +29,6 @@ const deleteDialog = ref(false);
 const isDeleting = ref(false);
 const selectedNotification = ref(null);
 const totalRecords = ref(0);
-const totalPages = ref(1);
 
 const tableHeaders = [
   { title: "عنوان التنبيه", key: "title", sortable: true },
@@ -45,17 +44,6 @@ const formatReceiverNames = (receivers) => {
     .map((user) => `${user.firstname} ${user.lastname}`)
     .join(", ");
 };
-
-// Computed
-const filteredData = computed(() => {
-  return notifications.value.filter((item) => {
-    return (
-      search.value === "" ||
-      item.title.toLowerCase().includes(search.value.toLowerCase()) ||
-      item.body.toLowerCase().includes(search.value.toLowerCase())
-    );
-  });
-});
 
 const pagination = reactive({
   per_page: 12,
@@ -333,6 +321,7 @@ onMounted(async () => {
                 </v-text-field>
 
                 <VBtn
+                  v-if="hasPermission('admin_notifications.create')"
                   prepend-icon="tabler-plus"
                   color="primary"
                   @click="dialog = true"
@@ -454,6 +443,7 @@ onMounted(async () => {
                   @click="editNotification(item)"
                 /> -->
                 <v-list-item
+                  v-if="hasPermission('admin_notifications.create')"
                   prepend-icon="tabler-trash"
                   title="حذف"
                   color="error"
@@ -499,161 +489,177 @@ onMounted(async () => {
     </VCard>
 
     <!-- Send Notification Dialog -->
-    <VDialog v-model="dialog" max-width="600" persistent>
-      <VCard>
-        <VCardTitle class="d-flex justify-space-between pa-4">
-          <span>إرسال تنبيه جديد</span>
-          <VBtn icon variant="text" @click="closeDialog">
-            <VIcon icon="tabler-x" />
-          </VBtn>
-        </VCardTitle>
-        <VDivider />
-        <VCardText class="pa-4">
-          <VForm ref="form" @submit.prevent="handleSubmit" v-model="isValid">
-            <VRow>
-              <VCol cols="12">
-                <VSelect
-                  v-model="selectedUsers"
-                  :items="users"
-                  item-title="fullName"
-                  item-value="id"
-                  label="المستخدمين"
-                  multiple
-                  chips
-                  :rules="[
-                    (v) =>
-                      (!!v && v.length > 0) ||
-                      'يرجى اختيار مستخدم واحد على الأقل',
-                  ]"
+    <template v-if="hasPermission('admin_notifications.create')">
+      <VDialog v-model="dialog" max-width="600" persistent>
+        <VCard>
+          <VCardTitle class="d-flex justify-space-between pa-4">
+            <span>إرسال تنبيه جديد</span>
+            <VBtn icon variant="text" @click="closeDialog">
+              <VIcon icon="tabler-x" />
+            </VBtn>
+          </VCardTitle>
+          <VDivider />
+          <VCardText class="pa-4">
+            <VForm ref="form" @submit.prevent="handleSubmit" v-model="isValid">
+              <VRow>
+                <VCol cols="12">
+                  <VSelect
+                    v-model="selectedUsers"
+                    :items="users"
+                    item-title="fullName"
+                    item-value="id"
+                    label="المستخدمين"
+                    multiple
+                    chips
+                    :rules="[
+                      (v) =>
+                        (!!v && v.length > 0) ||
+                        'يرجى اختيار مستخدم واحد على الأقل',
+                    ]"
+                  >
+                    <template v-slot:selection="{ item }">
+                      <v-chip
+                        class="ma-1"
+                        closable
+                        @click:close="removeUser(item.value)"
+                      >
+                        <template v-slot:prepend>
+                          <v-avatar
+                            size="24"
+                            color="primary"
+                            class="text-white"
+                          >
+                            <v-img
+                              v-if="item.raw.personal_image"
+                              :src="item.raw.personal_image"
+                              :alt="item.raw.firstname"
+                              @error="onImageError"
+                            >
+                              <template v-slot:error>
+                                <span class="text-caption">
+                                  {{
+                                    getInitials(
+                                      item.raw.firstname,
+                                      item.raw.lastname
+                                    )
+                                  }}
+                                </span>
+                              </template>
+                            </v-img>
+                            <span v-else class="text-caption">
+                              {{
+                                getInitials(
+                                  item.raw.firstname,
+                                  item.raw.lastname
+                                )
+                              }}
+                            </span>
+                          </v-avatar>
+                        </template>
+                        {{ item.raw.firstname }} {{ item.raw.lastname }}
+                        <v-icon size="16" class="ms-2" color="primary">
+                          {{ getRoleIcon(item.raw.role?.title) }}
+                        </v-icon>
+                      </v-chip>
+                    </template>
+                    <template v-slot:item="{ item, props }">
+                      <v-list-item
+                        v-bind="props"
+                        :title="item.raw.firstname + ' ' + item.raw.lastname"
+                        :subtitle="getRoleTitle(item.raw.role?.title)"
+                      >
+                        <template v-slot:prepend>
+                          <v-avatar
+                            size="32"
+                            color="primary"
+                            class="text-white"
+                          >
+                            <v-img
+                              v-if="item.raw.personal_image"
+                              :src="item.raw.personal_image"
+                              :alt="item.raw.firstname"
+                              @error="onImageError"
+                            >
+                              <template v-slot:error>
+                                <span class="text-subtitle-2">
+                                  {{
+                                    getInitials(
+                                      item.raw.firstname,
+                                      item.raw.lastname
+                                    )
+                                  }}
+                                </span>
+                              </template>
+                            </v-img>
+                            <span v-else class="text-subtitle-2">
+                              {{
+                                getInitials(
+                                  item.raw.firstname,
+                                  item.raw.lastname
+                                )
+                              }}
+                            </span>
+                          </v-avatar>
+                        </template>
+                      </v-list-item>
+                    </template>
+                  </VSelect>
+                </VCol>
+                <VCol cols="12">
+                  <VTextField
+                    v-model="newNotification.title"
+                    label="عنوان التنبيه"
+                    :rules="[(v) => !!v || 'عنوان التنبيه مطلوب']"
+                  />
+                </VCol>
+                <VCol cols="12">
+                  <VTextarea
+                    v-model="newNotification.body"
+                    label="نص التنبيه"
+                    :rules="[(v) => !!v || 'نص التنبيه مطلوب']"
+                  />
+                </VCol>
+              </VRow>
+              <div class="d-flex gap-4 justify-end mt-4">
+                <VBtn color="secondary" variant="outlined" @click="closeDialog">
+                  إلغاء
+                </VBtn>
+                <VBtn
+                  color="primary"
+                  type="submit"
+                  :loading="isSending"
+                  :disabled="!isValid || isSending"
                 >
-                  <template v-slot:selection="{ item }">
-                    <v-chip
-                      class="ma-1"
-                      closable
-                      @click:close="removeUser(item.value)"
-                    >
-                      <template v-slot:prepend>
-                        <v-avatar size="24" color="primary" class="text-white">
-                          <v-img
-                            v-if="item.raw.personal_image"
-                            :src="item.raw.personal_image"
-                            :alt="item.raw.firstname"
-                            @error="onImageError"
-                          >
-                            <template v-slot:error>
-                              <span class="text-caption">
-                                {{
-                                  getInitials(
-                                    item.raw.firstname,
-                                    item.raw.lastname
-                                  )
-                                }}
-                              </span>
-                            </template>
-                          </v-img>
-                          <span v-else class="text-caption">
-                            {{
-                              getInitials(item.raw.firstname, item.raw.lastname)
-                            }}
-                          </span>
-                        </v-avatar>
-                      </template>
-                      {{ item.raw.firstname }} {{ item.raw.lastname }}
-                      <v-icon size="16" class="ms-2" color="primary">
-                        {{ getRoleIcon(item.raw.role?.title) }}
-                      </v-icon>
-                    </v-chip>
-                  </template>
-                  <template v-slot:item="{ item, props }">
-                    <v-list-item
-                      v-bind="props"
-                      :title="item.raw.firstname + ' ' + item.raw.lastname"
-                      :subtitle="getRoleTitle(item.raw.role?.title)"
-                    >
-                      <template v-slot:prepend>
-                        <v-avatar size="32" color="primary" class="text-white">
-                          <v-img
-                            v-if="item.raw.personal_image"
-                            :src="item.raw.personal_image"
-                            :alt="item.raw.firstname"
-                            @error="onImageError"
-                          >
-                            <template v-slot:error>
-                              <span class="text-subtitle-2">
-                                {{
-                                  getInitials(
-                                    item.raw.firstname,
-                                    item.raw.lastname
-                                  )
-                                }}
-                              </span>
-                            </template>
-                          </v-img>
-                          <span v-else class="text-subtitle-2">
-                            {{
-                              getInitials(item.raw.firstname, item.raw.lastname)
-                            }}
-                          </span>
-                        </v-avatar>
-                      </template>
-                    </v-list-item>
-                  </template>
-                </VSelect>
-              </VCol>
-              <VCol cols="12">
-                <VTextField
-                  v-model="newNotification.title"
-                  label="عنوان التنبيه"
-                  :rules="[(v) => !!v || 'عنوان التنبيه مطلوب']"
-                />
-              </VCol>
-              <VCol cols="12">
-                <VTextarea
-                  v-model="newNotification.body"
-                  label="نص التنبيه"
-                  :rules="[(v) => !!v || 'نص التنبيه مطلوب']"
-                />
-              </VCol>
-            </VRow>
-            <div class="d-flex gap-4 justify-end mt-4">
-              <VBtn color="secondary" variant="outlined" @click="closeDialog">
-                إلغاء
-              </VBtn>
-              <VBtn
-                color="primary"
-                type="submit"
-                :loading="isSending"
-                :disabled="!isValid || isSending"
-              >
-                إرسال
-              </VBtn>
-            </div>
-          </VForm>
-        </VCardText>
-      </VCard>
-    </VDialog>
+                  إرسال
+                </VBtn>
+              </div>
+            </VForm>
+          </VCardText>
+        </VCard>
+      </VDialog>
 
-    <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="400">
-      <v-card>
-        <v-card-title class="text-center pa-4"> تأكيد الحذف </v-card-title>
-        <v-card-text class="text-center pa-4">
-          هل أنت متأكد من حذف هذا التنبيه؟
-        </v-card-text>
-        <v-card-actions class="d-flex justify-center pa-4 gap-4">
-          <v-btn
-            color="primary"
-            variant="outlined"
-            @click="deleteDialog = false"
-          >
-            إلغاء
-          </v-btn>
-          <v-btn color="error" :loading="isDeleting" @click="confirmDelete">
-            حذف
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+      <!-- Delete Confirmation Dialog -->
+      <v-dialog v-model="deleteDialog" max-width="400">
+        <v-card>
+          <v-card-title class="text-center pa-4"> تأكيد الحذف </v-card-title>
+          <v-card-text class="text-center pa-4">
+            هل أنت متأكد من حذف هذا التنبيه؟
+          </v-card-text>
+          <v-card-actions class="d-flex justify-center pa-4 gap-4">
+            <v-btn
+              color="primary"
+              variant="outlined"
+              @click="deleteDialog = false"
+            >
+              إلغاء
+            </v-btn>
+            <v-btn color="error" :loading="isDeleting" @click="confirmDelete">
+              حذف
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </template>
   </v-container>
 </template>
 

@@ -110,6 +110,7 @@ body pre {
 }
 
 .v-select.custom-select,
+.v-autocomplete.custom-select,
 .v-input.v-filter-input {
   .v-input__control {
     border-radius: 25px !important;
@@ -154,5 +155,22 @@ body .v-btn--variant-outlined {
 .text-subtitle-2,
 .whitespace-wrap {
   white-space: normal !important;
+}
+
+.v-input--density-compact .v-field--variant-filled {
+  --v-input-control-height: 48px;
+  --v-field-padding-bottom: 0px;
+}
+
+.responsive-text {
+  font-size: 0.7rem; /* text-xs equivalent */
+
+  @media (min-width: 1024px) {
+    font-size: 1rem; /* larger on lg screens */
+  }
+}
+
+body .v-card {
+  overflow: initial !important;
 }
 </style>

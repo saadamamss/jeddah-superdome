@@ -272,9 +272,12 @@ onMounted(() => {
                         المراقب
                       </h3>
                     </div>
-                    <div class="w-100 ps-10">
+                    <div class="d-flex ga-1 w-100 ps-10">
                       <span class="text-subtitle-2">{{
                         rating.rating_by?.firstname
+                      }}</span>
+                      <span class="text-subtitle-2">{{
+                        rating.rating_by?.lastname
                       }}</span>
                     </div>
                   </div>

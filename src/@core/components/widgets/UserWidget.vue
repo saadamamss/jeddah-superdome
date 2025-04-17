@@ -48,7 +48,7 @@ const fallbackAvatar = "https://placehold.co/400";
         </span>
       </div>
       <div>
-        <h2 class="user-name text-subtitle-1 text-black mb-1">
+        <h2 class="user-name text-subtitle-2 text-black whitespace-wrap">
           {{ user?.firstname }} {{ user?.lastname }}
         </h2>
         <p class="user-job mb-0 text-body-2">

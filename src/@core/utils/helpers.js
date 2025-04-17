@@ -1,5 +1,6 @@
 import axios from "@/plugins/axios";
 import { toast } from "vue3-toastify";
+import { authService } from "@/services/auth.service";
 
 export const saveToStorage = (key, value) => {
   if (!key || !value) return null;
@@ -168,10 +169,11 @@ export function printElement(elementId, title = "تقييم") {
  * @returns
  */
 export const hasPermission = (permissionLabel, hasSome = false) => {
-  const userPermissions = localStorage.getItem("najdPermissions");
+  const userPermissions = authService.getStoredUser()?.user?.permissions || [];
+
   if (!userPermissions) return false;
 
-  if (typeof permissionLabel == "object" && permissionLabel.length) {
+  if (Array.isArray(permissionLabel) && permissionLabel.length) {
     if (hasSome) {
       return permissionLabel.some((permission) =>
         userPermissions?.includes(permission)

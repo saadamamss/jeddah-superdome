@@ -4,6 +4,7 @@ import Pagination from "@/@core/components/Pagination";
 import TeamWidget from "@/@core/components/widgets/TeamWidget.vue";
 import { ref, onMounted, watch } from "vue";
 import axios from "@/plugins/axios";
+import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
@@ -379,6 +380,7 @@ onMounted(() => {
               </VBtn>
 
               <VBtn
+                v-if="hasPermission('teams.create')"
                 height="48"
                 elevation="0"
                 class="rounded-lg"
