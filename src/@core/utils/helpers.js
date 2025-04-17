@@ -1,3 +1,6 @@
+import axios from "@/plugins/axios";
+import { toast } from "vue3-toastify";
+
 export const saveToStorage = (key, value) => {
   if (!key || !value) return null;
 
@@ -157,3 +160,106 @@ export function printElement(elementId, title = "تقييم") {
   printWindow.print();
   printWindow.close();
 }
+
+/**
+ * User has permission
+ * @param {Array | String} permissionLabel
+ * @param {Boolean} hasSome
+ * @returns
+ */
+export const hasPermission = (permissionLabel, hasSome = false) => {
+  const userPermissions = localStorage.getItem("najdPermissions");
+  if (!userPermissions) return false;
+
+  if (typeof permissionLabel == "object" && permissionLabel.length) {
+    if (hasSome) {
+      return permissionLabel.some((permission) =>
+        userPermissions?.includes(permission)
+      );
+    }
+
+    return permissionLabel.every((permission) =>
+      userPermissions?.includes(permission)
+    );
+  }
+
+  return userPermissions?.includes(permissionLabel);
+};
+
+/**
+ * user has roles
+ * @param {Array | String} rolesKeys
+ * @returns
+ */
+export const hasRole = (rolesKeys = []) => {
+  if (!localStorage.getItem("najdUser")) return false;
+
+  const user = JSON.parse(localStorage.getItem("najdUser"));
+  const roles = user.roles || [];
+
+  if (typeof rolesKeys == "string") {
+    return roles.some((role) => role == rolesKeys);
+  }
+
+  let hasOneRole = 0;
+  rolesKeys.forEach((roleKey) => {
+    if (roles.some((role) => role == roleKey)) {
+      hasOneRole++;
+    }
+  });
+
+  return hasOneRole > 0;
+};
+
+export const exportData = async (url, filters = {}, successMessage) => {
+  return await new Promise(async (resolve, reject) => {
+    try {
+      const { data } = await axios.post(
+        url,
+        {},
+        {
+          // responseType: "blob", // Important to receive binary data
+          ...filters,
+        }
+      );
+
+      const responseMessage = data.status?.message || "";
+      if (successMessage || responseMessage) {
+        toast.success(successMessage || responseMessage, {
+          rtl: true,
+          hideProgressBar: true,
+          position: "top-center",
+        });
+      }
+      resolve(data);
+
+      // const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // const link = document.createElement("a");
+      // link.href = url;
+
+      // Optional: Get file name from headers
+      // const disposition = response.headers["content-disposition"];
+      // let fileName = "التقييمات.xlsx";
+      // if (disposition && disposition.includes("filename=")) {
+      //   fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
+      // }
+
+      // link.setAttribute("download", fileName);
+      // document.body.appendChild(link);
+      // link.click();
+
+      // // Clean up
+      // link.remove();
+      // window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("خطأ غير متوقع اثناء التصدير!", {
+        rtl: true,
+        hideProgressBar: true,
+        position: "top-center",
+      });
+      reject(error);
+    }
+  });
+};

@@ -5,13 +5,14 @@ import axios from "@/plugins/axios";
 import Pagination from "@/@core/components/Pagination";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import { format } from "@core/utils/formatters";
-import { printElement } from "@core/utils/helpers";
+import { printElement, exportData } from "@core/utils/helpers";
+import { toast } from "vue3-toastify";
 
 const router = useRouter();
 const route = useRoute();
 
 const isLoading = ref(true);
-const isExporting = ref(false);
+
 const isGettingFilters = ref(false);
 const ratings = ref([]);
 const phases = ref([]);
@@ -99,81 +100,32 @@ watch(
   }
 );
 
-const exportData = async () => {
+const isExporting = ref({
+  rating: false,
+  ratingAnswers: false,
+});
+
+const exportRatingData = async () => {
   try {
-    isExporting.value = true;
+    isExporting.value.rating = true;
 
-    const response = await axios.post(
-      "/ratings-export-excel",
-      {},
-      {
-        responseType: "blob", // Important to receive binary data
-        ...filters,
-      }
-    );
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-
-    const link = document.createElement("a");
-    link.href = url;
-
-    // Optional: Get file name from headers
-    const disposition = response.headers["content-disposition"];
-    let fileName = "التقييمات.xlsx";
-    if (disposition && disposition.includes("filename=")) {
-      fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
-    }
-
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up
-    link.remove();
-    window.URL.revokeObjectURL(url);
+    await exportData("/ratings-export-excel", filters);
   } catch (error) {
-    console.error("Download failed:", error);
+    console.error("export failed:", error);
   } finally {
-    isExporting.value = false;
+    isExporting.value.rating = false;
   }
 };
 
-const exportAnswers = async () => {
+const exportRatingAnswersData = async () => {
   try {
-    isExporting.value = true;
+    isExporting.value.ratingAnswers = true;
 
-    const response = await axios.post(
-      "/ratings-export-answers-excel",
-      {},
-      {
-        responseType: "blob", // Important to receive binary data
-        ...filters,
-      }
-    );
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-
-    const link = document.createElement("a");
-    link.href = url;
-
-    // Optional: Get file name from headers
-    const disposition = response.headers["content-disposition"];
-    let fileName = "الأجوبة.xlsx";
-    if (disposition && disposition.includes("filename=")) {
-      fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
-    }
-
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up
-    link.remove();
-    window.URL.revokeObjectURL(url);
+    await exportData("/ratings-export-answers-excel", filters);
   } catch (error) {
-    console.error("Download failed:", error);
+    console.error("export failed:", error);
   } finally {
-    isExporting.value = false;
+    isExporting.value.ratingAnswers = false;
   }
 };
 
@@ -371,13 +323,13 @@ onMounted(() => {
               />
 
               <VBtn
-                :loading="isExporting"
-                :disabled="isExporting"
+                :loading="isExporting.rating"
+                :disabled="isExporting.rating"
                 variant="outlined"
                 height="42"
                 elevation="0"
                 class="px-4 bg-white rounded-xl"
-                @click="exportData"
+                @click="exportRatingData"
               >
                 <div class="d-flex align-center ga-2">
                   <span>
@@ -409,13 +361,13 @@ onMounted(() => {
                 </div>
               </VBtn>
               <VBtn
-                :loading="isExporting"
-                :disabled="isExporting"
+                :loading="isExporting.ratingAnswers"
+                :disabled="isExporting.ratingAnswers"
                 variant="outlined"
                 height="42"
                 elevation="0"
                 class="px-4 bg-white rounded-xl"
-                @click="exportAnswers"
+                @click="exportRatingAnswersData"
               >
                 <div class="d-flex align-center ga-2">
                   <span>
