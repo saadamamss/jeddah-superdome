@@ -13,6 +13,14 @@ const props = defineProps({
       permissions: [],
     }),
   },
+  canEdit: {
+    type: Boolean,
+    default: true,
+  },
+  canDelete: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const emit = defineEmits(["delete-role", "edit-role"]);
@@ -88,6 +96,7 @@ const avatars = computed(() =>
         </div>
         <div class="d-flex align-center ga-2">
           <v-btn
+            v-if="canEdit"
             icon
             class="rounded-circle"
             variant="text"
@@ -108,6 +117,7 @@ const avatars = computed(() =>
             </svg>
           </v-btn>
           <v-btn
+            v-if="canDelete"
             @click="emit('delete-role', role.id)"
             icon
             class="rounded-circle"

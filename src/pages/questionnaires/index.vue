@@ -2,10 +2,9 @@
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import questionnaireWidget from "@/@core/components/widgets/questionnaireWidget.vue";
-import { ref, onMounted, watch } from "vue";
-import axios from "@/plugins/axios";
-
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
+import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
+import axios from "@/plugins/axios";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
@@ -262,7 +261,7 @@ onMounted(() => {
                 item-value="id"
               />
 
-              <CustomVSelect
+              <CustomVAutocomplete
                 v-model="filters.contract_id"
                 :items="contracts"
                 min-width="140"

@@ -6,6 +6,7 @@ import DeleteRoleConfirmationDialog from "./components/DeleteRoleConfirmationDia
 import { useAppStore } from "@/stores/app";
 import { ref, onMounted, watch } from "vue";
 import axios from "@/plugins/axios";
+import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
@@ -213,6 +214,7 @@ onMounted(() => {
               </v-text-field> -->
 
               <VBtn
+                v-if="hasPermission('permissions.create')"
                 height="48"
                 elevation="0"
                 class="rounded-lg"
@@ -252,6 +254,8 @@ onMounted(() => {
                 :role="role"
                 @delete-role="handleDeleteRole"
                 @edit-role="handleEditRole"
+                :can-edit="hasPermission('permissions.update')"
+                :can-delete="hasPermission('permissions.delete')"
               />
             </v-col>
           </v-row>
