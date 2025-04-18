@@ -5,6 +5,7 @@ import NotificationWidget from "@/@core/components/widgets/NotificationWidget";
 import UserWidget from "@/@core/components/widgets/UserWidget";
 import TeamWidget from "@/@core/components/widgets/TeamWidget";
 import homeRateWidget from "@/@core/components/widgets/homeRateWidget.vue";
+import { format } from "@core/utils/formatters";
 
 // import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
@@ -504,7 +505,455 @@ onMounted(() => {
               md="6"
               lg="4"
             >
-              <homeRateWidget :rate="rating" />
+              <v-card
+                :id="`rating_${rating.id}`"
+                class="h-100 pa-4 pa-sm-6 rounded-lg"
+              >
+                <v-card-title class="pa-0">
+                  <div class="d-flex justify-space-between align-start ga-2">
+                    <div>
+                      <h2 class="text-body-1 mb-1">
+                        <router-link
+                          :to="`/rating/details/${rating.id}`"
+                          class="font-weight-bold d-flex align-center ga-2 text-dark"
+                        >
+                          <span>التقييم</span>
+                          <span dir="ltr" class="d-flex"
+                            ><span> #</span><span>{{ rating?.id }}</span></span
+                          >
+                        </router-link>
+                      </h2>
+                      <span
+                        class="d-flex align-center ga-2"
+                        style="color: #75797c"
+                      >
+                        <small class="d-flex align-center ga-1">
+                          <small> {{ format(rating.created_at, "D") }}</small>
+                          <small> {{ format(rating.created_at, "MMM") }}</small>
+                          <small>{{ format(rating.created_at, "YYYY") }}</small>
+                        </small>
+                        <small>-</small>
+                        <small class="d-flex align-center ga-1">
+                          <div class="d-flex align-center">
+                            <small>
+                              {{ format(rating.created_at, "mm") }}</small
+                            >
+                            <small>:</small>
+                            <small> {{ format(rating.created_at, "h") }}</small>
+                          </div>
+                          <small>{{ format(rating.created_at, "A") }}</small>
+                        </small>
+                      </span>
+                    </div>
+                    <div class="d-flex align-center gap-3">
+                      <v-chip
+                        v-if="rating.status === 'PENDING'"
+                        color="warning"
+                        size="small"
+                      >
+                        قيد المراجعة
+                      </v-chip>
+                      <v-chip
+                        v-else-if="rating.status === 'APPROVED'"
+                        color="success"
+                        size="small"
+                      >
+                        معتمد
+                      </v-chip>
+                      <v-chip
+                        v-else-if="rating.status === 'REJECTED'"
+                        color="danger"
+                        size="small"
+                      >
+                        مرفوض
+                      </v-chip>
+                    </div>
+                  </div>
+                  <v-row class="mt-4">
+                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <div
+                            class="overflow-hidden rounded-pill"
+                            style="
+                              width: 30px;
+                              height: 30px;
+                              background-color: #f3f1ed;
+                            "
+                          >
+                            <img
+                              v-if="rating.rating_by?.avatar"
+                              width="100%"
+                              height="100%"
+                              :src="rating.rating_by.avatar"
+                              alt="icon"
+                            />
+                            <img
+                              v-else
+                              width="100%"
+                              height="100%"
+                              src="/imgs/placholderimg.svg"
+                              alt="icon"
+                            />
+                          </div>
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            المراقب
+                          </h3>
+                        </div>
+                        <div class="d-flex ga-1 w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.rating_by?.firstname
+                          }}</span>
+                          <span class="text-subtitle-2">{{
+                            rating.rating_by?.lastname
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/welcome.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم هوية المراقب
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.rating_by?.sa_id
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/welcome.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم جوال المراقب
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.rating_by?.phone
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="rating?.imtithal_phase">
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/welcome.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            اسم المرحلة
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.imtithal_phase?.title
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col cols="12" md="6" v-if="rating?.location?.contract">
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            اسم الباقة
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.location.contract?.name
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.location?.gate_number"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم البوابة
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.location.gate_number
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.location?.square_number"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم المربع
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.location.square_number
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.location?.camp_number"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم المخيم
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.location.camp_number
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.location?.service_center_no"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/welcome.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم مركز الخدمة
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.location.service_center_no
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.company?.pligrims_nationality"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            جنسية الحجاج
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.company.pligrims_nationality
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.company?.name"
+                      class="mb-4"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            اسم مقدم الخدمة
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.company.name
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.location?.delegate_phone"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/welcome.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            رقم التواصل مع المفوض
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.location.delegate_phone
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      v-if="rating?.company?.parent_company_name"
+                      class="mb-4"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            اسم الشركة الرئيسية
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.company.parent_company_name
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                    <v-col
+                      cols="12"
+                      v-if="rating?.questionnaire?.title"
+                      class="mb-4"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            اسم الاستبانة
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-subtitle-2">{{
+                            rating.questionnaire.title
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
+                  </v-row>
+                </v-card-title>
+              </v-card>
             </v-col>
           </v-row>
           <v-row v-else>
