@@ -79,7 +79,7 @@ export default [
     title: "إدارة التكاملات",
     to: { name: "integrations" },
     icon: IntegrationIcon,
-    permission: true,
+    permission: "integrations.view",
   },
   {
     title: "سجل الحضور و الإنصراف",

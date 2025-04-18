@@ -101,7 +101,7 @@ export default [
         component: MainSectorsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "phases.view",
         },
       },
       {
@@ -110,7 +110,7 @@ export default [
         component: PhaseDetailsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "phases.view",
         },
       },
       {
@@ -119,7 +119,7 @@ export default [
         component: AddSectorsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "phases.view",
         },
       },
       {
@@ -146,7 +146,7 @@ export default [
         component: NotesPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "notes.view",
         },
       },
       {
@@ -155,7 +155,7 @@ export default [
         component: () => import("@/pages/notes/details.vue"),
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "notes.view",
         },
       },
       {
@@ -164,7 +164,7 @@ export default [
         component: AddNotePage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "notes.view",
         },
       },
       {
@@ -173,7 +173,7 @@ export default [
         component: EditNotePage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "notes.view",
         },
       },
       {
@@ -254,7 +254,7 @@ export default [
         meta: {
           // layout: "default",
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "companies.view",
         },
       },
       {
@@ -264,7 +264,7 @@ export default [
         meta: {
           // layout: "default",
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "companies.view",
         },
       },
       {
@@ -282,7 +282,7 @@ export default [
         component: AttendancePage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "attendances.view",
         },
       },
       {
@@ -291,7 +291,7 @@ export default [
         component: IntegrationsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "integrations.view",
         },
       },
       {
