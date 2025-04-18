@@ -254,7 +254,7 @@ onMounted(() => {
                 :role="role"
                 @delete-role="handleDeleteRole"
                 @edit-role="handleEditRole"
-                :can-edit="hasPermission('permissions.update')"
+                :can-edit="hasPermission('permissions.edit')"
                 :can-delete="hasPermission('permissions.delete')"
               />
             </v-col>

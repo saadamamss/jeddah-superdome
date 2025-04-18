@@ -344,7 +344,9 @@ onMounted(() => {
                 :loading="isGettingFilters"
               />
 
-              <FiltersMenu />
+              <FiltersMenu
+                @update:filters="(e) => (filters = { ...filters, ...e })"
+              />
 
               <VBtn
                 :loading="isExporting.rating"

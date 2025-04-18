@@ -1,4 +1,6 @@
 <script setup>
+import { watch } from "vue";
+
 const filters = reactive({
   location_type_id: "1",
   search: "",
@@ -7,6 +9,14 @@ const filters = reactive({
   imtithal_phase_id: undefined,
   contract_id: undefined,
 });
+
+watch(
+  () => filters,
+  (newFilters) => {
+    emit("update:filters", newFilters);
+  },
+  { deep: true }
+);
 </script>
 
 <template>
