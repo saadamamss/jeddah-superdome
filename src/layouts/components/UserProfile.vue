@@ -34,6 +34,11 @@ const logout = async () => {
     isLoading.value = false;
   }
 };
+
+onMounted(() => {
+  user.value = authStore.user.user;
+  console.log(user.value);
+});
 </script>
 
 <template>
@@ -46,22 +51,24 @@ const logout = async () => {
     >
       <div class="d-flex align-center ga-3">
         <img
-          v-if="user?.avatar"
+          v-if="user?.avatar_image"
           width="30"
           height="30"
-          :src="user.avatar"
+          :src="user.avatar_image"
           class="avatar-img"
           style="width: 30px; height: 30px"
         />
         <img
           v-else
-          src="/imgs/person.svg"
+          src="https://placehold.co/400"
           width="30"
           height="30"
-          class="avatar-img"
+          class="avatar-img rounded-circle"
           style="width: 30px; height: 30px"
         />
-        <span class="text-black text-sm">عبدالله قحطاني</span>
+        <span class="text-black text-sm"
+          >{{ user?.firstname }} {{ user?.lastname }}</span
+        >
 
         <span class="ms-2">
           <svg
@@ -84,9 +91,6 @@ const logout = async () => {
 
       <v-menu activator="parent">
         <v-list>
-          <v-list-item to="/ai">
-            <v-list-item-title class="text-sm">حسابي</v-list-item-title>
-          </v-list-item>
           <v-list-item to="/ai">
             <v-list-item-title class="text-sm">إدارة المواقع</v-list-item-title>
           </v-list-item>
