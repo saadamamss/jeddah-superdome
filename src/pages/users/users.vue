@@ -65,7 +65,7 @@ const editUserForm = ref({
 // Filter form data
 const filterForm = ref({
   role_id: null,
-  district: "العزيزية",
+  district: null,
 });
 
 // Available roles for selection
@@ -332,6 +332,12 @@ watch(search, (newValue) => {
 
 // Watch for page changes
 watch(currentPage, () => {
+  fetchUsers();
+});
+
+// Add watcher for perPage changes
+watch(perPage, () => {
+  currentPage.value = 1; // Reset to first page when changing page size
   fetchUsers();
 });
 
@@ -876,14 +882,14 @@ onMounted(() => {
               <v-col cols="12" class="bg-gray-1 mt-4">
                 <label class="mb-2 d-block">فلترة حسب الدور</label>
                 <v-radio-group v-model="filterForm.role_id" class="mt-2">
-                  <div class="d-flex flex-row">
+                  <div class="d-flex flex-row flex-wrap">
                     <v-radio
                       v-for="role in roles"
                       :key="role.id"
-                      :label="role.title"
+                      :label="role.name"
                       :value="role.id"
                       style="width: 50%"
-                      class="mx-0"
+                      class="mx-0 flex-shrink-0"
                     ></v-radio>
                   </div>
                 </v-radio-group>
@@ -1190,5 +1196,10 @@ onMounted(() => {
     letter-spacing: 0;
     font-weight: 500;
   }
+}
+
+.v-dialog > .v-overlay__content {
+  overflow-y: scroll !important;
+  padding-inline-end: 0px !important;
 }
 </style>
