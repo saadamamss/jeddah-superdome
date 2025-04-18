@@ -7,8 +7,8 @@ import UsersIcon from "./icons/Users";
 import NotesIcon from "./icons/Notes";
 import RatingIcon from "./icons/Rating";
 import ContractsIcon from "./icons/Contracts";
-import CompanyIcon from "./icons/Company";
-import ShiftsIcon from "./icons/Shifts";
+// import CompanyIcon from "./icons/Company";
+// import ShiftsIcon from "./icons/Shifts";
 import QuestionnairesIcon from "./icons/Questionnaires";
 import AttendanceIcon from "./icons/Attendance";
 import IntegrationIcon from "./icons/Integration";
@@ -25,7 +25,7 @@ export default [
     title: "إدارة المواقع",
     to: { name: "sites" },
     icon: SiteIcon,
-    permission: true,
+    permission: "locations.view",
   },
   // {
   //   title: "إدارة الشركات",
@@ -37,31 +37,31 @@ export default [
     title: "⁠⁠إدارة الفرق الميدانية",
     to: { name: "teams" },
     icon: TeamIcon,
-    permission: true,
+    permission: "teams.view",
   },
   {
     title: "⁠⁠إدارة التقييمات",
     to: { name: "rating" },
     icon: RatingIcon,
-    permission: true,
+    permission: "ratings.view",
   },
   {
     title: "إدارة الباقات (التعاقدات)",
     to: { name: "contracts" },
     icon: ContractsIcon,
-    permission: true,
+    permission: "contracts.view",
   },
   {
     title: "إدارة الاستبيانات",
     to: { name: "questionnaires" },
     icon: QuestionnairesIcon,
-    permission: true,
+    permission: "questionnaires.view",
   },
   {
     title: "إدارة التنبيهات",
     to: { name: "notifications" },
     icon: NotificationIcon,
-    permission: true,
+    permission: "admin_notifications.view",
   },
   // {
   //   title: "⁠⁠إدارة المراحل",
@@ -73,7 +73,7 @@ export default [
     title: "⁠⁠إدارة الملاحظات",
     to: { name: "notes" },
     icon: NotesIcon,
-    permission: true,
+    permission: "notes.view",
   },
   {
     title: "إدارة التكاملات",
@@ -85,19 +85,19 @@ export default [
     title: "سجل الحضور و الإنصراف",
     to: { name: "attendance" },
     icon: AttendanceIcon,
-    permission: true,
+    permission: "attendances.view",
   },
   {
     title: "إدارة المستخدمين",
     to: { name: "users" },
     icon: UsersIcon,
-    permission: true,
+    permission: "users.view",
   },
   {
     title: "إدارة الأدوار والصلاحيات ",
     to: { name: "roles" },
     icon: RolesIcon,
-    permission: true,
+    permission: "permissions.view",
   },
   // {
   //   title: "اداره الورديات",

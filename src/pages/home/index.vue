@@ -6,6 +6,7 @@ import UserWidget from "@/@core/components/widgets/UserWidget";
 import TeamWidget from "@/@core/components/widgets/TeamWidget";
 import homeRateWidget from "@/@core/components/widgets/homeRateWidget.vue";
 import { format } from "@core/utils/formatters";
+import { hasPermission } from "@core/utils/helpers";
 
 // import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
@@ -443,7 +444,10 @@ onMounted(() => {
       </v-row>
 
       <!-- sites administration -->
-      <VCard class="mt-6 pa-sm-2 rounded-lg">
+      <VCard
+        v-if="hasPermission('ratings.view')"
+        class="mt-6 pa-sm-2 rounded-lg"
+      >
         <v-card-title
           class="d-flex flex-column flex-lg-row align-lg-center justify-space-between ga-4"
         >
@@ -977,7 +981,7 @@ onMounted(() => {
       </VCard>
 
       <!-- teams administration -->
-      <VCard class="mt-6 pa-sm-2 rounded-lg">
+      <VCard v-if="hasPermission('teams.view')" class="mt-6 pa-sm-2 rounded-lg">
         <v-card-title
           class="d-flex flex-column flex-lg-row align-lg-center justify-space-between ga-4"
         >
