@@ -4,7 +4,7 @@ import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import NotificationWidget from "@/@core/components/widgets/NotificationWidget";
 import UserWidget from "@/@core/components/widgets/UserWidget";
 import TeamWidget from "@/@core/components/widgets/TeamWidget";
-import SiteWidget from "@/@core/components/widgets/SiteWidget";
+import homeRateWidget from "@/@core/components/widgets/homeRateWidget.vue";
 
 // import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
@@ -95,9 +95,9 @@ onMounted(() => {
           </v-list>
         </v-menu>
       </div>
-    </div> -->
+    </div>
 
-    <!-- <div class="font-weight-bold mb-4 ms-3">تقارير عامة</div>
+    <div class="font-weight-bold mb-4 ms-3">تقارير عامة</div>
     <div class="d-flex align-center justify-space-between mb-6">
       <v-tabs v-model="tab" bg-color="transparent" class="">
         <v-tab
@@ -234,7 +234,7 @@ onMounted(() => {
         <v-col cols="6" md="4" lg="2">
           <StatsWidget
             title="المساكن"
-            :number="homeData?.data?.statistics?.companies_count || 0"
+            :number="homeData?.data?.statistics?.locations_count || 0"
           >
             <template #icon>
               <svg
@@ -277,7 +277,7 @@ onMounted(() => {
         <v-col cols="6" md="4" lg="2">
           <StatsWidget
             title="الشركات الرئيسية"
-            :number="homeData.data?.statistics.reports_count"
+            :number="homeData.data?.statistics.main_companies_count"
           >
             <template #icon>
               <svg
@@ -320,7 +320,7 @@ onMounted(() => {
         <v-col cols="6" md="4" lg="2">
           <StatsWidget
             title="مراكز الخدمة"
-            :number="homeData.data?.statistics?.teams_count || 0"
+            :number="homeData.data?.statistics?.companies_count || 0"
           >
             <template #icon>
               <svg
@@ -362,7 +362,7 @@ onMounted(() => {
         <v-col cols="6" md="4" lg="2">
           <StatsWidget
             title="الملاحظات"
-            :number="homeData.data?.statistics?.teams_count || 0"
+            :number="homeData.data?.statistics?.reports_count || 0"
           >
             <template #icon>
               <svg
@@ -408,7 +408,7 @@ onMounted(() => {
         <v-col cols="6" md="4" lg="2">
           <StatsWidget
             title="الاستبيانات "
-            :number="homeData.data?.statistics?.teams_count || 0"
+            :number="homeData.data?.statistics?.questionnaires_count || 0"
           >
             <template #icon>
               <svg
@@ -455,7 +455,6 @@ onMounted(() => {
             >
               <span class="d-flex align-center ga-2">
                 <span class="font-weight-bold">عرض جميع التقييمات</span>
-
                 <svg
                   width="1.1rem"
                   height="1.1rem"
@@ -481,7 +480,7 @@ onMounted(() => {
         </v-card-title>
         <v-card-text class="mt-2">
           <v-row v-if="isLoading">
-            <v-col v-for="item in 4" :key="item" cols="12" md="4">
+            <v-col v-for="item in 4" :key="item" cols="12" md="6" lg="4">
               <VCard elevation="0" class="py-2">
                 <v-card-text class="px-1 py-2">
                   <v-skeleton-loader
@@ -494,43 +493,24 @@ onMounted(() => {
               </VCard>
             </v-col>
           </v-row>
+
           <v-row
-            v-else-if="
-              homeData?.data?.location_section &&
-              homeData.data.location_section.locations &&
-              homeData.data.location_section.locations.length
-            "
+            v-else-if="homeData?.data?.ratings && homeData.data.ratings.length"
           >
             <v-col
-              v-for="location in homeData.data.location_section.locations"
-              :key="location.id"
+              v-for="rating in homeData.data.ratings"
+              :key="rating.id"
               cols="12"
               md="6"
               lg="4"
             >
-              <SiteWidget
-                :type="
-                  location.location_type.title === 'مخيم' ? 'camp' : 'company'
-                "
-                :title="
-                  location.name ||
-                  `المخيم ${location.camp_number || ''} المربع ${
-                    location.square_number || ''
-                  }`
-                "
-                :camp-number="location.camp_number"
-                :square-number="location.square_number"
-                :companies-count="location.companies_count"
-                :delegate-name="location.delegate_name"
-                :delegate-phone="location.delegate_phone"
-                :license-no="location.license_no"
-              />
+              <homeRateWidget :rate="rating" />
             </v-col>
           </v-row>
           <v-row v-else>
             <v-col cols="12">
               <p class="text-center text-medium-emphasis">
-                لا توجد مواقع متاحة
+                لا توجد تقييمات متاحة
               </p>
             </v-col>
           </v-row>
