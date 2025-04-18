@@ -606,32 +606,7 @@ onMounted(() => {
                     ></v-select>
                   </div>
                 </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">الدور</label>
-                  <v-select
-                    v-model="newUserForm.role_id"
-                    :items="[
-                      { id: 1, title: 'مدير النظام' },
-                      { id: 4, title: 'المشرف العام' },
-                      { id: 2, title: 'المشرف' },
-                      { id: 3, title: 'المراقب' },
-                    ]"
-                    item-title="title"
-                    item-value="id"
-                    :rules="[rules.required]"
-                    required
-                  ></v-select>
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">دور النظام</label>
-                  <v-select
-                    v-model="newUserForm.admin_role_id"
-                    :items="roles"
-                    item-title="name"
-                    item-value="id"
-                    required
-                  ></v-select>
-                </v-col>
+
                 <!-- <v-col cols="12">
                   <label class="mb-2 d-block">المدينة</label>
                   <v-text-field
@@ -705,6 +680,32 @@ onMounted(() => {
                     :rules="[rules.required, rules.passwordMatch]"
                     required
                   ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <label class="mb-2 d-block">الدور</label>
+                  <v-select
+                    v-model="newUserForm.role_id"
+                    :items="[
+                      { id: 1, title: 'مدير النظام' },
+                      { id: 4, title: 'المشرف العام' },
+                      { id: 2, title: 'المشرف' },
+                      { id: 3, title: 'المراقب' },
+                    ]"
+                    item-title="title"
+                    item-value="id"
+                    :rules="[rules.required]"
+                    required
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <label class="mb-2 d-block">دور النظام</label>
+                  <v-select
+                    v-model="newUserForm.admin_role_id"
+                    :items="roles"
+                    item-title="name"
+                    item-value="id"
+                    required
+                  ></v-select>
                 </v-col>
               </v-row>
             </v-form>
