@@ -12,6 +12,7 @@ import { LOCAL_STORAGE_USER_KEY } from "@/config";
 import { toast } from "vue3-toastify";
 import { authService } from "@/services/auth.service";
 import { useRouter, useRoute } from "vue-router";
+import { hasPermission } from "@core/utils/helpers";
 
 const props = defineProps({
   tag: {
@@ -208,14 +209,18 @@ const handleLogout = async () => {
         :options="{ wheelPropagation: false }"
         @ps-scroll-y="handleNavScroll"
       >
-        <Component
-          :is="resolveNavItemComponent(item)"
-          v-for="(item, index) in navItems"
-          :key="index"
-          v-can="item.permission"
-          :item="item"
-          :class="item.permission"
-        />
+        <template v-for="(item, index) in navItems">
+          <Component
+            :is="resolveNavItemComponent(item)"
+            :key="index"
+            v-if="
+              (typeof item.permission == 'boolean' && item.permission) ||
+              hasPermission(item.permission)
+            "
+            :item="item"
+            :class="item.permission"
+          />
+        </template>
       </PerfectScrollbar>
       <div class="nav-link py-3 px-2 pe-6">
         <v-btn

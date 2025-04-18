@@ -682,7 +682,7 @@ onMounted(() => {
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <label class="mb-2 d-block">الدور</label>
+                  <label class="mb-2 d-block"> الدور الأساسي</label>
                   <v-select
                     v-model="newUserForm.role_id"
                     :items="[
@@ -698,7 +698,7 @@ onMounted(() => {
                   ></v-select>
                 </v-col>
                 <v-col cols="12">
-                  <label class="mb-2 d-block">دور النظام</label>
+                  <label class="mb-2 d-block">دور لوحة التحكم</label>
                   <v-select
                     v-model="newUserForm.admin_role_id"
                     :items="roles"
@@ -1052,7 +1052,7 @@ onMounted(() => {
               </v-col>
 
               <v-col cols="12">
-                <label class="mb-2 d-block">الدور</label>
+                <label class="mb-2 d-block"> الدور الأساسي</label>
                 <v-select
                   v-model="editUserForm.role_id"
                   :items="[
@@ -1069,7 +1069,7 @@ onMounted(() => {
               </v-col>
 
               <v-col cols="12">
-                <label class="mb-2 d-block">دور النظام</label>
+                <label class="mb-2 d-block">دور لوحة التحكم</label>
                 <v-select
                   v-model="editUserForm.admin_role_id"
                   :items="roles"

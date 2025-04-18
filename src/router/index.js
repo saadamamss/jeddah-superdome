@@ -26,22 +26,51 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = authService.isAuthenticated();
 
+  console.log({ isAuthenticated });
+
   if (
-    to.meta.requiresPermission &&
-    !hasPermission(to.meta.requiresPermission)
+    (typeof to.meta.requiresPermission == "boolean" &&
+      to.meta.requiresPermission) ||
+    (typeof to.meta.requiresPermission == "string" &&
+      !hasPermission(to.meta.requiresPermission))
   ) {
     next({ name: "NotFound" });
     return;
   }
 
+  // if (
+  //   typeof to.meta.requiresPermission == "boolean" &&
+  //   !to.meta.requiresPermission &&
+  //   to.meta.requiresAuth &&
+  //   isAuthenticated
+  // ) {
+  //   console.log({ isAuthenticated });
+
+  //   next();
+  //   return;
+  // }
+
+  // if (
+  //   typeof to.meta.requiresPermission == "string" &&
+  //   !hasPermission(to.meta.requiresPermission)
+  // ) {
+  //   next({ name: "NotFound" });
+  //   return;
+  // }
+
+  console.log({ check: !isAuthenticated });
+
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next("/auth/login");
+    return next("/auth/login");
   } else if (to.meta.guest && isAuthenticated) {
-    next("/");
+    return next("/");
   } else {
-    next();
+    return next();
   }
 });
+
+// test@test.com
+// password
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
 router.onError((err, to) => {

@@ -35,6 +35,10 @@ export default [
   {
     path: "/",
     component: DashboardLayout,
+    meta: {
+      requiresAuth: true,
+      requiresPermission: false,
+    },
     children: [
       {
         path: "",
@@ -42,6 +46,7 @@ export default [
         component: DashboardHome,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -96,6 +101,7 @@ export default [
         component: MainSectorsPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -104,6 +110,7 @@ export default [
         component: PhaseDetailsPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -112,6 +119,7 @@ export default [
         component: AddSectorsPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -138,6 +146,7 @@ export default [
         component: NotesPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -146,6 +155,7 @@ export default [
         component: () => import("@/pages/notes/details.vue"),
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -154,6 +164,7 @@ export default [
         component: AddNotePage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -162,6 +173,7 @@ export default [
         component: EditNotePage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -214,6 +226,7 @@ export default [
         component: ContractDetailsPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -239,8 +252,9 @@ export default [
         name: "companies",
         component: () => import("@/pages/company/index.vue"),
         meta: {
-          layout: "default",
+          // layout: "default",
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -248,8 +262,9 @@ export default [
         name: "company-details",
         component: () => import("@/pages/company/company_details.vue"),
         meta: {
-          layout: "default",
+          // layout: "default",
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -267,6 +282,7 @@ export default [
         component: AttendancePage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -275,6 +291,7 @@ export default [
         component: IntegrationsPage,
         meta: {
           requiresAuth: true,
+          requiresPermission: false,
         },
       },
       {
@@ -311,24 +328,50 @@ export default [
     ],
   },
   {
-    path: "/auth/login",
-    name: "login",
-    component: LoginPage,
-  },
-  {
-    path: "/auth/create-password",
-    name: "create-password",
-    component: CreatePasswordPage,
-  },
-  {
-    path: "/auth/forgot-password",
-    name: "forgot-password",
-    component: ForgotPasswordPage,
-  },
-  {
-    path: "/auth/otp",
-    name: "otp",
-    component: OTPPage,
+    path: "/auth",
+    // component: DashboardLayout,
+    meta: {
+      requiresAuth: false,
+      requiresPermission: false,
+    },
+    children: [
+      {
+        path: "login",
+        name: "login",
+        component: LoginPage,
+        meta: {
+          requiresAuth: false,
+          requiresPermission: false,
+        },
+      },
+      {
+        path: "create-password",
+        name: "create-password",
+        component: CreatePasswordPage,
+        meta: {
+          requiresAuth: false,
+          requiresPermission: false,
+        },
+      },
+      {
+        path: "forgot-password",
+        name: "forgot-password",
+        component: ForgotPasswordPage,
+        meta: {
+          requiresAuth: false,
+          requiresPermission: false,
+        },
+      },
+      {
+        path: "otp",
+        name: "otp",
+        component: OTPPage,
+        meta: {
+          requiresAuth: false,
+          requiresPermission: false,
+        },
+      },
+    ],
   },
   {
     path: "/:pathMatch(.*)*",
