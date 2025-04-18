@@ -645,4 +645,7 @@ onMounted(() => {
     }
   }
 }
+.v-dialog > .v-overlay__content {
+  overflow-y: auto;
+}
 </style>
