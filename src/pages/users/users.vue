@@ -37,6 +37,7 @@ const newUserForm = ref({
   password: "",
   password_confirmation: "",
   role_id: null,
+  admin_role_id: null,
   city: "",
   blood_type: "",
   gender: "",
@@ -54,6 +55,7 @@ const editUserForm = ref({
   email: "",
   phone: "",
   role_id: null,
+  admin_role_id: null,
   city: "",
   blood_type: "",
   gender: "",
@@ -311,6 +313,7 @@ const populateEditForm = (user) => {
     email: user.email || "",
     phone: user.phone || "",
     role_id: user.role?.id || null,
+    admin_role_id: user.admin_role?.id || null,
     city: user.city || "",
     blood_type: user.blood_type || "",
     gender: user.gender || "",
@@ -607,10 +610,25 @@ onMounted(() => {
                   <label class="mb-2 d-block">الدور</label>
                   <v-select
                     v-model="newUserForm.role_id"
+                    :items="[
+                      { id: 1, title: 'مدير النظام' },
+                      { id: 4, title: 'المشرف العام' },
+                      { id: 2, title: 'المشرف' },
+                      { id: 3, title: 'المراقب' },
+                    ]"
+                    item-title="title"
+                    item-value="id"
+                    :rules="[rules.required]"
+                    required
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <label class="mb-2 d-block">دور النظام</label>
+                  <v-select
+                    v-model="newUserForm.admin_role_id"
                     :items="roles"
                     item-title="name"
                     item-value="id"
-                    :rules="[rules.required]"
                     required
                   ></v-select>
                 </v-col>
@@ -1033,30 +1051,30 @@ onMounted(() => {
               </v-col>
 
               <v-col cols="12">
-                <label class="mb-2 d-block">دور المستخدم</label>
+                <label class="mb-2 d-block">الدور</label>
                 <v-select
                   v-model="editUserForm.role_id"
-                  :items="roles"
-                  item-title="name"
+                  :items="[
+                    { id: 1, title: 'مدير النظام' },
+                    { id: 4, title: 'المشرف العام' },
+                    { id: 2, title: 'المشرف' },
+                    { id: 3, title: 'المراقب' },
+                  ]"
+                  item-title="title"
                   item-value="id"
-                  placeholder="اختر دور المستخدم"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="white"
-                  hide-details
+                  :rules="[rules.required]"
+                  required
                 ></v-select>
               </v-col>
 
               <v-col cols="12">
                 <label class="mb-2 d-block">دور النظام</label>
                 <v-select
-                  v-model="editUserForm.system_role"
-                  :items="['مشرف', 'مستخدم']"
-                  placeholder="اختر دور النظام"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="white"
-                  hide-details
+                  v-model="editUserForm.admin_role_id"
+                  :items="roles"
+                  item-title="name"
+                  item-value="id"
+                  required
                 ></v-select>
               </v-col>
             </v-row>

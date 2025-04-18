@@ -792,7 +792,7 @@ const exportData = async () => {
                         class="px-0 pt-0 d-flex justify-space-between align-center"
                       >
                         <span class="text-subtitle-1 font-weight-bold"
-                          >فلتر البيانات</span
+                          >فلترة البيانات</span
                         >
                         <v-btn
                           variant="text"

@@ -173,4 +173,9 @@ body .v-btn--variant-outlined {
 body .v-card {
   overflow: initial !important;
 }
+
+body .v-date-picker-month__day--selected .v-btn {
+  background-color: #b69265 !important;
+  color: rgb(var(--v-theme-on-surface-variant));
+}
 </style>

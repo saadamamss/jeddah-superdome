@@ -551,7 +551,7 @@ const getStatusStyle = (status) => {
                     class="px-0 pt-0 d-flex justify-space-between align-center"
                   >
                     <span class="text-subtitle-1 font-weight-bold"
-                      >فلتر البيانات</span
+                      >فلترة البيانات</span
                     >
                     <v-btn
                       variant="text"
@@ -687,7 +687,7 @@ const getStatusStyle = (status) => {
                 :class="{ active: activeTab === 'ratings' }"
                 @click="activeTab = 'ratings'"
               >
-                التقييمات
+                ⁠⁠إدارة التقييمات
               </div>
               <div
                 class="tab-item px-4 py-2"
