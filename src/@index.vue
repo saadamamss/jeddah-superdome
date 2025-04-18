@@ -38,7 +38,7 @@
 
     <v-card class="pa-4 rounded-lg filter-menu-card">
       <v-card-title class="px-0 pt-0 d-flex justify-space-between align-center">
-        <span class="text-subtitle-1 font-weight-bold">فلتر البيانات</span>
+        <span class="text-subtitle-1 font-weight-bold">فلترة البيانات</span>
         <v-btn
           variant="text"
           color="primary"

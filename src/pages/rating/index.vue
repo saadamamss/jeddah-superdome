@@ -1,12 +1,11 @@
 <script setup>
-// pagination added
-import { ref, watch, onMounted } from "vue";
-import axios from "@/plugins/axios";
 import Pagination from "@/@core/components/Pagination";
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
 import MapDisplay from "@/components/maps/MapDisplay.vue";
+import FiltersMenu from "./components/FiltersMenu.vue";
 
+import axios from "@/plugins/axios";
 import { format } from "@core/utils/formatters";
 import { printElement, exportData } from "@core/utils/helpers";
 
@@ -344,6 +343,8 @@ onMounted(() => {
                 placeholder="الحالة"
                 :loading="isGettingFilters"
               />
+
+              <FiltersMenu />
 
               <VBtn
                 :loading="isExporting.rating"
@@ -979,12 +980,17 @@ onMounted(() => {
     <v-dialog v-model="mapDialog" max-width="800">
       <v-card>
         <v-card-title class="d-flex justify-space-between align-center pa-4">
-          <span class="font-weight-bold d-flex align-center ga-2 text-dark">
-            <span>التقييم</span>
-            <span dir="ltr" class="d-flex"
-              ><span> #</span><span>{{ currentRating?.id }}</span></span
-            >
-          </span>
+          <div class="d-flex flex-column">
+            <span class="font-weight-bold d-flex align-center ga-2 text-dark">
+              <span>التقييم</span>
+              <span dir="ltr" class="d-flex"
+                ><span> #</span><span>{{ currentRating?.id }}</span></span
+              >
+            </span>
+            <small class="d-flex align-center ga-2" style="color: #75797c">
+              {{ currentRating?.location?.name }}
+            </small>
+          </div>
           <v-btn icon @click="hideMapDialog()">
             <v-icon>mdi-close</v-icon>
           </v-btn>
