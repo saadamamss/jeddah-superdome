@@ -26,7 +26,7 @@ const filters = reactive({
   rating_by_id: null,
   approved_by_id: null,
   location_sub_type_id: null,
-  companies_id: null,
+  parent_company_id: null,
 });
 
 const pagination = reactive({

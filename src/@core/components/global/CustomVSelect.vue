@@ -11,7 +11,7 @@
     bg-color="#F8F9F9"
     class="custom-select"
     clearable
-    :menu-icon="false"
+    :menu-icon="''"
   >
     <template #append-inner>
       <svg
