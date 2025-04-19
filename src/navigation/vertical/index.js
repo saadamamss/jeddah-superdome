@@ -63,12 +63,12 @@ export default [
     icon: NotificationIcon,
     permission: "admin_notifications.view",
   },
-  // {
-  //   title: "⁠⁠إدارة المراحل",
-  //   to: { name: "main-sectors" },
-  //   icon: PointIcon,
-  //   permission: true,
-  // },
+  {
+    title: "⁠⁠إدارة المراحل",
+    to: { name: "phases" },
+    icon: PointIcon,
+    permission: "imtithal_phases.view",
+  },
   {
     title: "⁠⁠إدارة الملاحظات",
     to: { name: "notes" },

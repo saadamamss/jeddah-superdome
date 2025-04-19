@@ -91,12 +91,14 @@ onMounted(() => {
 
       <v-menu activator="parent">
         <v-list>
-          <v-list-item to="/ai">
-            <v-list-item-title class="text-sm">إدارة المواقع</v-list-item-title>
-          </v-list-item>
-          <v-list-item to="/ai">
+          <!-- <v-list-item :to="{ name: 'home' }">
+            <v-list-item-title class="text-sm"
+              >الصفحة الرئيسية</v-list-item-title
+            >
+          </v-list-item> -->
+          <!-- <v-list-item to="/ai">
             <v-list-item-title class="text-sm">حسابي</v-list-item-title>
-          </v-list-item>
+          </v-list-item> -->
           <v-list-item @click="logout">
             <v-list-item-title>
               <VIcon class="me-2" icon="tabler-logout" size="21" />

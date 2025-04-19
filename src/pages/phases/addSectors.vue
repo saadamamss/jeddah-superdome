@@ -28,7 +28,7 @@ const breadcrumbItems = computed(() =>
   generateBreadcrumbItems([
     {
       title: "القطاعات الرئيسية",
-      href: "/main-sectors",
+      href: "/phases",
       disabled: false,
     },
     {

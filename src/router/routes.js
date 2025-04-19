@@ -12,9 +12,9 @@ import HousingDetailsPage from "@/pages/sites/housing-details";
 import TeamManagementPage from "@/pages/teams/team-management";
 import AddRatePage from "@/pages/sites/addRate";
 import TeamsPage from "@/pages/teams";
-import MainSectorsPage from "@/pages/main-sectors";
-import AddSectorsPage from "@/pages/main-sectors/addSectors";
-import PhaseDetailsPage from "@/pages/main-sectors/details";
+import MainSectorsPage from "@/pages/phases";
+import AddSectorsPage from "@/pages/phases/addSectors";
+import PhaseDetailsPage from "@/pages/phases/details";
 import RolesPage from "@/pages/roles";
 import NotesPage from "@/pages/notes";
 import AddNotePage from "@/pages/notes/addNote";
@@ -96,30 +96,30 @@ export default [
         },
       },
       {
-        path: "/main-sectors",
-        name: "main-sectors",
+        path: "/phases",
+        name: "phases",
         component: MainSectorsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: "phases.view",
+          requiresPermission: "imtithal_phases.view",
         },
       },
       {
-        path: "/main-sectors/details/:id",
+        path: "/phases/details/:id",
         name: "phase-details",
         component: PhaseDetailsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: "phases.view",
+          requiresPermission: "imtithal_phases.view",
         },
       },
       {
-        path: "/main-sectors/add-sectors",
+        path: "/phases/add-sectors",
         name: "add-sectors",
         component: AddSectorsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: "phases.view",
+          requiresPermission: "imtithal_phases.view",
         },
       },
       {
