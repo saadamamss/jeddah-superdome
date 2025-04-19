@@ -22,10 +22,14 @@ const isDatepickerMenu = ref(false);
 const filters = reactive({
   location_type_id: "1",
   search: "",
-  status: undefined,
-  created_at: undefined,
-  imtithal_phase_id: undefined,
-  contract_id: undefined,
+  status: null,
+  created_at: null,
+  imtithal_phase_id: null,
+  contract_id: null,
+  rating_by_id: null,
+  approved_by_id: null,
+  location_sub_type_id: null,
+  companies_id: null,
 });
 
 const pagination = reactive({
@@ -63,16 +67,36 @@ const onClearDateFilter = () => {
 const fetchRatings = async () => {
   try {
     isLoading.value = true;
+
+    // Prepare filter parameters, removing null/undefined values
+    const filterParams = {
+      page: pagination.page,
+      per_page: pagination.per_page,
+      location_type_id: filters.location_type_id,
+      search: filters.search || undefined,
+      status: filters.status || undefined,
+      imtithal_phase_id: filters.imtithal_phase_id || undefined,
+      contract_id: filters.contract_id || undefined,
+      rating_by_id: filters.rating_by_id || undefined,
+      approved_by_id: filters.approved_by_id || undefined,
+      location_sub_type_id: filters.location_sub_type_id || undefined,
+      companies_id: filters.companies_id || undefined,
+      created_at: filters.created_at
+        ? format(filters.created_at, "YYYY-MM-DD")
+        : undefined,
+    };
+
+    // Remove undefined values
+    Object.keys(filterParams).forEach(
+      (key) => filterParams[key] === undefined && delete filterParams[key]
+    );
+
+    console.log("Sending filter params:", filterParams);
+
     const response = await axios.get("/ratings", {
-      params: {
-        page: pagination.page,
-        per_page: pagination.per_page,
-        ...filters,
-        created_at: filters.created_at
-          ? format(filters.created_at, "YYYY-MM-DD")
-          : null,
-      },
+      params: filterParams,
     });
+
     ratings.value = response.data?.data || [];
     const ratingsPagination = response.data?.pagination || {};
 
@@ -82,33 +106,39 @@ const fetchRatings = async () => {
     pagination.items_on_page = ratingsPagination.items_on_page;
   } catch (error) {
     console.error("Error fetching ratings:", error);
+    // You might want to add error handling here, such as showing a notification
   } finally {
     isLoading.value = false;
   }
 };
 
-watch(
-  () => [
-    filters.status,
-    filters.created_at,
-    filters.imtithal_phase_id,
-    filters.contract_id,
-    pagination.page,
-    pagination.per_page,
-  ],
-  () => {
-    fetchRatings();
-  }
-);
+// watch(
+//   () => [
+//     filters.status,
+//     filters.created_at,
+//     filters.imtithal_phase_id,
+//     filters.contract_id,
+//     filters.rating_by_id,
+//     filters.approved_by_id,
+//     filters.location_sub_type_id,
+//     filters.companies_id,
+//     pagination.page,
+//     pagination.per_page,
+//   ],
+//   () => {
+//     fetchRatings();
+//   },
+//   { deep: true }
+// );
 
-watch(
-  () => [filters.location_type_id],
-  (locationType) => {
-    pagination.page = 1;
-    router.push({ query: { ...route.query, location_type: locationType } });
-    fetchRatings();
-  }
-);
+// watch(
+//   () => [filters.location_type_id],
+//   (locationType) => {
+//     pagination.page = 1;
+//     router.push({ query: { ...route.query, location_type: locationType } });
+//     fetchRatings();
+//   }
+// );
 
 const debouncedSearch = ref(null);
 watch(
@@ -164,6 +194,40 @@ const getFiltersUtilities = async () => {
   } finally {
     isGettingFilters.value = false;
   }
+};
+
+// Add a method to handle filter updates from FiltersMenu
+const handleFilterUpdate = (newFilters) => {
+  console.log("Received new filters:", newFilters);
+  Object.keys(newFilters).forEach((key) => {
+    if (filters.hasOwnProperty(key)) {
+      filters[key] = newFilters[key];
+    }
+  });
+  // Reset to first page when filters change
+  pagination.page = 1;
+  fetchRatings();
+};
+
+// const applyFilters = () => {
+//   console.log("Applying filters:", filters);
+//   pagination.page = 1; // Reset to first page when applying filters
+//   fetchRatings();
+// };
+
+const resetFilters = () => {
+  // Reset all filters except location_type_id
+  Object.keys(filters).forEach((key) => {
+    if (key !== "location_type_id") {
+      filters[key] = null;
+    }
+  });
+
+  // Reset pagination
+  pagination.page = 1;
+
+  // Fetch ratings with reset filters
+  fetchRatings();
 };
 
 onMounted(() => {
@@ -262,7 +326,7 @@ onMounted(() => {
                   </svg>
                 </template>
               </v-text-field>
-
+              <!--
               <v-menu
                 v-model="isDatepickerMenu"
                 :close-on-content-click="false"
@@ -285,7 +349,6 @@ onMounted(() => {
                     clearable
                     @click:clear="onClearDateFilter"
                   ></v-text-field>
-                  <!-- prepend-inner-icon="mdi-calendar" -->
                 </template>
 
                 <v-date-picker
@@ -295,9 +358,9 @@ onMounted(() => {
                   hide-header
                   clearable
                 ></v-date-picker>
-              </v-menu>
+              </v-menu> -->
 
-              <CustomVSelect
+              <!-- <CustomVSelect
                 v-model="filters.imtithal_phase_id"
                 :items="phases"
                 min-width="140"
@@ -342,10 +405,11 @@ onMounted(() => {
                 :return-object="false"
                 placeholder="الحالة"
                 :loading="isGettingFilters"
-              />
+              /> -->
 
               <FiltersMenu
-                @update:filters="(e) => (filters = { ...filters, ...e })"
+                @update:filters="handleFilterUpdate"
+                @applyFilters="applyFilters"
               />
 
               <VBtn
@@ -471,6 +535,28 @@ onMounted(() => {
                     type="list-item-two-line, table-heading"
                   ></v-skeleton-loader>
                 </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
+          <v-row v-else-if="!ratings.length" class="mt-8">
+            <v-col cols="12">
+              <v-card elevation="0" class="text-center pa-12">
+                <div class="d-flex flex-column align-center">
+                  <h3 class="text-h6 font-weight-medium mb-2">
+                    لا توجد تقييمات
+                  </h3>
+                  <p class="text-body-1 text-medium-emphasis mb-6">
+                    لم يتم العثور على أي تقييمات تطابق معايير البحث الحالية
+                  </p>
+                  <v-btn
+                    color="primary"
+                    @click="resetFilters"
+                    prepend-icon="mdi-refresh"
+                    class="px-6"
+                  >
+                    إعادة تعيين الفلتر
+                  </v-btn>
+                </div>
               </v-card>
             </v-col>
           </v-row>
@@ -880,11 +966,7 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="rating?.location?.delegate_phone"
-                    >
+                    <v-col cols="12" v-if="rating?.location?.delegate_phone">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img
