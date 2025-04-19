@@ -1,9 +1,3 @@
-<script setup>
-const search = (val) => {
-  console.log({ search: val });
-};
-</script>
-
 <template>
   <v-autocomplete
     item-title="label"
@@ -17,8 +11,7 @@ const search = (val) => {
     bg-color="#F8F9F9"
     class="custom-select"
     clearable
-    :menu-icon="false"
-    :update:search="search"
+    :menu-icon="''"
   >
     <template #append-inner>
       <svg

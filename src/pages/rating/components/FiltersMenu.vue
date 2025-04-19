@@ -21,7 +21,7 @@ const filters = reactive({
   rating_by_id: undefined,
   approved_by_id: undefined,
   location_sub_type_id: undefined,
-  companies_id: undefined,
+  parent_company_id: undefined,
 });
 
 const hasActiveFilters = computed(() => {
@@ -52,7 +52,9 @@ const getFiltersUtilities = async () => {
     subTypes.value = locationTypesResponse?.data?.data.sub_types || [];
 
     // Get all companies
-    const companiesResponse = await axios.get("/companies?per_page=1000");
+    const companiesResponse = await axios.get(
+      "/companies?per_page=1000&type=parent"
+    );
     companies.value = companiesResponse?.data?.data || [];
 
     // Get observers (rating_by)
@@ -192,6 +194,7 @@ const handleGetFilters = () => {
             :loading="isGettingFilters"
             item-title="title"
             item-value="id"
+            :return-object="false"
           />
         </div>
 
@@ -204,6 +207,7 @@ const handleGetFilters = () => {
             :loading="isGettingFilters"
             item-title="name"
             item-value="id"
+            :return-object="false"
           />
         </div>
 
@@ -227,6 +231,7 @@ const handleGetFilters = () => {
             ]"
             label="الحالة"
             :loading="isGettingFilters"
+            :return-object="false"
           />
         </div>
 
@@ -235,10 +240,11 @@ const handleGetFilters = () => {
           <CustomVSelect
             v-model="filters.rating_by_id"
             :items="observers"
-            label="اسم المراقب"
+            label="المراقب"
             :loading="isGettingFilters"
             item-title="firstname"
             item-value="id"
+            :return-object="false"
           />
         </div>
 
@@ -247,7 +253,7 @@ const handleGetFilters = () => {
           <CustomVAutocomplete
             v-model="filters.approved_by_id"
             :items="supervisors"
-            label="اسم المشرف"
+            label="المشرف"
             :loading="isGettingFilters"
             item-title="firstname"
             item-value="id"
@@ -259,27 +265,28 @@ const handleGetFilters = () => {
           <CustomVAutocomplete
             v-model="filters.location_sub_type_id"
             :items="subTypes"
-            label="نوع الموقع الفرعي"
+            label="الموقع الفرعي"
             :loading="isGettingFilters"
             item-title="name"
             item-value="id"
             clearable
             :return-object="false"
             persistent-hint
-            hint="اختر نوع الموقع الفرعي"
+            hint="اختر الموقع الفرعي"
           />
         </div>
 
         <!-- Companies Filter -->
         <div class="mb-4">
           <CustomVAutocomplete
-            v-model="filters.companies_id"
+            v-model="filters.parent_company_id"
             :items="companies"
-            label="الشركة"
+            label="الشركة الرئيسية"
             :loading="isGettingFilters"
             item-title="name"
             item-value="id"
             clearable
+            :return-object="false"
           />
         </div>
       </v-card-text>
