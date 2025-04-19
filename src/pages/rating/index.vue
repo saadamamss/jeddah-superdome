@@ -1,7 +1,5 @@
 <script setup>
 import Pagination from "@/@core/components/Pagination";
-import CustomVSelect from "@core/components/global/CustomVSelect.vue";
-import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
 import MapDisplay from "@/components/maps/MapDisplay.vue";
 import FiltersMenu from "./components/FiltersMenu.vue";
 
@@ -18,7 +16,6 @@ const ratings = ref([]);
 const phases = ref([]);
 const contracts = ref([]);
 
-const isDatepickerMenu = ref(false);
 const filters = reactive({
   location_type_id: "1",
   search: "",
@@ -60,41 +57,19 @@ const hideMapDialog = () => {
   mapDialog.value = false;
 };
 
-const onClearDateFilter = () => {
-  filters.created_at = undefined;
-};
-
 const fetchRatings = async () => {
   try {
     isLoading.value = true;
 
-    // Prepare filter parameters, removing null/undefined values
-    const filterParams = {
-      page: pagination.page,
-      per_page: pagination.per_page,
-      location_type_id: filters.location_type_id,
-      search: filters.search || undefined,
-      status: filters.status || undefined,
-      imtithal_phase_id: filters.imtithal_phase_id || undefined,
-      contract_id: filters.contract_id || undefined,
-      rating_by_id: filters.rating_by_id || undefined,
-      approved_by_id: filters.approved_by_id || undefined,
-      location_sub_type_id: filters.location_sub_type_id || undefined,
-      companies_id: filters.companies_id || undefined,
-      created_at: filters.created_at
-        ? format(filters.created_at, "YYYY-MM-DD")
-        : undefined,
-    };
-
-    // Remove undefined values
-    Object.keys(filterParams).forEach(
-      (key) => filterParams[key] === undefined && delete filterParams[key]
-    );
-
-    console.log("Sending filter params:", filterParams);
-
     const response = await axios.get("/ratings", {
-      params: filterParams,
+      params: {
+        ...filters,
+        created_at: filters.created_at
+          ? format(filters.created_at, "YYYY-MM-DD")
+          : null,
+        page: pagination.page,
+        per_page: pagination.per_page,
+      },
     });
 
     ratings.value = response.data?.data || [];
@@ -112,33 +87,22 @@ const fetchRatings = async () => {
   }
 };
 
-// watch(
-//   () => [
-//     filters.status,
-//     filters.created_at,
-//     filters.imtithal_phase_id,
-//     filters.contract_id,
-//     filters.rating_by_id,
-//     filters.approved_by_id,
-//     filters.location_sub_type_id,
-//     filters.companies_id,
-//     pagination.page,
-//     pagination.per_page,
-//   ],
-//   () => {
-//     fetchRatings();
-//   },
-//   { deep: true }
-// );
+watch(
+  () => [pagination.page, pagination.per_page],
+  () => {
+    fetchRatings();
+  },
+  { deep: true }
+);
 
-// watch(
-//   () => [filters.location_type_id],
-//   (locationType) => {
-//     pagination.page = 1;
-//     router.push({ query: { ...route.query, location_type: locationType } });
-//     fetchRatings();
-//   }
-// );
+watch(
+  () => [filters.location_type_id],
+  (locationType) => {
+    pagination.page = 1;
+    router.push({ query: { ...route.query, location_type: locationType } });
+    fetchRatings();
+  }
+);
 
 const debouncedSearch = ref(null);
 watch(
@@ -198,22 +162,16 @@ const getFiltersUtilities = async () => {
 
 // Add a method to handle filter updates from FiltersMenu
 const handleFilterUpdate = (newFilters) => {
-  console.log("Received new filters:", newFilters);
-  Object.keys(newFilters).forEach((key) => {
-    if (filters.hasOwnProperty(key)) {
-      filters[key] = newFilters[key];
-    }
-  });
+  Object.assign(filters, newFilters);
   // Reset to first page when filters change
   pagination.page = 1;
   fetchRatings();
 };
 
-// const applyFilters = () => {
-//   console.log("Applying filters:", filters);
-//   pagination.page = 1; // Reset to first page when applying filters
-//   fetchRatings();
-// };
+const applyFilters = () => {
+  pagination.page = 1;
+  fetchRatings();
+};
 
 const resetFilters = () => {
   // Reset all filters except location_type_id

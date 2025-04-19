@@ -10,8 +10,8 @@ const route = useRoute();
 const router = useRouter();
 
 const links = ref([
-  { title: "إدارة المراحل", href: "/main-sectors", disabled: false },
-  { title: "تفاصيل المرحلة", href: "/main-sectors/details", disabled: true },
+  { title: "إدارة المراحل", href: "/phases", disabled: false },
+  { title: "تفاصيل المرحلة", href: "/phases/details", disabled: true },
 ]);
 
 const phase = ref(null);
@@ -49,7 +49,7 @@ const fetchPhase = async () => {
       message: error.response?.data?.message || "حدث خطأ أثناء جلب البيانات",
       color: "error",
     });
-    router.push("/main-sectors");
+    router.push("/phases");
   } finally {
     isLoading.value = false;
   }
@@ -115,7 +115,7 @@ const deletePhase = async () => {
         message: "تم حذف المرحلة بنجاح",
         color: "success",
       });
-      router.push("/main-sectors");
+      router.push("/phases");
     }
   } catch (error) {
     console.error("Error deleting phase:", error);
@@ -281,7 +281,7 @@ onMounted(() => {
                   <v-btn
                     color="grey-darken-1"
                     variant="outlined"
-                    @click="router.push('/main-sectors')"
+                    @click="router.push('/phases')"
                     min-width="140"
                     height="48"
                     class="rounded-lg me-3"

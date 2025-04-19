@@ -22,7 +22,7 @@ const router = useRouter();
 
 const goToDetails = () => {
   router.push({
-    path: `/main-sectors/details/${props.data.id}`,
+    path: `/phases/details/${props.data.id}`,
   });
 };
 </script>
@@ -42,7 +42,7 @@ const goToDetails = () => {
           elevation="0"
           class="btn-card-link px-3 text-primary rounded-xl"
           link
-          :to="`/main-sectors/details/${data.id}`"
+          :to="`/phases/details/${data.id}`"
         >
           <div class="d-flex align-center ga-2">
             <span class="font-weight-bold">عرض</span>
