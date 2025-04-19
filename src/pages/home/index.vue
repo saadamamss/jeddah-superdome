@@ -202,7 +202,7 @@ onMounted(() => {
         <v-col cols="6" md="4" lg="2">
           <StatsWidget
             title="المخيمات"
-            :number="homeData?.data?.statistics?.locations_count || 0"
+            :number="homeData?.data?.statistics?.camps_count || 0"
           >
             <template #icon>
               <svg
@@ -507,7 +507,6 @@ onMounted(() => {
               :key="rating.id"
               cols="12"
               md="6"
-              lg="4"
             >
               <v-card
                 :id="`rating_${rating.id}`"

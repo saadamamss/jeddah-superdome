@@ -1,5 +1,18 @@
 <script setup>
 import { watch } from "vue";
+import CustomVSelect from "@core/components/global/CustomVSelect.vue";
+import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
+import axios from "@/plugins/axios";
+
+const isGettingFilters = ref(false);
+const phases = ref([]);
+const contracts = ref([]);
+const observers = ref([]); // For rating_by_id
+const supervisors = ref([]); // For approved_by_id
+const companies = ref([]); // For all companies
+const subTypes = ref([]); // For location sub types
+
+const filterMenu = ref(false);
 
 const filters = reactive({
   location_type_id: "1",
@@ -8,19 +21,128 @@ const filters = reactive({
   created_at: undefined,
   imtithal_phase_id: undefined,
   contract_id: undefined,
+  rating_by_id: undefined,
+  approved_by_id: undefined,
+  location_sub_type_id: undefined,
+  companies_id: undefined,
+});
+
+const emit = defineEmits(["update:filters", "apply-filters"]);
+
+const getFiltersUtilities = async () => {
+  try {
+    isGettingFilters.value = true;
+
+    // Get phases
+    const phasesResponse = await axios.get("/phases?per_page=1000");
+    phases.value = phasesResponse?.data?.data || [];
+
+    // Get contracts
+    const contractsResponse = await axios.get("/contracts?per_page=1000");
+    contracts.value = contractsResponse?.data?.data || [];
+
+    // Get location sub types - Fix the data access
+    const locationTypesResponse = await axios.get("/locations-types");
+    // The data shows sub_types is directly in the response data
+    subTypes.value = locationTypesResponse?.data?.data.sub_types || [];
+    console.log("Location sub types:", subTypes.value);
+
+    // Get all companies
+    const companiesResponse = await axios.get("/companies");
+    companies.value = companiesResponse?.data?.data || [];
+
+    // Get observers (rating_by)
+    const observersResponse = await axios.get("/users", {
+      params: {
+        role: "observer",
+      },
+    });
+    observers.value = observersResponse?.data?.data || [];
+
+    // Get supervisors (approved_by)
+    const supervisorsResponse = await axios.get("/users", {
+      params: {
+        role: "supervisor",
+      },
+    });
+    supervisors.value = supervisorsResponse?.data?.data || [];
+  } catch (error) {
+    console.error("Error fetching filters data:", error);
+  } finally {
+    isGettingFilters.value = false;
+  }
+};
+
+const resetFilters = () => {
+  Object.keys(filters).forEach((key) => {
+    if (key !== "location_type_id") {
+      filters[key] = undefined;
+    }
+  });
+};
+
+const applyFilters = () => {
+  console.log("Applying filters:", filters);
+  // Transform filters to only include primitive values
+  const transformedFilters = {
+    location_type_id: filters.location_type_id,
+    search: filters.search,
+    status: filters.status?.value,
+    created_at: filters.created_at,
+    imtithal_phase_id: filters.imtithal_phase_id?.id,
+    contract_id: filters.contract_id?.id,
+    rating_by_id: filters.rating_by_id?.id,
+    approved_by_id: filters.approved_by_id?.id,
+    location_sub_type_id: filters.location_sub_type_id, // Direct value, not nested
+    companies_id: filters.companies_id?.id,
+  };
+
+  console.log("Transformed filters:", transformedFilters);
+  emit("update:filters", transformedFilters);
+  filterMenu.value = false;
+};
+
+const hasActiveFilters = computed(() => {
+  return Object.entries(filters).some(([key, value]) => {
+    if (key === "location_type_id") return false;
+    return value !== undefined && value !== "";
+  });
 });
 
 watch(
   () => filters,
   (newFilters) => {
-    emit("update:filters", newFilters);
+    // Transform filters to only include primitive values
+    const transformedFilters = {
+      location_type_id: newFilters.location_type_id,
+      search: newFilters.search,
+      status: newFilters.status?.value,
+      created_at: newFilters.created_at,
+      imtithal_phase_id: newFilters.imtithal_phase_id?.id,
+      contract_id: newFilters.contract_id?.id,
+      rating_by_id: newFilters.rating_by_id?.id,
+      approved_by_id: newFilters.approved_by_id?.id,
+      location_sub_type_id: newFilters.location_sub_type_id,
+      companies_id: newFilters.companies_id?.id,
+    };
+    // Only update parent filters, don't trigger refetch
+    // emit("update:filters", transformedFilters);
   },
   { deep: true }
 );
+
+onMounted(() => {
+  getFiltersUtilities();
+});
 </script>
 
 <template>
-  <v-menu :close-on-content-click="false" location="bottom end" min-width="350">
+  <v-menu
+    v-model="filterMenu"
+    :close-on-content-click="false"
+    location="bottom end"
+    min-width="350"
+  >
     <template v-slot:activator="{ props }">
       <VBtn
         color="default"
@@ -51,7 +173,10 @@ watch(
       </VBtn>
     </template>
 
-    <v-card class="pa-4 rounded-lg filter-menu-card">
+    <v-card
+      class="pa-4 rounded-lg filter-menu-card"
+      style="overflow-y: auto !important"
+    >
       <v-card-title class="px-0 pt-0 d-flex justify-space-between align-center">
         <span class="text-subtitle-1 font-weight-bold">فلترة البيانات</span>
         <v-btn
@@ -85,6 +210,106 @@ watch(
             clearable
           ></v-date-picker>
         </div>
+
+        <!-- Phase Filter -->
+        <div class="mb-4">
+          <CustomVSelect
+            v-model="filters.imtithal_phase_id"
+            :items="phases"
+            label="المرحلة"
+            :loading="isGettingFilters"
+            item-title="title"
+            item-value="id"
+          />
+        </div>
+
+        <!-- Contract Filter -->
+        <div class="mb-4">
+          <CustomVAutocomplete
+            v-model="filters.contract_id"
+            :items="contracts"
+            label="الباقة"
+            :loading="isGettingFilters"
+            item-title="name"
+            item-value="id"
+          />
+        </div>
+
+        <!-- Status Filter -->
+        <div class="mb-4">
+          <CustomVSelect
+            v-model="filters.status"
+            :items="[
+              {
+                label: 'قيد المراجعة',
+                value: 'PENDING',
+              },
+              {
+                label: 'معتمد',
+                value: 'APPROVED',
+              },
+              {
+                label: 'مرفوض',
+                value: 'REJECTED',
+              },
+            ]"
+            label="الحالة"
+            :loading="isGettingFilters"
+          />
+        </div>
+
+        <!-- Observer Filter -->
+        <div class="mb-4">
+          <CustomVSelect
+            v-model="filters.rating_by_id"
+            :items="observers"
+            label="اسم المراقب"
+            :loading="isGettingFilters"
+            item-title="firstname"
+            item-value="id"
+          />
+        </div>
+
+        <!-- Supervisor Filter -->
+        <div class="mb-4">
+          <CustomVSelect
+            v-model="filters.approved_by_id"
+            :items="supervisors"
+            label="اسم المشرف"
+            :loading="isGettingFilters"
+            item-title="firstname"
+            item-value="id"
+          />
+        </div>
+
+        <!-- Location Sub Type Filter -->
+        <div class="mb-4">
+          <CustomVSelect
+            v-model="filters.location_sub_type_id"
+            :items="subTypes"
+            label="نوع الموقع الفرعي"
+            :loading="isGettingFilters"
+            item-title="name"
+            item-value="id"
+            clearable
+            :return-object="false"
+            persistent-hint
+            hint="اختر نوع الموقع الفرعي"
+          />
+        </div>
+
+        <!-- Companies Filter -->
+        <div class="mb-4">
+          <CustomVSelect
+            v-model="filters.companies_id"
+            :items="companies"
+            label="الشركة"
+            :loading="isGettingFilters"
+            item-title="name"
+            item-value="id"
+            clearable
+          />
+        </div>
       </v-card-text>
 
       <v-card-actions class="px-0 pt-4">
@@ -97,3 +322,10 @@ watch(
     </v-card>
   </v-menu>
 </template>
+
+<style>
+.filter-menu-card {
+  max-height: 600px;
+  overflow-y: auto !important;
+}
+</style>

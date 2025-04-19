@@ -116,7 +116,7 @@ const search = ref("");
         <!-- <NavbarThemeSwitcher /> -->
         <VSpacer />
         <div class="d-flex gap-3">
-          <Notifications :notifications="notifications" />
+          <!-- <Notifications :notifications="notifications" /> -->
 
           <UserProfile />
         </div>
