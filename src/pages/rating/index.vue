@@ -690,7 +690,7 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                    <!-- <v-col cols="12" md="6" v-if="rating?.rating_by">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img
@@ -712,7 +712,7 @@ onMounted(() => {
                           }}</span>
                         </div>
                       </div>
-                    </v-col>
+                    </v-col> -->
                     <v-col cols="12" md="6" v-if="rating?.imtithal_phase">
                       <div>
                         <div class="d-flex align-center ga-2">
