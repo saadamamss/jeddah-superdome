@@ -139,10 +139,24 @@ const handleSearchClear = () => {
   fetchContracts();
 };
 
-// Watch for changes in search, currentPage, or perPage
-watch([search, currentPage, perPage], () => {
-  fetchContracts();
-});
+// Watch for changes in search or perPage to reset to page 1
+watch(
+  [search, perPage],
+  () => {
+    currentPage.value = 1;
+    fetchContracts();
+  },
+  { flush: "post" }
+);
+
+// Watch for changes in currentPage only
+watch(
+  currentPage,
+  () => {
+    fetchContracts();
+  },
+  { flush: "post" }
+);
 
 // Function to fetch contracts
 const fetchContracts = async () => {
@@ -151,7 +165,7 @@ const fetchContracts = async () => {
     const params = new URLSearchParams();
     params.append("page", currentPage.value);
     params.append("per_page", perPage.value);
-    if (search.value !== null) {
+    if (search.value) {
       params.append("search", search.value);
     }
 
@@ -159,8 +173,17 @@ const fetchContracts = async () => {
 
     if (response.data?.status?.success) {
       contracts.value = response.data.data;
-      console.log("Contracts data:", contracts.value);
-      totalItems.value = response.data.meta?.total || response.data.data.length;
+      // Update pagination info from API response
+      if (response.data.pagination) {
+        totalItems.value = response.data.pagination.i_total_objects;
+        // Sync local state with server pagination if needed
+        if (currentPage.value !== response.data.pagination.i_current_page) {
+          currentPage.value = response.data.pagination.i_current_page;
+        }
+        if (perPage.value !== response.data.pagination.i_per_page) {
+          perPage.value = response.data.pagination.i_per_page;
+        }
+      }
     }
   } catch (error) {
     console.error("Error fetching contracts:", error);
@@ -377,6 +400,7 @@ onMounted(() => {
             :total-items="totalItems"
             v-model:per-page="perPage"
             v-model:page="currentPage"
+            :loading="isLoading"
           />
         </v-card-title>
       </VCard>
