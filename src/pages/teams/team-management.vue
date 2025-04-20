@@ -6,7 +6,7 @@ import Pagination from "@/@core/components/Pagination";
 // import supervisorCard from "@/@core/components/widgets/supervisorCard.vue";
 // import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 import inspectorsCard from "@/@core/components/widgets/inspectorsCard.vue";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "@/plugins/axios";
 import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
@@ -59,6 +59,7 @@ const fetchTeamData = async () => {
       params: {
         page: inspectorsPagination.value.currentPage,
         per_page: inspectorsPagination.value.itemsPerPage,
+        search: search.value || undefined,
       },
     });
     teamData.value = response.data;
@@ -218,6 +219,12 @@ const complaintOptions = ref([
   },
 ]);
 
+const filteredTeamMembers = computed(() => {
+  if (!search.value) return teamMembers.value;
+
+  const searchTerm = search.value.toLowerCase();
+});
+
 const handleSubmit = async () => {
   if (
     !formModel.value.zone_id ||
@@ -354,6 +361,19 @@ const handlePageSizeChange = async (newSize) => {
   inspectorsPagination.value.itemsPerPage = newSize;
   await fetchTeamData();
 };
+
+// Watch for search changes
+watch(search, (newValue) => {
+  // Reset to first page when searching
+  inspectorsPagination.value.currentPage = 1;
+  // Debounce the API call
+  if (searchTimeout) clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    fetchTeamData();
+  }, 300);
+});
+
+let searchTimeout;
 
 onMounted(() => {
   fetchTeamData();
@@ -682,7 +702,7 @@ onMounted(() => {
                 <div class="mt-4">
                   <v-row>
                     <v-col
-                      v-for="inspector in teamMembers"
+                      v-for="inspector in filteredTeamMembers"
                       :key="inspector.id"
                       cols="12"
                       sm="6"
@@ -699,6 +719,16 @@ onMounted(() => {
                       <div class="text-center py-8 bg-light-gray-1 rounded-lg">
                         <p class="text-medium-emphasis">
                           لا يوجد مفتشين في هذا الفريق
+                        </p>
+                      </div>
+                    </v-col>
+                    <v-col
+                      v-else-if="filteredTeamMembers.length === 0"
+                      cols="12"
+                    >
+                      <div class="text-center py-8 bg-light-gray-1 rounded-lg">
+                        <p class="text-medium-emphasis">
+                          لا توجد نتائج تطابق بحثك
                         </p>
                       </div>
                     </v-col>
