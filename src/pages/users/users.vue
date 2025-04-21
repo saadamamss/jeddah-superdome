@@ -32,7 +32,7 @@ const userStatistics = ref(null);
 const newUserForm = ref({
   firstname: "",
   lastname: "",
-  parent_company_id: "",
+  parent_companies: [],
   email: "",
   phone: "",
   password: "",
@@ -51,7 +51,7 @@ const newUserForm = ref({
 const editUserForm = ref({
   firstname: "",
   lastname: "",
-  parent_company_id: "",
+  parent_companies: [],
   email: "",
   phone: "",
   role_id: null,
@@ -127,7 +127,7 @@ const fetchUsers = async () => {
     const queryParams = new URLSearchParams({
       page: currentPage.value.toString(),
       per_page: perPage.value.toString(),
-      search: search.value,
+      search: search.value || "",
       district: filterForm.value.district,
     });
 
@@ -310,7 +310,7 @@ const populateEditForm = (user) => {
     // secondname: user.secondname || "",
     // thirdname: user.thirdname || "",
     lastname: user.lastname || "",
-    parent_company_id: user.company?.id || user.parent_company?.id || null,
+    parent_companies: user.parent_companies,
     email: user.email || "",
     phone: user.phone || "",
     role_id: user.role?.id || null,
@@ -690,12 +690,13 @@ onMounted(() => {
                 <v-col cols="12">
                   <label class="mb-2 d-block">الشركة الرئيسية</label>
                   <CustomVAutocomplete
-                    v-model="newUserForm.parent_company_id"
+                    v-model="newUserForm.parent_companies"
                     :items="companies"
                     :loading="isGettingFilters"
                     item-title="name"
                     item-value="id"
                     clearable
+                    multiple
                     :return-object="false"
                   />
                 </v-col>
@@ -860,12 +861,13 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">الشركة الرئيسية</label>
                 <CustomVAutocomplete
-                  v-model="editUserForm.parent_company_id"
+                  v-model="editUserForm.parent_companies"
                   :items="companies"
                   :loading="isGettingFilters"
                   item-title="name"
                   item-value="id"
                   clearable
+                  multiple
                   :return-object="false"
                 />
               </v-col>

@@ -642,7 +642,8 @@ onMounted(() => {
                       cols="12"
                       md="6"
                       v-if="
-                        rating?.rating_by && !rating?.company?.parent_company
+                        rating?.rating_by &&
+                        rating.rating_by?.parent_companies?.length === 0
                       "
                     >
                       <div>
@@ -691,7 +692,8 @@ onMounted(() => {
                       cols="12"
                       md="6"
                       v-if="
-                        rating?.rating_by && !rating?.company?.parent_company
+                        rating?.rating_by &&
+                        rating.rating_by?.parent_companies?.length === 0
                       "
                     >
                       <div>
@@ -720,7 +722,8 @@ onMounted(() => {
                       cols="12"
                       md="6"
                       v-if="
-                        rating?.rating_by && !rating?.company?.parent_company
+                        rating?.rating_by &&
+                        rating.rating_by?.parent_companies?.length === 0
                       "
                     >
                       <div>
@@ -927,7 +930,34 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.company?.parent_company_name"
+                      class="mb-4"
+                    >
+                      <div>
+                        <div class="d-flex align-center ga-2">
+                          <img
+                            width="32"
+                            height="32"
+                            src="/imgs/icons/building-icon.svg"
+                            alt="icon"
+                          />
+                          <h3
+                            class="text-body-2"
+                            style="font-weight: 300; color: #565a5d"
+                          >
+                            اسم الشركة الرئيسية
+                          </h3>
+                        </div>
+                        <div class="w-100 ps-10">
+                          <span class="text-sm whitespace-wrap text-dark">{{
+                            rating.company.parent_company_name
+                          }}</span>
+                        </div>
+                      </div>
+                    </v-col>
                     <v-col
                       cols="12"
                       md="6"
@@ -956,7 +986,12 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col cols="12" v-if="rating?.location?.delegate_phone">
+
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="rating?.location?.delegate_phone"
+                    >
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img
@@ -979,35 +1014,10 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
+
                     <v-col
                       cols="12"
-                      v-if="rating?.company?.parent_company_name"
-                      class="mb-4"
-                    >
-                      <div>
-                        <div class="d-flex align-center ga-2">
-                          <img
-                            width="32"
-                            height="32"
-                            src="/imgs/icons/building-icon.svg"
-                            alt="icon"
-                          />
-                          <h3
-                            class="text-body-2"
-                            style="font-weight: 300; color: #565a5d"
-                          >
-                            اسم الشركة الرئيسية
-                          </h3>
-                        </div>
-                        <div class="w-100 ps-10">
-                          <span class="text-subtitle-2">{{
-                            rating.company.parent_company_name
-                          }}</span>
-                        </div>
-                      </div>
-                    </v-col>
-                    <v-col
-                      cols="12"
+                      md="6"
                       v-if="rating?.questionnaire?.title"
                       class="mb-4"
                     >
@@ -1027,7 +1037,7 @@ onMounted(() => {
                           </h3>
                         </div>
                         <div class="w-100 ps-10">
-                          <span class="text-subtitle-2">{{
+                          <span class="text-sm whitespace-wrap text-dark">{{
                             rating.questionnaire.title
                           }}</span>
                         </div>

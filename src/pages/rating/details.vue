@@ -256,7 +256,10 @@ onMounted(() => {
                   cols="6"
                   md="4"
                   xl="3"
-                  v-if="rating?.rating_by && !rating?.company?.parent_company"
+                  v-if="
+                    rating?.rating_by &&
+                    rating.rating_by?.parent_companies?.length === 0
+                  "
                   class="mb-4"
                 >
                   <div>
