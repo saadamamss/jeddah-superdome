@@ -2,10 +2,10 @@
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import axios from "@/plugins/axios";
-import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 import LocationPicker from "@/components/maps/LocationPicker.vue";
 import { format } from "@core/utils/formatters";
-import { printElement } from "@core/utils/helpers";
+import { exportPDFFromURL } from "@core/utils/helpers";
+// import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -41,6 +41,23 @@ const fetchRatingDetails = async () => {
     console.error("Error fetching rating details:", error);
   } finally {
     isLoading.value = false;
+  }
+};
+
+const isPrintingAsPDF = ref(false);
+const printRate = async (rateId) => {
+  try {
+    isPrintingAsPDF.value = rateId;
+
+    await exportPDFFromURL(
+      `/export-rating-pdf/${rateId}`,
+      {},
+      `rate_${rateId}`
+    );
+  } catch (error) {
+    console.error("printing failed:", error);
+  } finally {
+    isPrintingAsPDF.value = null;
   }
 };
 
@@ -92,7 +109,9 @@ onMounted(() => {
             height="42"
             elevation="0"
             class="px-4 bg-white rounded-xl"
-            @click="printElement(`rating_${rating.id}`, `تقييم - ${rating.id}`)"
+            @click="printRate(rating.id)"
+            :loading="isPrintingAsPDF"
+            :disabled="isPrintingAsPDF"
           >
             <div class="d-flex align-center ga-2">
               <span>
@@ -638,6 +657,7 @@ onMounted(() => {
                             lng: rating?.location.longitude,
                           }"
                           :isDraggable="false"
+                          :isClickable="false"
                           class="rounded-lg overflow-hidden"
                           style="height: 250px"
                         />

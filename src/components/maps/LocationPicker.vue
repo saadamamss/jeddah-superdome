@@ -17,6 +17,10 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  isClickable: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -84,9 +88,11 @@ const initMap = async () => {
 
     // Add click event to map
     map.addListener("click", (e) => {
-      const position = e.latLng;
-      marker.setPosition(position);
-      updateCoordinates(position);
+      if (props.isClickable) {
+        const position = e.latLng;
+        marker.setPosition(position);
+        updateCoordinates(position);
+      }
     });
 
     // Add dragend event to marker
