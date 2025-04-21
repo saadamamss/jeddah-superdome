@@ -198,7 +198,7 @@ onMounted(() => {
           </VCard>
         </v-col>
       </v-row>
-      <v-row v-else>
+      <v-row v-else-if="!isLoading && hasPermission('statistics.view')">
         <v-col cols="6" md="4" lg="2">
           <StatsWidget
             title="المخيمات"

@@ -389,6 +389,7 @@ onMounted(() => {
               />
 
               <VBtn
+                v-if="canAccessObserverInfo()"
                 :loading="isExporting.rating"
                 :disabled="isExporting.rating"
                 variant="outlined"
@@ -427,6 +428,7 @@ onMounted(() => {
                 </div>
               </VBtn>
               <VBtn
+                v-if="canAccessObserverInfo()"
                 :loading="isExporting.ratingAnswers"
                 :disabled="isExporting.ratingAnswers"
                 variant="outlined"
