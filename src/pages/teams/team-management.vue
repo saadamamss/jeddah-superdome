@@ -280,10 +280,6 @@ const closeDialog = () => {
   resetForm();
 };
 
-const addNewLocation = () => {
-  dialog.value = true;
-};
-
 const addNewTeam = () => {
   fetchSupervisorsAndInspectors();
   fetchZones();

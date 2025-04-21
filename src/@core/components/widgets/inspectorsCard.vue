@@ -103,10 +103,7 @@ const handleMapError = (error) => {
             </div>
           </div>
         </div>
-        <div
-          v-if="user.locations_count"
-          class="d-flex justify-space-between align-center"
-        >
+        <div class="d-flex justify-space-between align-center">
           <div class="d-flex align-start gap-2">
             <svg
               width="14"
@@ -129,18 +126,19 @@ const handleMapError = (error) => {
             </svg>
 
             <div>
-              <div class="text-body-2 text-medium-emphasis">الاسنادات عدد</div>
-              <div class="text-body-2 font-weight-medium">
+              <div class="text-body-2 text-medium-emphasis">عدد الاسنادات</div>
+              <div
+                v-if="user.locations_count"
+                class="text-body-2 font-weight-medium"
+              >
                 {{ user.locations_count }}
               </div>
+              <div v-else class="text-body-2 font-weight-medium">-</div>
             </div>
           </div>
         </div>
 
-        <div
-          v-if="user.daily_visits_count"
-          class="d-flex justify-space-between align-center"
-        >
+        <div class="d-flex justify-space-between align-center">
           <div class="d-flex align-start gap-2">
             <svg
               width="16"
@@ -169,11 +167,15 @@ const handleMapError = (error) => {
 
             <div>
               <div class="text-body-2 text-medium-emphasis">
-                عدد التقييمات اليوميه
+                عدد التقييمات اليومية
               </div>
-              <div class="text-body-2 font-weight-medium">
+              <div
+                v-if="user.daily_visits_count"
+                class="text-body-2 font-weight-medium"
+              >
                 {{ user.daily_visits_count }}
               </div>
+              <div v-else class="text-body-2 font-weight-medium">-</div>
             </div>
           </div>
         </div>
