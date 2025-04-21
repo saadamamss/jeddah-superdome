@@ -1,6 +1,7 @@
 import axios from "axios";
 import { API_BASE_URL } from "@/config";
 import { authService } from "@/services/auth.service";
+import { toast } from "vue3-toastify";
 
 const axiosIns = axios.create({
   baseURL: API_BASE_URL,
@@ -38,6 +39,18 @@ axiosIns.interceptors.response.use(
       // window.location.href = "/auth/login";
 
       return Promise.reject("Unauthorized");
+    }
+
+    if (error.response?.status === 422) {
+      const errorsObj = error.response?.data?.errors;
+
+      for (const key in errorsObj) {
+        if (Object.prototype.hasOwnProperty.call(errorsObj, key)) {
+          errorsObj[key].forEach((value) => {
+            toast.error(value);
+          });
+        }
+      }
     }
 
     return Promise.reject(error);

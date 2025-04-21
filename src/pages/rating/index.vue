@@ -5,7 +5,7 @@ import FiltersMenu from "./components/FiltersMenu.vue";
 
 import axios from "@/plugins/axios";
 import { format } from "@core/utils/formatters";
-import { printElement, exportData } from "@core/utils/helpers";
+import { exportPDFFromURL, exportData } from "@core/utils/helpers";
 
 const router = useRouter();
 const route = useRoute();
@@ -120,6 +120,23 @@ const isExporting = ref({
   rating: false,
   ratingAnswers: false,
 });
+
+const printingRateId = ref(null);
+const printRate = async (rateId) => {
+  try {
+    printingRateId.value = rateId;
+
+    await exportPDFFromURL(
+      `/export-rating-pdf/${rateId}`,
+      {},
+      `rate_${rateId}`
+    );
+  } catch (error) {
+    console.error("printing failed:", error);
+  } finally {
+    printingRateId.value = null;
+  }
+};
 
 const exportRatingData = async () => {
   try {
@@ -587,12 +604,9 @@ onMounted(() => {
                         elevation="0"
                         class="bg-white no-print"
                         size="small"
-                        @click="
-                          printElement(
-                            `rating_${rating.id}`,
-                            `تقييم - ${rating.id}`
-                          )
-                        "
+                        @click="printRate(rating.id)"
+                        :loading="rating.id == printingRateId"
+                        :disabled="rating.id == printingRateId"
                       >
                         <img
                           width="22"
@@ -624,7 +638,13 @@ onMounted(() => {
                     </div>
                   </div>
                   <v-row class="mt-4">
-                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="
+                        rating?.rating_by && !rating?.company?.parent_company
+                      "
+                    >
                       <div>
                         <div class="d-flex align-center ga-2">
                           <div
@@ -667,7 +687,13 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col cols="12" md="6" v-if="rating?.rating_by">
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="
+                        rating?.rating_by && !rating?.company?.parent_company
+                      "
+                    >
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img
@@ -690,7 +716,13 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <!-- <v-col cols="12" md="6" v-if="rating?.rating_by">
+                    <v-col
+                      cols="12"
+                      md="6"
+                      v-if="
+                        rating?.rating_by && !rating?.company?.parent_company
+                      "
+                    >
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img
@@ -712,7 +744,7 @@ onMounted(() => {
                           }}</span>
                         </div>
                       </div>
-                    </v-col> -->
+                    </v-col>
                     <v-col cols="12" md="6" v-if="rating?.imtithal_phase">
                       <div>
                         <div class="d-flex align-center ga-2">

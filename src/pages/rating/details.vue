@@ -237,7 +237,7 @@ onMounted(() => {
                   cols="6"
                   md="4"
                   xl="3"
-                  v-if="rating?.rating_by"
+                  v-if="rating?.rating_by && !rating?.company?.parent_company"
                   class="mb-4"
                 >
                   <div>

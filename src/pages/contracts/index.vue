@@ -6,8 +6,6 @@ import axios from "@/plugins/axios";
 import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
-const filterToggle = ref(0);
-const dateRange = ref();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
@@ -22,116 +20,6 @@ const totalItems = ref(0);
 const quoteForm = ref({
   name: "",
 });
-
-const formModel = ref({
-  location: null,
-  fieldSupervisor: null,
-  fieldTeam: [],
-});
-
-const locations = [
-  { title: "موقع 1", value: "location1" },
-  { title: "موقع 2", value: "location2" },
-  { title: "موقع 3", value: "location3" },
-];
-
-const supervisors = [
-  { title: "أحمد محمد", value: "ahmed" },
-  { title: "محمد علي", value: "mohammed" },
-  { title: "عبدالله خالد", value: "abdullah" },
-];
-
-const fieldTeamMembers = [
-  {
-    title: "علي الحسين",
-    value: "ali",
-    avatar: "https://i.pravatar.cc/150?img=1",
-  },
-  {
-    title: "سارة نصر",
-    value: "sara",
-    avatar: "https://i.pravatar.cc/150?img=2",
-  },
-  {
-    title: "أحمد حسين",
-    value: "ahmed",
-    avatar: "https://i.pravatar.cc/150?img=3",
-  },
-  {
-    title: "عبدالرحمن صالح",
-    value: "abdulrahman",
-    avatar: "https://i.pravatar.cc/150?img=4",
-  },
-];
-
-const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
-];
-
-const companies = [
-  { title: "شركة رواف منى", value: "rawaf" },
-  { title: "شركة الخليج", value: "gulf" },
-];
-
-const teams = ref([
-  {
-    teamId: "team-01",
-    location: "موقع 1",
-    teamAvatars: [
-      { name: "محمد أحمد", avatar: "https://i.pravatar.cc/150?img=1" },
-      { name: "فاطمة علي", avatar: "https://i.pravatar.cc/150?img=2" },
-      { name: "عبدالله محمد", avatar: "https://i.pravatar.cc/150?img=3" },
-      { name: "سارة خالد", avatar: "https://i.pravatar.cc/150?img=4" },
-      { name: "عمر يوسف", avatar: "https://i.pravatar.cc/150?img=5" },
-    ],
-    supervisor: "أحمد محمد",
-  },
-  {
-    teamId: "team-02",
-    location: "موقع 2",
-    teamAvatars: [
-      { name: "ليلى حسن", avatar: "https://i.pravatar.cc/150?img=6" },
-      { name: "أحمد علي", avatar: "https://i.pravatar.cc/150?img=7" },
-      { name: "نورة سعد", avatar: "https://i.pravatar.cc/150?img=8" },
-    ],
-    supervisor: "محمد علي",
-  },
-  {
-    teamId: "team-03",
-    location: "موقع 3",
-    teamAvatars: [
-      { name: "خالد عمر", avatar: "https://i.pravatar.cc/150?img=9" },
-      { name: "ريم ناصر", avatar: "https://i.pravatar.cc/150?img=10" },
-      { name: "طارق سعيد", avatar: "https://i.pravatar.cc/150?img=11" },
-      { name: "منى فهد", avatar: "https://i.pravatar.cc/150?img=12" },
-    ],
-    supervisor: "عبدالله خالد",
-  },
-]);
-
-const violationOptions = ref([
-  {
-    name: "series-1",
-    data: [30, 40, 35, 50, 49, 60, 70],
-  },
-]);
-
-const complaintOptions = ref([
-  {
-    name: "Gold medals",
-    data: [148, 113, 104, 71, 77],
-  },
-  {
-    name: "Silver medals",
-    data: [113, 122, 98, 88, 72],
-  },
-  {
-    name: "Bronze medals",
-    data: [124, 95, 65, 91, 76],
-  },
-]);
 
 // Add handler for search clear
 const handleSearchClear = () => {
@@ -228,25 +116,6 @@ const handleSubmit = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-const nextStep = () => {
-  if (siteType.value) {
-    dialogStep.value = 2;
-  }
-};
-
-const prevStep = () => {
-  dialogStep.value = 1;
-};
-
-const closeDialog = () => {
-  dialog.value = false;
-  dialogStep.value = 1;
-};
-
-const addNewQouta = () => {
-  dialog.value = true;
 };
 
 onMounted(() => {

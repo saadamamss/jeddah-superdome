@@ -4,6 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 import axios from "@/plugins/axios";
 import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
+import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
 const route = useRoute();
@@ -181,6 +182,7 @@ onMounted(() => {
               <div class="d-flex align-center justify-space-between ga-4">
                 <h2 class="text-h5 font-weight-bold mb-4">تفاصيل المرحلة</h2>
                 <v-btn
+                  v-if="hasPermission('imtithal_phases.delete')"
                   color="error"
                   variant="outlined"
                   @click="deleteDialog = true"
@@ -269,6 +271,7 @@ onMounted(() => {
                 <v-card-actions class="pa-0 mt-6">
                   <v-spacer></v-spacer>
                   <v-btn
+                    v-if="hasPermission('imtithal_phases.edit')"
                     color="primary"
                     type="submit"
                     :loading="loading"

@@ -226,7 +226,7 @@ export default [
         component: ContractDetailsPage,
         meta: {
           requiresAuth: true,
-          requiresPermission: false,
+          requiresPermission: "contracts.view",
         },
       },
       {
