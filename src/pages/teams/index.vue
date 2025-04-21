@@ -4,7 +4,7 @@ import Pagination from "@/@core/components/Pagination";
 import TeamWidget from "@/@core/components/widgets/TeamWidget.vue";
 import { ref, onMounted, watch } from "vue";
 import axios from "@/plugins/axios";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const appStore = useAppStore();
 const isLoading = ref(true);

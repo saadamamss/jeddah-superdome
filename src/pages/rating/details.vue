@@ -5,6 +5,7 @@ import axios from "@/plugins/axios";
 import LocationPicker from "@/components/maps/LocationPicker.vue";
 import { format } from "@core/utils/formatters";
 import { exportPDFFromURL } from "@core/utils/helpers";
+import { canAccessObserverInfo } from "@core/utils/permissions";
 // import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 
 const route = useRoute();
@@ -256,10 +257,7 @@ onMounted(() => {
                   cols="6"
                   md="4"
                   xl="3"
-                  v-if="
-                    rating?.rating_by &&
-                    rating.rating_by?.parent_companies?.length === 0
-                  "
+                  v-if="canAccessObserverInfo()"
                   class="mb-4"
                 >
                   <div>

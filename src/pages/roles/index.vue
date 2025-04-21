@@ -6,7 +6,7 @@ import DeleteRoleConfirmationDialog from "./components/DeleteRoleConfirmationDia
 import { useAppStore } from "@/stores/app";
 import { ref, onMounted, watch } from "vue";
 import axios from "@/plugins/axios";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const appStore = useAppStore();
 const isLoading = ref(true);

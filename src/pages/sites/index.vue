@@ -7,7 +7,7 @@ import SiteCard from "@/@core/components/widgets/SiteCard.vue";
 import CorrectSiteCard from "@/@core/components/widgets/CorrectSiteCard.vue";
 import axios from "@/plugins/axios";
 import LocationPicker from "@/components/maps/LocationPicker.vue";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const isLoading = ref(true);
 const isExporting = ref(false);

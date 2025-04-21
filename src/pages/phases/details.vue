@@ -4,7 +4,7 @@ import { useRoute, useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
 import axios from "@/plugins/axios";
 import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const appStore = useAppStore();
 const route = useRoute();

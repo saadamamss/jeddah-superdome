@@ -12,7 +12,7 @@ import { LOCAL_STORAGE_USER_KEY } from "@/config";
 import { toast } from "vue3-toastify";
 import { authService } from "@/services/auth.service";
 import { useRouter, useRoute } from "vue-router";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const props = defineProps({
   tag: {
