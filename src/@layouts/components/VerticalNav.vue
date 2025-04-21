@@ -8,11 +8,12 @@ import {
 import { config } from "@layouts/config";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 import { useAuthStore } from "@/stores/Auth";
-import { LOCAL_STORAGE_USER_KEY } from "@/config";
 import { toast } from "vue3-toastify";
 import { authService } from "@/services/auth.service";
 import { useRouter, useRoute } from "vue-router";
 import { hasPermission } from "@core/utils/permissions";
+import axios from "@/plugins/axios";
+// import { LOCAL_STORAGE_USER_KEY } from "@/config";
 
 const props = defineProps({
   tag: {
@@ -87,8 +88,9 @@ const handleNavScroll = (evt) => {
 };
 
 const handleLogout = async () => {
+  isLoggingOut.value = true;
   try {
-    isLoggingOut.value = true;
+    await axios.post("/logout");
     // First clear the auth store
     auth.logout();
     // Then clear any remaining session data
@@ -226,6 +228,7 @@ const handleLogout = async () => {
         <v-btn
           @click="handleLogout"
           :loading="isLoggingOut"
+          :disabled="isLoggingOut"
           block
           variant="link"
           color="white"
