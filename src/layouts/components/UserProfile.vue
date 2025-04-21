@@ -2,17 +2,20 @@
 import { useSettingsStore } from "@/stores/Settings";
 import { useAuthStore } from "@/stores/Auth";
 import { useRouter } from "vue-router";
+import axios from "@/plugins/axios";
 
 const user = ref();
 const settingsListStore = useSettingsStore();
 const authStore = useAuthStore();
 const router = useRouter();
-const isLoading = ref(false);
+const isLoggingOut = ref(false);
 const isMenu = ref(false);
 
 const logout = async () => {
+  isLoggingOut.value = true;
   try {
-    isLoading.value = true;
+    await axios.post("/logout");
+
     // Clear auth store state
     authStore.logout();
     // Navigate to login page
@@ -31,7 +34,7 @@ const logout = async () => {
     settingsListStore.alertMessage = "حدث خطأ أثناء تسجيل الخروج";
     settingsListStore.isAlertShow = true;
   } finally {
-    isLoading.value = false;
+    isLoggingOut.value = false;
   }
 };
 
@@ -99,10 +102,10 @@ onMounted(() => {
           <!-- <v-list-item to="/ai">
             <v-list-item-title class="text-sm">حسابي</v-list-item-title>
           </v-list-item> -->
-          <v-list-item @click="logout">
+          <v-list-item @click="logout" :disabled="isLoggingOut">
             <v-list-item-title>
               <VIcon class="me-2" icon="tabler-logout" size="21" />
-              <span v-if="!isLoading" class="text-sm">تسجيل الخروج</span>
+              <span v-if="!isLoggingOut" class="text-sm">تسجيل الخروج</span>
               <VIcon
                 v-else
                 icon="mingcute:loading-line"

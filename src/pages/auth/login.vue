@@ -79,81 +79,86 @@ const loginUser = async () => {
       lg="5"
       class="d-flex flex-column align-center justify-center py-4 pa-0 mx-auto"
     >
-      <div class="w-100 d-flex justify-center pb-6 pt-3 px-4">
-        <img width="280" src="/logo-colored.svg" alt="امتثال" />
+      <div style="width: 580px; max-width: 100%">
+        <div class="w-100 d-flex justify-center pb-6 pt-3 px-4">
+          <img width="280" src="/logo-colored.svg" alt="امتثال" />
+        </div>
+        <VCard
+          flat
+          class="w-100 app-logo py-4 px-2 px-sm-6 px-xl-12 rounded-xl"
+        >
+          <VCardTitle style="flex: 0">
+            <h1 class="text-h5 text-sm-h4 font-weight-semibold mb-1">
+              تسجيل الدخول!
+            </h1>
+            <p class="mb-4 text-lg" style="color: #75797c">
+              أدخل بياناتك لتسجيل الدخول إلى حسابك.
+            </p>
+          </VCardTitle>
+          <v-divider class="my-4" />
+          <VCardText style="flex: 0" class="px-4">
+            <VForm ref="form" @submit.prevent="loginUser" class="mb-8">
+              <VRow>
+                <VCol cols="12" class="py-1">
+                  <label class="d-block text-subtitle-1 mb-2 text-dark">
+                    البريد الإلكتروني
+                  </label>
+                  <VTextField
+                    v-model="formState.email"
+                    type="email"
+                    bg-color="white"
+                    density="comfortable"
+                    placeholder="ادخل البريد الإلكتروني"
+                    rounded="lg"
+                    :rules="[(v) => !!v || 'البريد الإلكتروني مطلوب']"
+                  />
+                </VCol>
+
+                <VCol cols="12" class="py-1">
+                  <label class="d-block text-subtitle-1 mb-2 text-dark">
+                    كلمة المرور
+                  </label>
+                  <VTextField
+                    v-model="formState.password"
+                    variant="outlined"
+                    bg-color="white"
+                    density="comfortable"
+                    placeholder="أدخل كلمة المرور"
+                    rounded="lg"
+                    :rules="[(v) => !!v || 'كلمة المرور مطلوبة']"
+                    :type="isPasswordVisible ? 'text' : 'password'"
+                    :append-inner-icon="
+                      isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
+                    "
+                    @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                  />
+
+                  <div class="d-flex align-center justify-space-between mt-6">
+                    <v-btn
+                      :to="{ name: 'forgot-password' }"
+                      variant="text"
+                      class="text-primary text-base px-0"
+                    >
+                      نسيت كلمة المرور؟
+                    </v-btn>
+
+                    <VBtn
+                      rounded="pill"
+                      :loading="isSubmitting"
+                      type="submit"
+                      size="large"
+                      height="50"
+                      color="primary"
+                    >
+                      تسجيل الدخول
+                    </VBtn>
+                  </div>
+                </VCol>
+              </VRow>
+            </VForm>
+          </VCardText>
+        </VCard>
       </div>
-      <VCard flat class="w-100 app-logo py-4 px-2 px-sm-6 px-xl-12 rounded-xl">
-        <VCardTitle style="flex: 0">
-          <h1 class="text-h5 text-sm-h4 font-weight-semibold mb-1">
-            تسجيل الدخول!
-          </h1>
-          <p class="mb-4 text-lg" style="color: #75797c">
-            أدخل بياناتك لتسجيل الدخول إلى حسابك.
-          </p>
-        </VCardTitle>
-        <v-divider class="my-4" />
-        <VCardText style="flex: 0" class="px-4">
-          <VForm ref="form" @submit.prevent="loginUser" class="mb-8">
-            <VRow>
-              <VCol cols="12" class="py-1">
-                <label class="d-block text-subtitle-1 mb-2 text-dark">
-                  البريد الإلكتروني
-                </label>
-                <VTextField
-                  v-model="formState.email"
-                  type="email"
-                  bg-color="white"
-                  density="comfortable"
-                  placeholder="ادخل البريد الإلكتروني"
-                  rounded="lg"
-                  :rules="[(v) => !!v || 'البريد الإلكتروني مطلوب']"
-                />
-              </VCol>
-
-              <VCol cols="12" class="py-1">
-                <label class="d-block text-subtitle-1 mb-2 text-dark">
-                  كلمة المرور
-                </label>
-                <VTextField
-                  v-model="formState.password"
-                  variant="outlined"
-                  bg-color="white"
-                  density="comfortable"
-                  placeholder="أدخل كلمة المرور"
-                  rounded="lg"
-                  :rules="[(v) => !!v || 'كلمة المرور مطلوبة']"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  :append-inner-icon="
-                    isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
-                  "
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                />
-
-                <div class="d-flex align-center justify-space-between mt-6">
-                  <v-btn
-                    :to="{ name: 'forgot-password' }"
-                    variant="text"
-                    class="text-primary text-base px-0"
-                  >
-                    نسيت كلمة المرور؟
-                  </v-btn>
-
-                  <VBtn
-                    rounded="pill"
-                    :loading="isSubmitting"
-                    type="submit"
-                    size="large"
-                    height="50"
-                    color="primary"
-                  >
-                    تسجيل الدخول
-                  </VBtn>
-                </div>
-              </VCol>
-            </VRow>
-          </VForm>
-        </VCardText>
-      </VCard>
     </VCol>
   </VRow>
 </template>
