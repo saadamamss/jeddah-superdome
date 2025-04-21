@@ -3,7 +3,7 @@ import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import contractWidget from "@/@core/components/widgets/contractWidget.vue";
 import axios from "@/plugins/axios";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const appStore = useAppStore();
 const isLoading = ref(true);

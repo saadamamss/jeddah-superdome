@@ -11,7 +11,7 @@ import { createRouter, createWebHistory } from "vue-router/auto";
 
 import routes from "./routes";
 import { authService } from "@/services/auth.service";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

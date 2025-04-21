@@ -5,7 +5,7 @@ import Pagination from "@/@core/components/Pagination";
 import dataTable from "@/components/dataTable.vue";
 import { format } from "@core/utils/formatters";
 import { useDebounceFn } from "@vueuse/core";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const appStore = useAppStore();
 const isLoading = ref(false);

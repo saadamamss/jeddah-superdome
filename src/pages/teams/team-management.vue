@@ -11,7 +11,7 @@ import { useRoute } from "vue-router";
 import axios from "@/plugins/axios";
 import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const appStore = useAppStore();
 const isLoading = ref(true);

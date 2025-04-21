@@ -4,7 +4,7 @@ import Pagination from "@/@core/components/Pagination";
 import UserCard from "@/@core/components/widgets/userCard";
 import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
 import axios from "@/plugins/axios";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 // import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 // import UserStatisticsCard from "@/@core/components/widgets/UserStatisticsCard.vue";
 

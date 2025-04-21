@@ -5,7 +5,7 @@ import { useAppStore } from "@/stores/app";
 import axiosIns from "@/plugins/axios";
 import Datepicker from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const route = useRoute();
 const router = useRouter();

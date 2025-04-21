@@ -1,6 +1,5 @@
 import axios from "@/plugins/axios";
 import { toast } from "vue3-toastify";
-import { authService } from "@/services/auth.service";
 
 export const saveToStorage = (key, value) => {
   if (!key || !value) return null;
@@ -161,57 +160,6 @@ export function printElement(elementId, title = "تقييم") {
   printWindow.print();
   printWindow.close();
 }
-
-/**
- * User has permission
- * @param {Array | String} permissionLabel
- * @param {Boolean} hasSome
- * @returns
- */
-export const hasPermission = (permissionLabel, hasSome = false) => {
-  const userPermissions = authService.getStoredUser()?.user?.permissions || [];
-
-  if (!userPermissions) return false;
-
-  if (Array.isArray(permissionLabel) && permissionLabel.length) {
-    if (hasSome) {
-      return permissionLabel.some((permission) =>
-        userPermissions?.includes(permission)
-      );
-    }
-
-    return permissionLabel.every((permission) =>
-      userPermissions?.includes(permission)
-    );
-  }
-
-  return userPermissions?.includes(permissionLabel);
-};
-
-/**
- * user has roles
- * @param {Array | String} rolesKeys
- * @returns
- */
-export const hasRole = (rolesKeys = []) => {
-  if (!localStorage.getItem("najdUser")) return false;
-
-  const user = JSON.parse(localStorage.getItem("najdUser"));
-  const roles = user.roles || [];
-
-  if (typeof rolesKeys == "string") {
-    return roles.some((role) => role == rolesKeys);
-  }
-
-  let hasOneRole = 0;
-  rolesKeys.forEach((roleKey) => {
-    if (roles.some((role) => role == roleKey)) {
-      hasOneRole++;
-    }
-  });
-
-  return hasOneRole > 0;
-};
 
 export const exportData = async (url, filters = {}, successMessage) => {
   return await new Promise(async (resolve, reject) => {

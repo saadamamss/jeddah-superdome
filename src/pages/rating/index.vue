@@ -6,6 +6,7 @@ import FiltersMenu from "./components/FiltersMenu.vue";
 import axios from "@/plugins/axios";
 import { format } from "@core/utils/formatters";
 import { exportPDFFromURL, exportData } from "@core/utils/helpers";
+import { canAccessObserverInfo } from "@core/utils/permissions";
 
 const router = useRouter();
 const route = useRoute();
@@ -638,14 +639,7 @@ onMounted(() => {
                     </div>
                   </div>
                   <v-row class="mt-4">
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="
-                        rating?.rating_by &&
-                        rating.rating_by?.parent_companies?.length === 0
-                      "
-                    >
+                    <v-col cols="12" md="6" v-if="canAccessObserverInfo()">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <div
@@ -688,14 +682,7 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="
-                        rating?.rating_by &&
-                        rating.rating_by?.parent_companies?.length === 0
-                      "
-                    >
+                    <v-col cols="12" md="6" v-if="canAccessObserverInfo()">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img
@@ -718,14 +705,7 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="
-                        rating?.rating_by &&
-                        rating.rating_by?.parent_companies?.length === 0
-                      "
-                    >
+                    <v-col cols="12" md="6" v-if="canAccessObserverInfo()">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img

@@ -1,19 +1,19 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
 import StatsWidget from "@/@core/components/widgets/StatsWidget";
-import NotificationWidget from "@/@core/components/widgets/NotificationWidget";
-import UserWidget from "@/@core/components/widgets/UserWidget";
 import TeamWidget from "@/@core/components/widgets/TeamWidget";
-import homeRateWidget from "@/@core/components/widgets/homeRateWidget.vue";
 import { format } from "@core/utils/formatters";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
+import { canAccessObserverInfo } from "@core/utils/permissions";
+// import NotificationWidget from "@/@core/components/widgets/NotificationWidget";
+// import UserWidget from "@/@core/components/widgets/UserWidget";
+// import homeRateWidget from "@/@core/components/widgets/homeRateWidget.vue";
 
 // import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
-import { PerfectScrollbar } from "vue3-perfect-scrollbar";
+// import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 import { useLayouts } from "@layouts";
 import Pagination from "@/@core/components/Pagination.vue";
 import axios from "@/plugins/axios";
-import { ref, onMounted } from "vue";
 
 const appStore = useAppStore();
 const { isAppRtl } = useLayouts();
@@ -573,14 +573,7 @@ onMounted(() => {
                     </div>
                   </div>
                   <v-row class="mt-4">
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="
-                        rating?.rating_by &&
-                        rating.rating_by?.parent_companies?.length === 0
-                      "
-                    >
+                    <v-col cols="12" md="6" v-if="canAccessObserverInfo()">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <div
@@ -623,14 +616,7 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="
-                        rating?.rating_by &&
-                        rating.rating_by?.parent_companies?.length === 0
-                      "
-                    >
+                    <v-col cols="12" md="6" v-if="canAccessObserverInfo()">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img
@@ -653,14 +639,7 @@ onMounted(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col
-                      cols="12"
-                      md="6"
-                      v-if="
-                        rating?.rating_by &&
-                        rating.rating_by?.parent_companies?.length === 0
-                      "
-                    >
+                    <v-col cols="12" md="6" v-if="canAccessObserverInfo()">
                       <div>
                         <div class="d-flex align-center ga-2">
                           <img

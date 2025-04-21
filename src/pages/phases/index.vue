@@ -6,7 +6,7 @@ import sectorWidget from "@/@core/components/widgets/sectorWidget.vue";
 import { ref, watch, onMounted } from "vue";
 import axios from "@/plugins/axios";
 import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
-import { hasPermission } from "@core/utils/helpers";
+import { hasPermission } from "@core/utils/permissions";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
