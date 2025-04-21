@@ -265,3 +265,51 @@ export const exportData = async (url, filters = {}, successMessage) => {
     }
   });
 };
+
+export const exportPDFFromURL = async (fileUrl, filters = {}, pdfName) => {
+  return await new Promise(async (resolve, reject) => {
+    try {
+      const response = await axios.post(
+        fileUrl,
+        {},
+        {
+          responseType: "blob", // Important to receive binary data
+          ...filters,
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      const link = document.createElement("a");
+      link.href = url;
+
+      //Optional: Get file name from headers
+      const disposition = response.headers["content-disposition"];
+      let fileName = `${pdfName || "file"}.pdf`;
+      if (disposition && disposition.includes("filename=")) {
+        fileName = disposition
+          .split("filename=")[1]
+          .replace(/['"]/g, "")
+          .trim();
+      }
+
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      resolve(true);
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("خطأ غير متوقع اثناء التصدير!", {
+        rtl: true,
+        hideProgressBar: true,
+        position: "top-center",
+      });
+      reject(error);
+    }
+  });
+};

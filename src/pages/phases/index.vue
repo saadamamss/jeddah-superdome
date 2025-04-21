@@ -6,10 +6,9 @@ import sectorWidget from "@/@core/components/widgets/sectorWidget.vue";
 import { ref, watch, onMounted } from "vue";
 import axios from "@/plugins/axios";
 import AppDateTimePicker from "@/@core/components/AppDateTimePicker";
+import { hasPermission } from "@core/utils/helpers";
 
 const appStore = useAppStore();
-const filterToggle = ref(0);
-const dateRange = ref();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
@@ -17,11 +16,6 @@ const search = ref("");
 const dialog = ref(false);
 const dialogStep = ref(1);
 const loading = ref(false);
-const siteType = ref("السكن");
-const housingPermitNumber = ref("");
-const authorizedContactNumber = ref("");
-const selectedCompany = ref(null);
-const activeTab = ref("all");
 const phases = ref([]);
 const totalItems = ref(0);
 
@@ -47,65 +41,6 @@ const formRules = {
 };
 
 const form = ref(null);
-
-const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
-];
-
-const links = ref([
-  { title: "إدارة المواقع", href: "/", disabled: false },
-  { title: "تفاصيل للسكن", href: "/sites", disabled: false },
-  { title: "شركة رواف منى", href: "/sites/company-details", disabled: false },
-  { title: "التقييمات", href: "/sites/company-details", disabled: true },
-]);
-
-const companies = [
-  { title: "شركة رواف منى", value: "rawaf" },
-  { title: "شركة الخليج", value: "gulf" },
-];
-
-const sites = ref([
-  {
-    siteId: "6127782187",
-    authorizationNumber: "231 3456 567",
-  },
-  {
-    siteId: "6127782188",
-    authorizationNumber: "231 3456 568",
-  },
-  {
-    siteId: "6127782189",
-    authorizationNumber: "231 3456 569",
-  },
-  {
-    siteId: "6127782190",
-    authorizationNumber: "231 3456 570",
-  },
-]);
-
-const violationOptions = ref([
-  {
-    name: "series-1",
-    data: [30, 40, 35, 50, 49, 60, 70],
-  },
-]);
-
-const complaintOptions = ref([
-  {
-    name: "Gold medals",
-    data: [148, 113, 104, 71, 77],
-  },
-  {
-    name: "Silver medals",
-    data: [113, 122, 98, 88, 72],
-  },
-  {
-    name: "Bronze medals",
-    data: [124, 95, 65, 91, 76],
-  },
-]);
 
 // Function to fetch phases with pagination and search
 const fetchPhases = async (page = 1) => {
@@ -157,32 +92,9 @@ watch(currentPage, () => {
   fetchPhases(currentPage.value);
 });
 
-const handleSubmit = async () => {
-  loading.value = true;
-  // Add your submit logic here
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  loading.value = false;
-  dialog.value = false;
-  dialogStep.value = 1;
-};
-
-const nextStep = () => {
-  if (siteType.value) {
-    dialogStep.value = 2;
-  }
-};
-
-const prevStep = () => {
-  dialogStep.value = 1;
-};
-
 const closeDialog = () => {
   dialog.value = false;
   dialogStep.value = 1;
-};
-
-const addNewLocation = () => {
-  dialog.value = true;
 };
 
 // Function to submit new phase
@@ -332,6 +244,7 @@ onMounted(() => {
                   </v-btn> -->
 
                   <v-btn
+                    v-if="hasPermission('imtithal_phases.create')"
                     height="48"
                     elevation="0"
                     class="rounded-lg"
