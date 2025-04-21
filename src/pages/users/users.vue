@@ -32,7 +32,7 @@ const userStatistics = ref(null);
 const newUserForm = ref({
   firstname: "",
   lastname: "",
-  parent_companies: [],
+  parent_company_ids: [],
   email: "",
   phone: "",
   password: "",
@@ -51,7 +51,7 @@ const newUserForm = ref({
 const editUserForm = ref({
   firstname: "",
   lastname: "",
-  parent_companies: [],
+  parent_company_ids: [],
   email: "",
   phone: "",
   role_id: null,
@@ -310,7 +310,7 @@ const populateEditForm = (user) => {
     // secondname: user.secondname || "",
     // thirdname: user.thirdname || "",
     lastname: user.lastname || "",
-    parent_companies: user.parent_companies,
+    parent_company_ids: user.parent_companies?.map((c) => c.id) || [],
     email: user.email || "",
     phone: user.phone || "",
     role_id: user.role?.id || null,
@@ -690,7 +690,7 @@ onMounted(() => {
                 <v-col cols="12">
                   <label class="mb-2 d-block">الشركة الرئيسية</label>
                   <CustomVAutocomplete
-                    v-model="newUserForm.parent_companies"
+                    v-model="newUserForm.parent_company_ids"
                     :items="companies"
                     :loading="isGettingFilters"
                     item-title="name"
@@ -861,7 +861,7 @@ onMounted(() => {
               <v-col cols="12">
                 <label class="mb-2 d-block">الشركة الرئيسية</label>
                 <CustomVAutocomplete
-                  v-model="editUserForm.parent_companies"
+                  v-model="editUserForm.parent_company_ids"
                   :items="companies"
                   :loading="isGettingFilters"
                   item-title="name"
