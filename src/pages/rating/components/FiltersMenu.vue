@@ -2,6 +2,7 @@
 import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
 import axios from "@/plugins/axios";
+import { canAccessObserverInfo } from "@core/utils/permissions";
 
 const isGettingFilters = ref(false);
 const phases = ref([]);
@@ -57,15 +58,19 @@ const getFiltersUtilities = async () => {
     );
     companies.value = companiesResponse?.data?.data || [];
 
-    // Get observers (rating_by)
-    const observersResponse = await axios.get("/users?per_page=1000&role_id=3");
-    observers.value = observersResponse?.data?.data || [];
+    if (canAccessObserverInfo()) {
+      // Get observers (rating_by)
+      const observersResponse = await axios.get(
+        "/users?per_page=1000&role_id=3"
+      );
+      observers.value = observersResponse?.data?.data || [];
 
-    // Get supervisors (approved_by)
-    const supervisorsResponse = await axios.get(
-      "/users?per_page=1000&role_id=2"
-    );
-    supervisors.value = supervisorsResponse?.data?.data || [];
+      // Get supervisors (approved_by)
+      const supervisorsResponse = await axios.get(
+        "/users?per_page=1000&role_id=2"
+      );
+      supervisors.value = supervisorsResponse?.data?.data || [];
+    }
   } catch (error) {
     console.error("Error fetching filters data:", error);
   } finally {
@@ -236,7 +241,7 @@ const handleGetFilters = () => {
         </div>
 
         <!-- Observer Filter -->
-        <div class="mb-4">
+        <div v-if="canAccessObserverInfo()" class="mb-4">
           <CustomVSelect
             v-model="filters.rating_by_id"
             :items="observers"
@@ -249,7 +254,7 @@ const handleGetFilters = () => {
         </div>
 
         <!-- Supervisor Filter -->
-        <div class="mb-4">
+        <div v-if="canAccessObserverInfo()" class="mb-4">
           <CustomVAutocomplete
             v-model="filters.approved_by_id"
             :items="supervisors"

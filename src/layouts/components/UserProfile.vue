@@ -11,7 +11,9 @@ const router = useRouter();
 const isLoggingOut = ref(false);
 const isMenu = ref(false);
 
-const logout = async () => {
+const logout = async (e) => {
+  e.preventDefault();
+
   isLoggingOut.value = true;
   try {
     await axios.post("/logout");
