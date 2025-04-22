@@ -164,14 +164,7 @@ export function printElement(elementId, title = "تقييم") {
 export const exportData = async (url, filters = {}, successMessage) => {
   return await new Promise(async (resolve, reject) => {
     try {
-      const { data } = await axios.post(
-        url,
-        {},
-        {
-          // responseType: "blob", // Important to receive binary data
-          ...filters,
-        }
-      );
+      const { data } = await axios.post(url, filters);
 
       const responseMessage = data.status?.message || "";
       if (successMessage || responseMessage) {

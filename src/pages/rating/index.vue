@@ -129,7 +129,7 @@ const printRate = async (rateId) => {
 
     await exportPDFFromURL(
       `/export-rating-pdf/${rateId}`,
-      {},
+      filters,
       `rate_${rateId}`
     );
   } catch (error) {
