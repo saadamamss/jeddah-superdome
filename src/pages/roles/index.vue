@@ -1,4 +1,5 @@
 <script setup>
+import Pagination from "@/@core/components/Pagination";
 import RoleCard from "./components/RoleCard.vue";
 import AddNewRoleDialog from "./components/AddNewRoleDialog.vue";
 import EditRoleDialog from "./components/EditRoleDialog.vue";
@@ -22,29 +23,40 @@ const totalItems = ref(0);
 const search = ref("");
 const debouncedSearch = ref(null);
 
+const pagination = reactive({
+  per_page: 12,
+  page: 1,
+  total: 0,
+  items_on_page: 0,
+});
+
+watch(
+  () => pagination,
+  () => {
+    fetchRoles();
+  },
+  { deep: true }
+);
+
 // Fetch roles with pagination and search
 const fetchRoles = async () => {
   try {
     isLoading.value = true;
-    const queryParams = new URLSearchParams();
 
-    // Add pagination parameters
-    queryParams.append("page", currentPage.value.toString());
-    queryParams.append("per_page", perPage.value.toString());
-
-    // Add search parameter if exists
-    if (search.value) {
-      queryParams.append("search", search.value);
-    }
-
-    const response = await axios.get(`/roles?${queryParams.toString()}`);
+    const response = await axios.get("/roles", {
+      params: { page: pagination.page, per_page: pagination.per_page },
+    });
 
     if (response.data?.data) {
       roles.value = response.data.data;
-      totalItems.value =
-        response.data.meta?.total ||
-        response.data.pagination?.i_total_objects ||
-        0;
+      const rolesPagination = response.data?.pagination || {};
+
+      console.log({ rolesPagination });
+
+      pagination.page = rolesPagination.i_current_page;
+      pagination.per_page = rolesPagination.i_per_page;
+      pagination.total = rolesPagination.i_total_objects;
+      pagination.items_on_page = rolesPagination.i_items_on_page;
     }
   } catch (error) {
     console.error("Error fetching roles:", error);
@@ -270,11 +282,12 @@ onMounted(() => {
             </v-col>
           </v-row>
 
+          <!-- pagination -->
           <Pagination
-            v-if="roles.length > 0"
-            :total-items="totalItems"
-            v-model:per-page="perPage"
-            v-model:page="currentPage"
+            v-if="pagination && pagination.total"
+            :total-items="pagination.total"
+            v-model:per-page="pagination.per_page"
+            v-model:page="pagination.page"
           />
         </v-card-title>
       </VCard>
