@@ -36,7 +36,8 @@ axiosIns.interceptors.response.use(
 
       // Handle token refresh or logout here
       authService.logout();
-      // window.location.href = "/auth/login";
+      // toast.error('g');
+      window.location.href = "/auth/login";
 
       return Promise.reject("Unauthorized");
     }
