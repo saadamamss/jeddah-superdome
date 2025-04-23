@@ -180,6 +180,12 @@ const getFiltersUtilities = async () => {
 
 // Add a method to handle filter updates from FiltersMenu
 const handleFilterUpdate = (newFilters) => {
+  newFilters = {
+    ...newFilters,
+    created_at: newFilters.created_at
+      ? format(newFilters.created_at, "YYYY-MM-DD")
+      : null,
+  };
   Object.assign(filters, newFilters);
   // Reset to first page when filters change
   pagination.page = 1;

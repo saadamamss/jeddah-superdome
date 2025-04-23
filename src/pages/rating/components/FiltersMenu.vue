@@ -3,6 +3,7 @@ import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
 import axios from "@/plugins/axios";
 import { canAccessObserverInfo } from "@core/utils/permissions";
+import { format } from "@/@core/utils/formatters";
 
 const isGettingFilters = ref(false);
 const phases = ref([]);
