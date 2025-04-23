@@ -20,7 +20,6 @@ import NotesPage from "@/pages/notes";
 import AddNotePage from "@/pages/notes/addNote";
 import EditNotePage from "@/pages/notes/editNote";
 import RatingPage from "@/pages/rating";
-import CompanyRatingPage from "@/pages/rating/company-rating";
 import ContractsPage from "@/pages/contracts";
 import ContractDetailsPage from "@/pages/contracts/contract_details";
 import NotFoundPage from "@/pages/NotFound";
@@ -29,6 +28,7 @@ import QuestionnairesPage from "@/pages/questionnaires/index.vue";
 import AttendancePage from "@/pages/attendance/index.vue";
 import IntegrationsPage from "@/pages/integrations/index.vue";
 import NotificationsPage from "@/pages/notifications/index.vue";
+// import CompanyRatingPage from "@/pages/rating/company-rating";
 // import TempPage from "@/pages/temp";
 
 export default [
