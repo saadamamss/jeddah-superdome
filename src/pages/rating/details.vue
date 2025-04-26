@@ -769,7 +769,21 @@ onMounted(() => {
                             {{ question?.answer?.answer || "-" }}
                           </p>
                         </div>
-
+                        <!-- Note -->
+                        <div
+                          v-if="question?.answer?.note"
+                          class="my-4"
+                        >
+                          <h2 class="text-body-1 mb-4">ملاحظات</h2>
+                          <div
+                            class="d-flex align-center justify-space-between ga-4 flex-wrap pa-4 rounded-lg"
+                            style="background-color: #f9f9f9"
+                          >
+                            <p class="mb-0">
+                              {{ question.answer.note }}
+                            </p>
+                          </div>
+                        </div>
                         <div
                           v-if="
                             question?.answer &&
