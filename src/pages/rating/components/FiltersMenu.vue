@@ -3,7 +3,7 @@ import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import CustomVAutocomplete from "@core/components/global/CustomVAutocomplete.vue";
 import axios from "@/plugins/axios";
 import { canAccessObserverInfo } from "@core/utils/permissions";
-import { format } from "@/@core/utils/formatters";
+import SearchableAutocomplete from "@/@core/components/global/SearchableAutocomplete.vue";
 
 const isGettingFilters = ref(false);
 const phases = ref([]);
@@ -207,9 +207,9 @@ const handleGetFilters = () => {
 
         <!-- Contract Filter -->
         <div class="mb-4">
-          <CustomVAutocomplete
+          <SearchableAutocomplete
+            search-url="/contracts"
             v-model="filters.contract_id"
-            :items="contracts"
             label="الباقة"
             :loading="isGettingFilters"
             item-title="name"
@@ -285,9 +285,9 @@ const handleGetFilters = () => {
 
         <!-- Companies Filter -->
         <div class="mb-4">
-          <CustomVAutocomplete
+          <SearchableAutocomplete
+            search-url="/companies?type=parent"
             v-model="filters.parent_company_id"
-            :items="companies"
             label="الشركة الرئيسية"
             :loading="isGettingFilters"
             item-title="name"
