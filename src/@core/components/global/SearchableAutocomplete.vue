@@ -36,6 +36,8 @@ watch(
 
 const isSelectedItemsAssigned = ref(false);
 const searchItems = async (keywords) => {
+  if (!props.searchUrl) return;
+
   try {
     isSearching.value = true;
     const { data } = await axios.get(`${props.searchUrl}?search=${keywords}`);
