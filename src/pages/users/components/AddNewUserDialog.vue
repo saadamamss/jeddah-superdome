@@ -230,7 +230,7 @@ const closeDialog = () => {
             <v-col cols="12">
               <label class="mb-2 d-block">الشركة الرئيسية</label>
               <SearchableAutocomplete
-                search-url="/companies"
+                search-url="/companies?type=parent"
                 v-model="formState.parent_company_ids"
                 item-title="name"
                 item-value="id"

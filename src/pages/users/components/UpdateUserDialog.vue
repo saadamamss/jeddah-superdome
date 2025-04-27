@@ -14,7 +14,6 @@ const submitting = ref(false);
 const isGettingUtilities = ref(false);
 const loading = ref(false);
 const appStore = useAppStore();
-const companies = ref([]);
 const roles = ref([]);
 const formState = reactive({
   firstname: "",
@@ -126,11 +125,6 @@ const getUtilities = async () => {
     isGettingUtilities.value = true;
     const response = await axios.get("/roles?per_page=1000");
     roles.value = response?.data?.data || [];
-
-    const companiesResponse = await axios.get(
-      "/companies?type=parent&per_page=1000"
-    );
-    companies.value = companiesResponse?.data?.data || [];
   } catch (error) {
     console.error("Error fetching ratings:", error);
   } finally {
@@ -252,7 +246,7 @@ onMounted(() => {
             <v-col cols="12">
               <label class="mb-2 d-block">الشركة الرئيسية</label>
               <SearchableAutocomplete
-                search-url="/companies"
+                search-url="/companies?type=parent"
                 v-model="formState.parent_company_ids"
                 item-title="name"
                 item-value="id"

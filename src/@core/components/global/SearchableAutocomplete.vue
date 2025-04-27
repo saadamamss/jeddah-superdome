@@ -40,7 +40,11 @@ const searchItems = async (keywords) => {
 
   try {
     isSearching.value = true;
-    const { data } = await axios.get(`${props.searchUrl}?search=${keywords}`);
+    const { data } = await axios.get(
+      `${props.searchUrl}${
+        props.searchUrl.includes("?") ? "&" : "?"
+      }search=${keywords}`
+    );
 
     if (!isSelectedItemsAssigned.value && props.selectedItems?.length) {
       storedSelectedItems.value = props.selectedItems;
