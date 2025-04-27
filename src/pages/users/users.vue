@@ -5,6 +5,9 @@ import UserCard from "@/@core/components/widgets/userCard";
 import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
 import axios from "@/plugins/axios";
 import { hasPermission } from "@core/utils/permissions";
+import DeleteObserverConfirmationDialog from "./components/DeleteObserverConfirmationDialog";
+import DeleteOperatorConfirmationDialog from "./components/DeleteOperatorConfirmationDialog";
+import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 // import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 // import UserStatisticsCard from "@/@core/components/widgets/UserStatisticsCard.vue";
 
@@ -22,11 +25,14 @@ const totalUsers = ref(0);
 const userDialog = ref(false);
 const isEditingDialog = ref(false);
 const selectedUser = ref(null);
-const deleteDialog = ref(false);
-const userToDelete = ref(null);
+const userIdToDelete = ref(null);
 const filterDialog = ref(false);
 const userDetailsDialog = ref(false);
 const userStatistics = ref(null);
+const deleteDialog = ref(false);
+const isDeletingObserver = ref(false);
+const isDeletingOperator = ref(false);
+const isDeleting = ref(false);
 
 // Form data for new user
 const newUserForm = ref({
@@ -76,9 +82,6 @@ const roles = ref([
   { id: 2, title: "SUPERVISOR" },
   { id: 3, title: "INSPECTOR" },
 ]);
-
-// Blood types for selection
-const bloodTypes = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 // Available districts
 const districts = [
@@ -139,7 +142,6 @@ const fetchUsers = async () => {
     const response = await axios.get(`/users?${queryParams.toString()}`);
     if (response.data?.data) {
       users.value = response.data.data;
-      console.log(response.data.data);
       // Update pagination data
       if (response.data.pagination) {
         totalUsers.value = response.data.pagination.i_total_objects;
@@ -248,26 +250,44 @@ const updateUser = async () => {
 };
 
 // Delete user confirmation
-const confirmDelete = (userId) => {
-  userToDelete.value = userId;
+const confirmDelete = (user) => {
+  userIdToDelete.value = user.id;
+  userIdToDelete.value = user.id;
+
+  // delete observer => role.id == 3
+  if (user.role?.id == 3) {
+    isDeletingObserver.value = true;
+    return;
+  }
+  // delete Operator (supervisor) => role.id == 2
+  if (user.role?.id == 2) {
+    isDeletingOperator.value = true;
+    return;
+  }
+
   deleteDialog.value = true;
 };
 
 // Delete user
-const deleteUser = async () => {
-  if (!userToDelete.value) return;
+const deleteUser = async (newSupervisorId = null) => {
+  if (!userIdToDelete.value) return;
 
   try {
-    loading.value = true;
-    const response = await axios.delete(`/users/${userToDelete.value}`);
+    isDeleting.value = true;
+    const response = await axios.delete(`/users/${userIdToDelete.value}`, {
+      data: newSupervisorId
+        ? {
+            new_supervisor_id: newSupervisorId,
+          }
+        : {},
+    });
 
     if (response.data) {
       appStore.showSnackbar({
         message: "تم حذف المستخدم بنجاح",
         color: "success",
       });
-      deleteDialog.value = false;
-      userToDelete.value = null;
+      closeDeletingDialog();
       await fetchUsers();
     }
   } catch (error) {
@@ -277,8 +297,16 @@ const deleteUser = async () => {
       color: "error",
     });
   } finally {
-    loading.value = false;
+    isDeleting.value = false;
   }
+};
+
+const closeDeletingDialog = () => {
+  isDeletingObserver.value = false;
+  isDeletingOperator.value = false;
+  deleteDialog.value = false;
+
+  userIdToDelete.value = null;
 };
 
 // Helper functions
@@ -531,7 +559,7 @@ onMounted(() => {
               <UserCard
                 :user="user"
                 @edit="getUserDetails(user.id)"
-                @delete="confirmDelete(user.id)"
+                @delete="confirmDelete(user)"
                 :can-delete="hasPermission('users.delete')"
                 :can-edit="hasPermission('users.edit')"
               />
@@ -927,33 +955,56 @@ onMounted(() => {
 
     <!-- Delete Confirmation Dialog -->
     <template v-if="hasPermission('users.delete')">
-      <v-dialog v-model="deleteDialog" max-width="500px">
-        <v-card>
-          <v-card-title class="text-h5 pa-4">تأكيد الحذف</v-card-title>
-          <v-card-text class="pa-4">
-            هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.
-          </v-card-text>
-          <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn
-              color="error"
-              variant="text"
-              @click="deleteDialog = false"
-              :disabled="loading"
-            >
-              إلغاء
-            </v-btn>
-            <v-btn
-              color="primary"
-              variant="flat"
-              @click="deleteUser"
-              :loading="loading"
-            >
-              تأكيد الحذف
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+      <!-- <template>
+        <v-dialog v-model="deleteDialog" max-width="500px">
+          <v-card>
+            <v-card-title class="text-h5 pa-4">تأكيد الحذف</v-card-title>
+            <v-card-text class="pa-4">
+              هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.
+            </v-card-text>
+            <v-card-actions class="pa-4">
+              <v-spacer></v-spacer>
+              <v-btn
+                color="error"
+                variant="text"
+                @click="deleteDialog = false"
+                :disabled="isDeleting"
+              >
+                إلغاء
+              </v-btn>
+              <v-btn
+                color="primary"
+                variant="flat"
+                @click="deleteUser"
+                :loading="isDeleting"
+              >
+                تأكيد الحذف
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+      </template> -->
+
+      <DeleteConfirmationDialog
+        v-model="deleteDialog"
+        @close="closeDeletingDialog"
+        @delete="deleteUser"
+        :isDeleting="isDeleting"
+      />
+
+      <DeleteObserverConfirmationDialog
+        v-model="isDeletingObserver"
+        @close="closeDeletingDialog"
+        @delete="deleteUser"
+        :isDeleting="isDeleting"
+      />
+
+      <DeleteOperatorConfirmationDialog
+        v-model="isDeletingOperator"
+        @close="closeDeletingDialog"
+        @delete="deleteUser"
+        :isDeleting="isDeleting"
+      />
     </template>
 
     <!-- Filter Dialog -->
