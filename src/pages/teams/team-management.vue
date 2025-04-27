@@ -2,37 +2,30 @@
 // pagination added
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
+import { validationRules } from "@/@core/utils/validators";
 // import StatisticsBar from "@/@core/components/widgets/StatisticsBar.vue";
 // import supervisorCard from "@/@core/components/widgets/supervisorCard.vue";
 // import UserWidget from "@/@core/components/widgets/UserWidget.vue";
 import inspectorsCard from "@/@core/components/widgets/inspectorsCard.vue";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed, watch, reactive } from "vue";
 import { useRoute } from "vue-router";
 import axios from "@/plugins/axios";
 import BreadcrumbNav from "@/components/BreadcrumbNav.vue";
 import { useBreadcrumbs } from "@/composables/useBreadcrumbs";
 import { hasPermission } from "@core/utils/permissions";
+import SearchableAutocomplete from "@/@core/components/global/SearchableAutocomplete.vue";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
 const route = useRoute();
-const perPage = ref(6);
-const currentPage = ref(1);
 const search = ref("");
 const dialog = ref(false);
-const dialogStep = ref(1);
 const loading = ref(false);
-const siteType = ref("السكن");
-const housingPermitNumber = ref("");
-const authorizedContactNumber = ref("");
-const selectedCompany = ref(null);
-const activeTab = ref("all");
 const teamData = ref(null);
 const teamMembers = ref([]);
 const shiftsData = ref([]);
-const supervisors = ref([]);
+const addMemberForm = ref(null);
 const fieldTeamMembers = ref([]);
-const zones = ref([]);
 const teamZones = ref([]);
 const mapDialog = ref(false);
 const name = ref("");
@@ -44,11 +37,8 @@ const inspectorsPagination = ref({
 });
 
 // Form data and options
-const formModel = ref({
-  zone_id: null,
-  supervisor_id: null,
-  inspector_ids: [],
-  shift_id: null,
+const formState = reactive({
+  inspector_id: null,
 });
 
 // API functions
@@ -97,24 +87,13 @@ const fetchTeamData = async () => {
 // Fetch supervisors and inspectors for the team creation form
 const fetchSupervisorsAndInspectors = async () => {
   try {
-    const [supervisorsResponse, inspectorsResponse] = await Promise.all([
-      axios.get("/users?role_id=2"),
-      axios.get("/users?role_id=3"),
-    ]);
-
-    if (supervisorsResponse.data?.data) {
-      supervisors.value = supervisorsResponse.data.data.map((supervisor) => ({
-        title: `${supervisor.firstname} ${supervisor.lastname}`,
-        value: supervisor.id,
-      }));
-    }
+    const inspectorsResponse = await axios.get("/users?role_id=3");
 
     if (inspectorsResponse.data?.data) {
       fieldTeamMembers.value = inspectorsResponse.data.data.map(
         (inspector) => ({
           title: `${inspector.firstname} ${inspector.lastname}`,
           value: inspector.id,
-          avatar: inspector.avatar_url || "https://i.pravatar.cc/150",
         })
       );
     }
@@ -127,98 +106,6 @@ const fetchSupervisorsAndInspectors = async () => {
   }
 };
 
-// Fetch zones for the team creation form
-const fetchZones = async () => {
-  try {
-    const response = await axios.get("/zones?page=1");
-    if (response.data?.data) {
-      zones.value = response.data.data.map((zone) => ({
-        title: zone.name || zone.title,
-        value: zone.id,
-      }));
-    }
-  } catch (error) {
-    console.error("Error fetching zones:", error);
-    appStore.showSnackbar({
-      message: "حدث خطأ أثناء جلب بيانات المناطق",
-      color: "error",
-    });
-  }
-};
-
-// Fetch shifts for the team creation form
-const fetchShifts = async () => {
-  try {
-    const response = await axios.get("/shifts?page=1");
-    if (response.data?.data) {
-      // For the dropdown, we need title and value properties
-      shiftsData.value = response.data.data.map((shift) => ({
-        title: shift.name || shift.title,
-        value: shift.id,
-        start_time: shift.start_time,
-        end_time: shift.end_time,
-      }));
-    }
-  } catch (error) {
-    console.error("Error fetching shifts:", error);
-    appStore.showSnackbar({
-      message: "حدث خطأ أثناء جلب بيانات المناوبات",
-      color: "error",
-    });
-  }
-};
-
-const siteTypes = [
-  { title: "موقع سكني", value: "residential" },
-  { title: "موقع تجاري", value: "commercial" },
-  { title: "موقع صناعي", value: "industrial" },
-];
-
-const links = ref([
-  { title: "إدارة المواقع", href: "/", disabled: false },
-  { title: "تفاصيل للسكن", href: "/sites", disabled: false },
-  { title: "شركة رواف منى", href: "/sites/company-details", disabled: false },
-  { title: "التقييمات", href: "/sites/company-details", disabled: true },
-]);
-
-const companies = [
-  { title: "شركة رواف منى", value: "rawaf" },
-  { title: "شركة الخليج", value: "gulf" },
-];
-
-const sites = ref([
-  {
-    siteId: "6127782187",
-    authorizationNumber: "231 3456 567",
-  },
-  {
-    siteId: "6127782188",
-    authorizationNumber: "231 3456 568",
-  },
-]);
-
-const violationOptions = ref([
-  {
-    name: "series-1",
-    data: [30, 40, 35, 50, 49, 60, 70],
-  },
-]);
-
-const complaintOptions = ref([
-  {
-    name: "Gold medals",
-    data: [148, 113, 104, 71, 77],
-  },
-  {
-    name: "Silver medals",
-    data: [113, 122, 98, 88, 72],
-  },
-  {
-    name: "Bronze medals",
-    data: [124, 95, 65, 91, 76],
-  },
-]);
-
 const filteredTeamMembers = computed(() => {
   if (!search.value) return teamMembers.value;
 
@@ -226,12 +113,8 @@ const filteredTeamMembers = computed(() => {
 });
 
 const handleSubmit = async () => {
-  if (
-    !formModel.value.zone_id ||
-    !formModel.value.supervisor_id ||
-    !formModel.value.shift_id ||
-    formModel.value.inspector_ids.length === 0
-  ) {
+  const { valid } = await addMemberForm.value.validate();
+  if (!valid) {
     appStore.showSnackbar({
       message: "يرجى ملء جميع الحقول المطلوبة",
       color: "error",
@@ -241,19 +124,17 @@ const handleSubmit = async () => {
 
   loading.value = true;
   try {
-    await axios.post("/teams", {
-      zone_id: formModel.value.zone_id,
-      supervisor_id: formModel.value.supervisor_id,
-      shift_id: formModel.value.shift_id,
-      inspector_ids: formModel.value.inspector_ids,
-    });
+    await axios.post(`/teams/${route.params.id}/update-inspector`, formState);
 
     appStore.showSnackbar({
-      message: "تم إضافة الفريق بنجاح",
+      message: "تم إضافة المراقب إلى الفريق بنجاح",
       color: "success",
     });
+
+    await fetchTeamData();
+
     dialog.value = false;
-    fetchTeamData(); // Refresh team data
+    fetchTeamData();
     resetForm();
   } catch (error) {
     console.error("Error creating team:", error);
@@ -267,12 +148,9 @@ const handleSubmit = async () => {
 };
 
 const resetForm = () => {
-  formModel.value = {
-    zone_id: null,
-    supervisor_id: null,
-    inspector_ids: [],
-    shift_id: null,
-  };
+  Object.assign(formState, {
+    inspector_id: null,
+  });
 };
 
 const closeDialog = () => {
@@ -280,10 +158,8 @@ const closeDialog = () => {
   resetForm();
 };
 
-const addNewTeam = () => {
+const addNewInspector = () => {
   fetchSupervisorsAndInspectors();
-  fetchZones();
-  fetchShifts();
   dialog.value = true;
 };
 
@@ -312,8 +188,8 @@ const handleEditInspector = (id) => {
 const handleDeleteInspector = async (id) => {
   try {
     isLoading.value = true;
-    await axios.delete(`/teams/${route.params.id}/update-inspector`, {
-      data: { inspector_id: id },
+    await axios.post(`/teams/${route.params.id}/update-inspector`, {
+      inspector_id: id,
     });
 
     appStore.showSnackbar({
@@ -332,15 +208,6 @@ const handleDeleteInspector = async (id) => {
   } finally {
     isLoading.value = false;
   }
-};
-
-const openMapDialog = () => {
-  if (teamData.value?.data?.supervisor) {
-    name.value = `${teamData.value.data.supervisor.firstname} ${teamData.value.data.supervisor.lastname}`;
-  } else {
-    name.value = "المشرف";
-  }
-  mapDialog.value = true;
 };
 
 const handleMapError = (error) => {
@@ -688,9 +555,9 @@ onMounted(() => {
                       height="40"
                       class="rounded-lg"
                       prepend-icon="mdi-plus"
-                      @click="addNewTeam"
+                      @click="addNewInspector"
                     >
-                      إضافة
+                      إضافة مراقب للفريق
                     </VBtn>
                   </div>
                 </div>
@@ -747,121 +614,29 @@ onMounted(() => {
                   <v-card-text class="pa-4">
                     <div class="border-b mb-4">
                       <div class="d-flex justify-space-between align-center">
-                        <h2 class="text-h6 font-weight-bold">
-                          إدارة الفرق الميدانية
-                        </h2>
+                        <h2 class="text-h6 font-weight-bold">إضافة مراقب</h2>
                         <v-btn icon @click="closeDialog">
                           <v-icon>mdi-close</v-icon>
                         </v-btn>
                       </div>
-                      <p class="text-subtitle-1 text-medium-emphasis mb-2">
-                        حدد تفاصيل الفريق الميداني
-                      </p>
                     </div>
 
-                    <v-form @submit.prevent="handleSubmit">
-                      <!-- Zone/Location -->
+                    <v-form ref="addMemberForm" @submit.prevent="handleSubmit">
                       <div class="mb-4">
                         <label class="text-subtitle-2 mb-2 d-block"
-                          >المواقع</label
+                          >المراقب</label
                         >
-                        <v-select
-                          v-model="formModel.zone_id"
-                          :items="zones"
-                          item-title="title"
-                          item-value="value"
-                          variant="outlined"
-                          density="comfortable"
-                          placeholder="اختر الموقع"
-                          hide-details
-                          class="rounded-lg bg-grey-lighten-4 px-2"
-                        />
-                      </div>
-
-                      <!-- Supervisor -->
-                      <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >المشرف الميداني</label
-                        >
-                        <v-select
-                          v-model="formModel.supervisor_id"
-                          :items="supervisors"
-                          item-title="title"
-                          item-value="value"
-                          variant="outlined"
-                          density="comfortable"
-                          placeholder="اختر المشرف"
-                          hide-details
-                          class="rounded-lg bg-grey-lighten-4 px-2"
-                        />
-                      </div>
-
-                      <!-- Team Members -->
-                      <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >فريق المراقبين الميدانيون</label
-                        >
-                        <v-select
-                          v-model="formModel.inspector_ids"
+                        <SearchableAutocomplete
+                          v-model="formState.inspector_id"
                           :items="fieldTeamMembers"
                           item-title="title"
                           item-value="value"
-                          variant="outlined"
-                          density="comfortable"
-                          placeholder="اختر الفريق"
-                          multiple
-                          hide-details
-                          class="rounded-lg bg-grey-lighten-4"
-                        >
-                          <template v-slot:selection="{ item }">
-                            <div class="d-flex align-center ga-2 ms-n2">
-                              <v-avatar size="32" class="">
-                                <v-img
-                                  :src="item.raw.avatar"
-                                  :alt="item.title"
-                                ></v-img>
-                              </v-avatar>
-                              <span class="text-subtitle-2">{{
-                                item.title
-                              }}</span>
-                            </div>
-                          </template>
-
-                          <template v-slot:item="{ item, props }">
-                            <v-list-item
-                              v-bind="props"
-                              :title="item.title"
-                              class="field-team-item"
-                            >
-                              <template v-slot:prepend>
-                                <v-avatar size="32" class="me-3">
-                                  <v-img
-                                    :src="item.raw.avatar"
-                                    :alt="item.title"
-                                  ></v-img>
-                                </v-avatar>
-                              </template>
-                            </v-list-item>
-                          </template>
-                        </v-select>
-                      </div>
-
-                      <!-- Shift -->
-                      <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block"
-                          >التحويل</label
-                        >
-                        <v-select
-                          v-model="formModel.shift_id"
-                          :items="shiftsData"
-                          item-title="title"
-                          item-value="value"
-                          variant="outlined"
-                          density="comfortable"
-                          placeholder="اختر التحويل"
-                          hide-details
-                          class="rounded-lg bg-grey-lighten-4 px-2"
-                        />
+                          required
+                          :rules="[validationRules.required]"
+                          placeholder="اختر المراقب"
+                          :loading="isGettingFilters"
+                          :return-object="false"
+                        ></SearchableAutocomplete>
                       </div>
 
                       <!-- Action Buttons -->

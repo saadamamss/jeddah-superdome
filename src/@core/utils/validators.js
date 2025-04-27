@@ -118,3 +118,27 @@ export const alphaDashValidator = (value) => {
 
   return /^[0-9A-Z_-]*$/i.test(valueAsString) || "جميع الحروف غير صالحة";
 };
+
+export const validationRules = {
+  required: (v) => !!v || "هذا الحقل مطلوب",
+  email: (v) => {
+    if (!v) return true;
+    return /.+@.+\..+/.test(v) || "البريد الإلكتروني غير صالح";
+  },
+  phone: (v) => {
+    if (!v) return true;
+    return /^[0-9]{10}$/.test(v) || "رقم الهاتف يجب أن يكون 10 أرقام";
+  },
+  password: (v) => {
+    if (!v) return true;
+    return v.length >= 8 || "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
+  },
+  passwordMatch: (passwordConfirmation, password) => {
+    if (!passwordConfirmation) return true;
+    return passwordConfirmation === password || "كلمة المرور غير متطابقة";
+  },
+  saId: (v) => {
+    if (!v) return true;
+    return /^[0-9]{10}$/.test(v) || "رقم الهوية يجب أن يكون 10 أرقام";
+  },
+};

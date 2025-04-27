@@ -1,74 +1,33 @@
 <script setup>
 import { useAppStore } from "@/stores/app";
-import Pagination from "@/@core/components/Pagination";
-import UserCard from "@/@core/components/widgets/userCard";
-import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
 import axios from "@/plugins/axios";
 import { hasPermission } from "@core/utils/permissions";
+import Pagination from "@/@core/components/Pagination";
+import UserCard from "@/@core/components/widgets/userCard";
 import DeleteObserverConfirmationDialog from "./components/DeleteObserverConfirmationDialog";
 import DeleteOperatorConfirmationDialog from "./components/DeleteOperatorConfirmationDialog";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
+import AddNewUserDialog from "./components/AddNewUserDialog.vue";
+import UpdateUserDialog from "./components/UpdateUserDialog.vue";
 // import UserWidget from "@/@core/components/widgets/UserWidget.vue";
-// import UserStatisticsCard from "@/@core/components/widgets/UserStatisticsCard.vue";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
 const search = ref("");
-const loading = ref(false);
-const companies = ref([]);
 
 // Data for users
 const users = ref([]);
 const totalUsers = ref(0);
 const userDialog = ref(false);
-const isEditingDialog = ref(false);
-const selectedUser = ref(null);
+const isUpdatingDialog = ref(false);
 const userIdToDelete = ref(null);
 const filterDialog = ref(false);
-const userDetailsDialog = ref(false);
-const userStatistics = ref(null);
 const deleteDialog = ref(false);
 const isDeletingObserver = ref(false);
 const isDeletingOperator = ref(false);
 const isDeleting = ref(false);
-
-// Form data for new user
-const newUserForm = ref({
-  firstname: "",
-  lastname: "",
-  parent_company_ids: [],
-  email: "",
-  phone: "",
-  password: "",
-  password_confirmation: "",
-  role_id: null,
-  admin_role_id: null,
-  city: "",
-  blood_type: "",
-  gender: "",
-  nationality: "",
-  sa_id: "",
-  // personal_image: "",
-});
-
-// Form data for edit user
-const editUserForm = ref({
-  firstname: "",
-  lastname: "",
-  parent_company_ids: [],
-  email: "",
-  phone: "",
-  role_id: null,
-  admin_role_id: null,
-  city: "",
-  blood_type: "",
-  gender: "",
-  nationality: "",
-  sa_id: "",
-  // personal_image: "",
-});
 
 // Filter form data
 const filterForm = ref({
@@ -78,9 +37,10 @@ const filterForm = ref({
 
 // Available roles for selection
 const roles = ref([
-  { id: 1, title: "ADMIN" },
-  { id: 2, title: "SUPERVISOR" },
-  { id: 3, title: "INSPECTOR" },
+  { id: 1, name: "مدير النظام" },
+  { id: 4, name: "المشرف العام" },
+  { id: 2, name: "المشرف" },
+  { id: 3, name: "المراقب" },
 ]);
 
 // Available districts
@@ -95,33 +55,11 @@ const districts = [
   "الزاهر",
 ];
 
-// Add validation rules
-const rules = {
-  required: (v) => !!v || "هذا الحقل مطلوب",
-  email: (v) => {
-    if (!v) return true;
-    return /.+@.+\..+/.test(v) || "البريد الإلكتروني غير صالح";
-  },
-  phone: (v) => {
-    if (!v) return true;
-    return /^[0-9]{10}$/.test(v) || "رقم الهاتف يجب أن يكون 10 أرقام";
-  },
-  password: (v) => {
-    if (!v) return true;
-    return v.length >= 8 || "كلمة المرور يجب أن تكون 8 أحرف على الأقل";
-  },
-  passwordMatch: (v) => {
-    if (!v) return true;
-    return v === newUserForm.value.password || "كلمة المرور غير متطابقة";
-  },
-  saId: (v) => {
-    if (!v) return true;
-    return /^[0-9]{10}$/.test(v) || "رقم الهوية يجب أن يكون 10 أرقام";
-  },
+const currentUserId = ref(null);
+const handleUpdateUserDialog = (userId) => {
+  currentUserId.value = userId;
+  isUpdatingDialog.value = true;
 };
-
-// Add form ref
-const addUserForm = ref(null);
 
 // Fetch users with pagination and search
 const fetchUsers = async () => {
@@ -159,93 +97,6 @@ const fetchUsers = async () => {
     totalUsers.value = 0;
   } finally {
     isLoading.value = false;
-  }
-};
-
-// Modify addUser function to use newUserForm
-const addUser = async () => {
-  const { valid } = await addUserForm.value.validate();
-
-  if (!valid) {
-    appStore.showSnackbar({
-      message: "يرجى التحقق من صحة البيانات المدخلة",
-      color: "error",
-    });
-    return;
-  }
-
-  try {
-    loading.value = true;
-    const response = await axios.post("/users", newUserForm.value);
-
-    if (response.data) {
-      appStore.showSnackbar({
-        message: "تم إضافة المستخدم بنجاح",
-        color: "success",
-      });
-      resetNewUserForm();
-      userDialog.value = false;
-      await fetchUsers();
-    }
-  } catch (error) {
-    console.error("Error adding user:", error);
-    appStore.showSnackbar({
-      message: error.response?.data?.message || "حدث خطأ أثناء إضافة المستخدم",
-      color: "error",
-    });
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Get user details
-const getUserDetails = async (userId) => {
-  try {
-    loading.value = true;
-    const response = await axios.get(`/users/${userId}`);
-    if (response.data?.data?.user) {
-      selectedUser.value = response.data.data.user;
-      userStatistics.value = response.data.data.statistics;
-      populateEditForm(response.data.data.user);
-      userDetailsDialog.value = true;
-    }
-  } catch (error) {
-    console.error("Error fetching user details:", error);
-    appStore.showSnackbar({
-      message: "حدث خطأ أثناء جلب بيانات المستخدم",
-      color: "error",
-    });
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Modify updateUser function to use editUserForm
-const updateUser = async () => {
-  try {
-    loading.value = true;
-    const response = await axios.put(
-      `/users/${selectedUser.value.id}`,
-      editUserForm.value
-    );
-
-    if (response.data) {
-      appStore.showSnackbar({
-        message: "تم تحديث بيانات المستخدم بنجاح",
-        color: "success",
-      });
-      isEditingDialog.value = false;
-      await fetchUsers();
-    }
-  } catch (error) {
-    console.error("Error updating user:", error);
-    appStore.showSnackbar({
-      message:
-        error.response?.data?.message || "حدث خطأ أثناء تحديث بيانات المستخدم",
-      color: "error",
-    });
-  } finally {
-    loading.value = false;
   }
 };
 
@@ -309,49 +160,6 @@ const closeDeletingDialog = () => {
   userIdToDelete.value = null;
 };
 
-// Helper functions
-const resetNewUserForm = () => {
-  newUserForm.value = {
-    firstname: "",
-    // secondname: "",
-    // thirdname: "",
-    lastname: "",
-    email: "",
-    phone: "",
-    password: "",
-    password_confirmation: "",
-    role_id: null,
-    city: "",
-    blood_type: "",
-    gender: "",
-    nationality: "",
-    sa_id: "",
-    personal_image: "",
-  };
-};
-
-const countryCode = ref("+966");
-
-const populateEditForm = (user) => {
-  editUserForm.value = {
-    firstname: user.firstname || "",
-    // secondname: user.secondname || "",
-    // thirdname: user.thirdname || "",
-    lastname: user.lastname || "",
-    parent_company_ids: user.parent_companies?.map((c) => c.id) || [],
-    email: user.email || "",
-    phone: user.phone || "",
-    role_id: user.role?.id || null,
-    admin_role_id: user.admin_role?.id || null,
-    city: user.city || "",
-    blood_type: user.blood_type || "",
-    gender: user.gender || "",
-    nationality: user.nationality || "",
-    sa_id: user.sa_id || "",
-    // personal_image: user.personal_image || "",
-  };
-};
-
 // Watch for changes in search with debounce
 const debouncedSearch = ref(null);
 watch(search, (newValue) => {
@@ -390,29 +198,19 @@ const resetFilter = () => {
   fetchUsers();
 };
 
-const isGettingUtilities = ref(false);
+const handleUserAdded = () => {
+  userDialog.value = false;
+  fetchUsers();
+};
 
-const getUtilities = async () => {
-  try {
-    isGettingUtilities.value = true;
-    const response = await axios.get("/roles?per_page=1000");
-    roles.value = response?.data?.data || [];
-
-    const companiesResponse = await axios.get(
-      "/companies?type=parent&per_page=1000"
-    );
-    companies.value = companiesResponse?.data?.data || [];
-  } catch (error) {
-    console.error("Error fetching ratings:", error);
-  } finally {
-    isGettingUtilities.value = false;
-  }
+const handleUserUpdated = () => {
+  isUpdatingDialog.value = false;
+  currentUserId.value = null;
+  fetchUsers();
 };
 
 onMounted(() => {
   fetchUsers();
-  getUtilities();
-  // hasPermission("users.view")
 });
 </script>
 
@@ -558,7 +356,7 @@ onMounted(() => {
             >
               <UserCard
                 :user="user"
-                @edit="getUserDetails(user.id)"
+                @edit="handleUpdateUserDialog(user.id)"
                 @delete="confirmDelete(user)"
                 :can-delete="hasPermission('users.delete')"
                 :can-edit="hasPermission('users.edit')"
@@ -585,406 +383,27 @@ onMounted(() => {
 
     <!-- Add User Dialog -->
     <template v-if="hasPermission('users.create')">
-      <v-dialog v-model="userDialog" max-width="600px">
-        <v-card class="pa-4">
-          <v-card-title class="text-h5 mb-4">إضافة مستخدم جديد</v-card-title>
-          <v-card-text>
-            <v-form ref="addUserForm" @submit.prevent="addUser">
-              <v-row>
-                <v-col cols="12" md="6">
-                  <label class="mb-2 d-block">الاسم الأول</label>
-                  <v-text-field
-                    v-model="newUserForm.firstname"
-                    :rules="[rules.required]"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <!-- <v-col cols="12">
-                  <label class="mb-2 d-block">الاسم الثاني</label>
-                  <v-text-field v-model="newUserForm.secondname"></v-text-field>
-                </v-col> -->
-                <!-- <v-col cols="12">
-                  <label class="mb-2 d-block">الاسم الثالث</label>
-                  <v-text-field v-model="newUserForm.thirdname"></v-text-field>
-                </v-col> -->
-                <v-col cols="12" md="6">
-                  <label class="mb-2 d-block">اسم العائلة</label>
-                  <v-text-field
-                    v-model="newUserForm.lastname"
-                    :rules="[rules.required]"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">رقم الجوال</label>
-                  <div class="d-flex gap-2">
-                    <v-text-field
-                      v-model="newUserForm.phone"
-                      type="number"
-                      :rules="[rules.required, rules.phone]"
-                      placeholder="00"
-                      variant="outlined"
-                      density="compact"
-                      bg-color="white"
-                      hide-details
-                      style="flex: 1"
-                    ></v-text-field>
-                    <v-select
-                      v-model="countryCode"
-                      :items="['+966']"
-                      variant="outlined"
-                      density="compact"
-                      bg-color="white"
-                      hide-details
-                      style="max-width: 120px"
-                    ></v-select>
-                  </div>
-                </v-col>
-
-                <!-- <v-col cols="12">
-                  <label class="mb-2 d-block">المدينة</label>
-                  <v-text-field
-                    v-model="newUserForm.city"
-                    :rules="[rules.required]"
-                    required
-                  ></v-text-field>
-                </v-col> -->
-                <!-- <v-col cols="12">
-                  <label class="mb-2 d-block">فصيلة الدم</label>
-                  <v-select
-                    v-model="newUserForm.blood_type"
-                    :items="bloodTypes"
-                    :rules="[rules.required]"
-                    required
-                  ></v-select>
-                </v-col> -->
-                <!-- <v-col cols="12">
-                  <label class="mb-2 d-block">الجنس</label>
-                  <v-select
-                    v-model="newUserForm.gender"
-                    :items="[
-                      { title: 'ذكر', value: 'male' },
-                      { title: 'أنثى', value: 'female' },
-                    ]"
-                    :rules="[rules.required]"
-                    required
-                  ></v-select>
-                </v-col> -->
-                <!-- <v-col cols="12">
-                  <label class="mb-2 d-block">الجنسية</label>
-                  <v-text-field
-                    v-model="newUserForm.nationality"
-                    :rules="[rules.required]"
-                    required
-                  ></v-text-field>
-                </v-col> -->
-                <v-col cols="12">
-                  <label class="mb-2 d-block">البريد الإلكتروني</label>
-                  <v-text-field
-                    v-model="newUserForm.email"
-                    type="email"
-                    :rules="[rules.required, rules.email]"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">رقم الهوية</label>
-                  <v-text-field
-                    v-model="newUserForm.sa_id"
-                    type="number"
-                    :rules="[rules.required, rules.saId]"
-                    placeholder="مثال: 1234567890"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">كلمة المرور</label>
-                  <v-text-field
-                    v-model="newUserForm.password"
-                    type="password"
-                    :rules="[rules.required, rules.password]"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">تأكيد كلمة المرور</label>
-                  <v-text-field
-                    v-model="newUserForm.password_confirmation"
-                    type="password"
-                    :rules="[rules.required, rules.passwordMatch]"
-                    required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">الشركة الرئيسية</label>
-                  <CustomVAutocomplete
-                    v-model="newUserForm.parent_company_ids"
-                    :items="companies"
-                    :loading="isGettingFilters"
-                    item-title="name"
-                    item-value="id"
-                    clearable
-                    multiple
-                    :return-object="false"
-                  />
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block"> الدور الأساسي</label>
-                  <v-select
-                    v-model="newUserForm.role_id"
-                    :items="[
-                      { id: 1, title: 'مدير النظام' },
-                      { id: 4, title: 'المشرف العام' },
-                      { id: 2, title: 'المشرف' },
-                      { id: 3, title: 'المراقب' },
-                    ]"
-                    item-title="title"
-                    item-value="id"
-                    :rules="[rules.required]"
-                    required
-                  ></v-select>
-                </v-col>
-                <v-col cols="12">
-                  <label class="mb-2 d-block">دور لوحة التحكم</label>
-                  <v-select
-                    v-model="newUserForm.admin_role_id"
-                    :items="roles"
-                    item-title="name"
-                    item-value="id"
-                    required
-                  ></v-select>
-                </v-col>
-              </v-row>
-            </v-form>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn
-              type="button"
-              class="bg-red"
-              color="error"
-              @click="userDialog = false"
-            >
-              إلغاء
-            </v-btn>
-            <v-btn
-              color="primary"
-              :loading="loading"
-              @click="addUser"
-              class="px-6 bg-primary text-white"
-            >
-              إضافة مستخدم
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
+      <AddNewUserDialog
+        v-if="userDialog"
+        v-model="userDialog"
+        @close="userDialog = false"
+        @added="handleUserAdded"
+      />
     </template>
 
-    <!-- Edit User Dialog  -->
-    <v-dialog
-      v-if="hasPermission('users.edit')"
-      v-model="userDetailsDialog"
-      max-width="600px"
-    >
-      <v-card class="pa-6">
-        <v-card-title class="px-0 d-flex justify-space-between align-center">
-          <h2 class="text-h5">تعديل البيانات</h2>
-          <v-btn icon variant="text" @click="userDetailsDialog = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-card-title>
-
-        <v-card-subtitle class="px-0 text-medium-emphasis">
-          يرجى عند تعديل بيانات المستخدم الضغط علي "حفظ" لإضافته إلى النظام
-        </v-card-subtitle>
-
-        <v-card-text class="px-0">
-          <v-form @submit.prevent="updateUser">
-            <v-row>
-              <v-col cols="12" md="6">
-                <label class="mb-2 d-block">الاسم الأول</label>
-                <v-text-field
-                  v-model="editUserForm.firstname"
-                  placeholder="اسم المستخدم"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="white"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" md="6">
-                <label class="mb-2 d-block">اسم العائلة</label>
-                <v-text-field
-                  v-model="editUserForm.lastname"
-                  placeholder="اسم العائلة"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="white"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="12">
-                <label class="mb-2 d-block">رقم الهوية</label>
-                <v-text-field
-                  v-model="editUserForm.sa_id"
-                  placeholder="6127782187"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="white"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="12">
-                <label class="mb-2 d-block">رقم الجوال</label>
-                <div class="d-flex gap-2">
-                  <v-text-field
-                    v-model="editUserForm.phone"
-                    placeholder="00"
-                    variant="outlined"
-                    density="compact"
-                    bg-color="white"
-                    hide-details
-                    style="flex: 1"
-                  ></v-text-field>
-                  <v-select
-                    v-model="countryCode"
-                    :items="['+966']"
-                    variant="outlined"
-                    density="compact"
-                    bg-color="white"
-                    hide-details
-                    style="max-width: 120px"
-                  ></v-select>
-                </div>
-              </v-col>
-
-              <v-col cols="12">
-                <label class="mb-2 d-block">البريد الإلكتروني</label>
-                <v-text-field
-                  v-model="editUserForm.email"
-                  type="email"
-                  placeholder="البريد الإلكتروني"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="white"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="12">
-                <label class="mb-2 d-block">كلمة المرور</label>
-                <v-text-field
-                  v-model="editUserForm.password"
-                  type="password"
-                  placeholder="***********"
-                  variant="outlined"
-                  density="compact"
-                  bg-color="white"
-                  hide-details
-                ></v-text-field>
-              </v-col>
-
-              <v-col cols="12">
-                <label class="mb-2 d-block">الشركة الرئيسية</label>
-                <CustomVAutocomplete
-                  v-model="editUserForm.parent_company_ids"
-                  :items="companies"
-                  :loading="isGettingFilters"
-                  item-title="name"
-                  item-value="id"
-                  clearable
-                  multiple
-                  :return-object="false"
-                />
-              </v-col>
-
-              <v-col cols="12">
-                <label class="mb-2 d-block"> الدور الأساسي</label>
-                <v-select
-                  v-model="editUserForm.role_id"
-                  :items="[
-                    { id: 1, title: 'مدير النظام' },
-                    { id: 4, title: 'المشرف العام' },
-                    { id: 2, title: 'المشرف' },
-                    { id: 3, title: 'المراقب' },
-                  ]"
-                  item-title="title"
-                  item-value="id"
-                  :rules="[rules.required]"
-                  required
-                ></v-select>
-              </v-col>
-
-              <v-col cols="12">
-                <label class="mb-2 d-block">دور لوحة التحكم</label>
-                <v-select
-                  v-model="editUserForm.admin_role_id"
-                  :items="roles"
-                  item-title="name"
-                  item-value="id"
-                  required
-                ></v-select>
-              </v-col>
-            </v-row>
-
-            <div class="d-flex gap-3 mt-6 justify-space-between">
-              <v-btn
-                color="error"
-                variant="outlined"
-                max-width="150px"
-                @click="userDetailsDialog = false"
-              >
-                إلغاء
-              </v-btn>
-              <v-btn
-                color="primary"
-                type="submit"
-                :loading="loading"
-                max-width="150px"
-                class="bg-primary"
-              >
-                حفظ
-              </v-btn>
-            </div>
-          </v-form>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <!-- Update User Dialog  -->
+    <template v-if="hasPermission('users.edit')">
+      <UpdateUserDialog
+        v-if="isUpdatingDialog"
+        v-model="isUpdatingDialog"
+        :user-id="currentUserId"
+        @close="isUpdatingDialog = false"
+        @updated="handleUserUpdated"
+      />
+    </template>
 
     <!-- Delete Confirmation Dialog -->
     <template v-if="hasPermission('users.delete')">
-      <!-- <template>
-        <v-dialog v-model="deleteDialog" max-width="500px">
-          <v-card>
-            <v-card-title class="text-h5 pa-4">تأكيد الحذف</v-card-title>
-            <v-card-text class="pa-4">
-              هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.
-            </v-card-text>
-            <v-card-actions class="pa-4">
-              <v-spacer></v-spacer>
-              <v-btn
-                color="error"
-                variant="text"
-                @click="deleteDialog = false"
-                :disabled="isDeleting"
-              >
-                إلغاء
-              </v-btn>
-              <v-btn
-                color="primary"
-                variant="flat"
-                @click="deleteUser"
-                :loading="isDeleting"
-              >
-                تأكيد الحذف
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog>
-      </template> -->
-
       <DeleteConfirmationDialog
         v-model="deleteDialog"
         @close="closeDeletingDialog"
