@@ -24,6 +24,7 @@ const filters = reactive({
   approved_by_id: undefined,
   location_sub_type_id: undefined,
   parent_company_id: undefined,
+  pilgrims_type: undefined,
 });
 
 const hasActiveFilters = computed(() => {
@@ -288,6 +289,28 @@ const handleGetFilters = () => {
             v-model="filters.parent_company_id"
             :items="companies"
             label="الشركة الرئيسية"
+            :loading="isGettingFilters"
+            item-title="name"
+            item-value="id"
+            clearable
+            :return-object="false"
+          />
+        </div>
+
+        <div class="mb-4">
+          <CustomVAutocomplete
+            v-model="filters.pilgrims_type"
+            :items="[
+              {
+                name: 'حجاج الداخل',
+                id: 'حجاج الداخل',
+              },
+              {
+                name: 'حجاج الخارج',
+                id: 'حجاج الخارج',
+              },
+            ]"
+            label="فئة الحجاج"
             :loading="isGettingFilters"
             item-title="name"
             item-value="id"
