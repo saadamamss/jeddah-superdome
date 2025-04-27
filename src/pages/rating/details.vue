@@ -770,10 +770,7 @@ onMounted(() => {
                           </p>
                         </div>
                         <!-- Note -->
-                        <div
-                          v-if="question?.answer?.note"
-                          class="my-4"
-                        >
+                        <div v-if="question?.answer?.note" class="my-4">
                           <h2 class="text-body-1 mb-4">ملاحظات</h2>
                           <div
                             class="d-flex align-center justify-space-between ga-4 flex-wrap pa-4 rounded-lg"
