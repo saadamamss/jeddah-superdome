@@ -281,7 +281,16 @@ onMounted(() => {
                 <div class="d-flex align-start ga-2">
                   <img width="23" src="/imgs/icons/star.svg" alt="icon" />
 
-                  <div>
+                  <div v-if="rating.calculate_type == 'compliance_rate'">
+                    <h2 class="text-body-1 text-medium-emphasis mb-1">
+                      نسبة الامتثال
+                    </h2>
+                    <span class="d-flex text-body-2 font-weight-medium">
+                      <span>{{ rating?.compliance_rate || "-" }}</span>
+                      <span v-if="rating?.compliance_rate">%</span>
+                    </span>
+                  </div>
+                  <div v-if="rating.calculate_type == 'readiness_rate'">
                     <h2 class="text-body-1 text-medium-emphasis mb-1">
                       نسبة الجاهزية
                     </h2>
