@@ -2,6 +2,7 @@
 import Pagination from "@/@core/components/Pagination";
 import MapDisplay from "@/components/maps/MapDisplay.vue";
 import FiltersMenu from "./components/FiltersMenu.vue";
+import StatsWidget from "@/@core/components/widgets/StatsWidget";
 
 import axios from "@/plugins/axios";
 import { format } from "@core/utils/formatters";
@@ -14,6 +15,12 @@ const route = useRoute();
 const isLoading = ref(true);
 const isGettingFilters = ref(false);
 const ratings = ref([]);
+const statistics = ref({
+  total_ratings: 0,
+  approve_ratings: 0,
+  pending_ratings: 0,
+  reject_ratings: 0,
+});
 const phases = ref([]);
 const contracts = ref([]);
 
@@ -29,6 +36,8 @@ const filters = reactive({
   location_sub_type_id: null,
   parent_company_id: null,
 });
+
+const tempStatusFilter = ref(null);
 
 const pagination = reactive({
   per_page: 12,
@@ -73,7 +82,8 @@ const fetchRatings = async () => {
       },
     });
 
-    ratings.value = response.data?.data || [];
+    ratings.value = response.data?.data?.ratings || [];
+    statistics.value = response.data?.data?.statistics || {};
     const ratingsPagination = response.data?.pagination || {};
 
     pagination.page = ratingsPagination.i_current_page;
@@ -197,6 +207,18 @@ const applyFilters = () => {
   fetchRatings();
 };
 
+const filterByStatus = (status) => {
+  if (!status) {
+    filters.status = null;
+    tempStatusFilter.value = "ALL";
+    applyFilters();
+    return;
+  }
+
+  filters.status = status;
+  tempStatusFilter.value = status;
+  applyFilters();
+};
 const resetFilters = () => {
   // Reset all filters except location_type_id
   Object.keys(filters).forEach((key) => {
@@ -266,6 +288,76 @@ onMounted(() => {
           </template>
         </v-breadcrumbs>
       </div>
+      <v-row class="mb-4">
+        <v-col cols="6" lg="3">
+          <StatsWidget
+            title="جميع التقييمات"
+            :number="statistics.total_ratings?.toLocaleString()"
+            :loading="isLoading"
+            @click="filterByStatus(null)"
+            class="border"
+            :class="[
+              tempStatusFilter === 'ALL' ? 'border-error' : 'border-white',
+            ]"
+            :disabled="tempStatusFilter === 'ALL'"
+          >
+            <template #icon>
+              <img width="25" src="/imgs/icons/star.svg" alt="icon" />
+            </template>
+          </StatsWidget>
+        </v-col>
+        <v-col cols="6" lg="3">
+          <StatsWidget
+            title="التقييمات بانتظار الاعتماد"
+            :number="statistics.pending_ratings?.toLocaleString()"
+            :loading="isLoading"
+            @click="filterByStatus('PENDING')"
+            class="border"
+            :class="[
+              tempStatusFilter === 'PENDING' ? 'border-error' : 'border-white',
+            ]"
+            :disabled="tempStatusFilter === 'PENDING'"
+          >
+            <template #icon>
+              <img width="25" src="/imgs/icons/star.svg" alt="icon" />
+            </template>
+          </StatsWidget>
+        </v-col>
+        <v-col cols="6" lg="3">
+          <StatsWidget
+            title="التقييمات المعتمدة"
+            :number="statistics.approve_ratings?.toLocaleString()"
+            :loading="isLoading"
+            @click="filterByStatus('APPROVED')"
+            class="border"
+            :class="[
+              tempStatusFilter === 'APPROVED' ? 'border-error' : 'border-white',
+            ]"
+            :disabled="tempStatusFilter === 'APPROVED'"
+          >
+            <template #icon>
+              <img width="25" src="/imgs/icons/star.svg" alt="icon" />
+            </template>
+          </StatsWidget>
+        </v-col>
+        <v-col cols="6" lg="3">
+          <StatsWidget
+            title="التقييمات المرفوضة"
+            :number="statistics.reject_ratings?.toLocaleString()"
+            :loading="isLoading"
+            @click="filterByStatus('REJECTED')"
+            class="border"
+            :class="[
+              tempStatusFilter === 'REJECTED' ? 'border-error' : 'border-white',
+            ]"
+            :disabled="tempStatusFilter === 'REJECTED'"
+          >
+            <template #icon>
+              <img width="25" src="/imgs/icons/star.svg" alt="icon" />
+            </template>
+          </StatsWidget>
+        </v-col>
+      </v-row>
       <v-card elevation="0" class="rounded-lg px-4 bg-light-white border-0">
         <!-- Header Section -->
         <v-card-title class="pt-4 pb-6">
