@@ -161,7 +161,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+  <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2 pt-0">
     <div class="mb-2">
       <v-breadcrumbs
         divider=">"
