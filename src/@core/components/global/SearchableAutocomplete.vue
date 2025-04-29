@@ -5,6 +5,7 @@ const props = defineProps({
   searchUrl: String,
   items: Object,
   selectedItems: Object,
+  itemTitleConcat: Array,
 });
 
 const searchedItems = ref([]);
@@ -52,9 +53,19 @@ const searchItems = async (keywords) => {
       isSelectedItemsAssigned.value = true;
     }
 
-    const itemsData = (data?.data || []).filter(
-      (item) => !selectedItemIds.value.includes(item.id)
-    );
+    const itemsData = (data?.data || [])
+      .map((item) => {
+        if (
+          Array.isArray(props.itemTitleConcat) &&
+          props.itemTitleConcat.length
+        ) {
+          item.label = `${item[props.itemTitleConcat[0]]} ${
+            item[props.itemTitleConcat[1]]
+          }`;
+        }
+        return item;
+      })
+      .filter((item) => !selectedItemIds.value.includes(item.id));
     searchedItems.value = [...storedSelectedItems.value, ...itemsData];
   } catch (error) {
     console.error("Error fetching items:", error);
