@@ -28,6 +28,9 @@ import QuestionnairesPage from "@/pages/questionnaires/index.vue";
 import AttendancePage from "@/pages/attendance/index.vue";
 import IntegrationsPage from "@/pages/integrations/index.vue";
 import NotificationsPage from "@/pages/notifications/index.vue";
+import AttributionsPage from "@/pages/attributions/index.vue";
+import ResidenceAttributionsPage from "@/pages/attributions/residence_dt.vue";
+import supervisors_dt from "@/pages/attributions/supervisors_dt.vue";
 // import CompanyRatingPage from "@/pages/rating/company-rating";
 // import TempPage from "@/pages/temp";
 
@@ -47,6 +50,31 @@ export default [
         meta: {
           requiresAuth: true,
           requiresPermission: false,
+        },
+      },
+      {
+        path: "/attributions",
+        name: "attributions",
+        component: AttributionsPage,
+        meta: {
+          requiresAuth: true,
+          // requiresPermission: "attributions.view",
+        },
+      },
+      {
+        path: "/attributions/residence/:id",
+        name: "residence-attributions",
+        component: ResidenceAttributionsPage,
+        meta: {
+          requiresAuth: true,
+        },
+      },
+      {
+        path: "/attributions/supervisors_dt/:id",
+        name: "supervisors_dt",
+        component: supervisors_dt,
+        meta: {
+          requiresAuth: true,
         },
       },
       {

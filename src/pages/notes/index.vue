@@ -336,7 +336,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2 pt-0">
       <v-row v-if="isLoading">
         <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
           <VCard elevation="0">

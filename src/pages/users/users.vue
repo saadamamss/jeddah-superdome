@@ -602,7 +602,7 @@ onMounted(() => {
 }
 
 .v-dialog > .v-overlay__content {
-  overflow-y: scroll !important;
+  overflow-y: auto !important;
   padding-inline-end: 0px !important;
 }
 </style>
