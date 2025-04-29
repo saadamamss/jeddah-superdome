@@ -377,6 +377,7 @@ const availableTypes = ref([
   { title: "منصة سحاب", value: "attendance" },
   // { title: "متأخر", value: "late" },
 ]);
+const type_render = ref("all");
 
 // Add this in the script setup section
 const staticNotes = ref([
