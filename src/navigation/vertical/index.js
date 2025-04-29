@@ -7,12 +7,13 @@ import UsersIcon from "./icons/Users";
 import NotesIcon from "./icons/Notes";
 import RatingIcon from "./icons/Rating";
 import ContractsIcon from "./icons/Contracts";
-// import CompanyIcon from "./icons/Company";
-// import ShiftsIcon from "./icons/Shifts";
+
 import QuestionnairesIcon from "./icons/Questionnaires";
 import AttendanceIcon from "./icons/Attendance";
 import IntegrationIcon from "./icons/Integration";
 import NotificationIcon from "./icons/Notification";
+import AttributionsIcon from "./icons/Attributions.vue";
+import ShiftsIcon from "./icons/Shifts.vue";
 
 export default [
   {
@@ -50,6 +51,12 @@ export default [
     to: { name: "contracts" },
     icon: ContractsIcon,
     permission: "contracts.view",
+  },
+  {
+    title: "الإسنادات",
+    to: { name: "attributions" },
+    icon: AttributionsIcon,
+    permission: true,
   },
   {
     title: "إدارة الاستبيانات",
@@ -99,12 +106,12 @@ export default [
     icon: RolesIcon,
     permission: "permissions.view",
   },
-  // {
-  //   title: "اداره الورديات",
-  //   to: { name: "shifts" },
-  //   icon: ShiftsIcon,
-  //   permission: true,
-  // },
+  {
+    title: "اداره الورديات",
+    to: { name: "shifts" },
+    icon: ShiftsIcon,
+    permission: true,
+  },
   // --------------
 
   // {

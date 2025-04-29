@@ -167,7 +167,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2 pt-0">
       <v-row v-if="isLoading">
         <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
           <v-card elevation="0">
@@ -562,7 +562,9 @@ onMounted(() => {
 
                       <!-- Map -->
                       <div class="mb-4">
-                        <label class="text-subtitle-2 mb-2 d-block">الاحداثيات</label>
+                        <label class="text-subtitle-2 mb-2 d-block"
+                          >الاحداثيات</label
+                        >
                         <MapDisplay
                           v-model:latitude="selectedLocation.value.lat"
                           v-model:longitude="selectedLocation.value.lng"
@@ -570,8 +572,12 @@ onMounted(() => {
                           :zoom="13"
                         />
                         <div class="d-flex justify-space-between mt-2">
-                          <span class="text-body-2 text-medium-emphasis">خط العرض: {{ selectedLocation.value.lat }}</span>
-                          <span class="text-body-2 text-medium-emphasis">خط الطول: {{ selectedLocation.value.lng }}</span>
+                          <span class="text-body-2 text-medium-emphasis"
+                            >خط العرض: {{ selectedLocation.value.lat }}</span
+                          >
+                          <span class="text-body-2 text-medium-emphasis"
+                            >خط الطول: {{ selectedLocation.value.lng }}</span
+                          >
                         </div>
                       </div>
 

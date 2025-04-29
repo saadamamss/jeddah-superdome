@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2 pt-0">
       <!-- ... existing stats row ... -->
 
       <v-container fluid class="mt-6 px-0 rounded-lg">
@@ -256,18 +256,21 @@ const getPendingCorrectionsCount = computed(() => {
 const fetchData = async (page = 1) => {
   try {
     isLoading.value = true;
-    const endpoint = activeTab.value === "correction" ? "location-corrections" : "locations";
+    const endpoint =
+      activeTab.value === "correction" ? "location-corrections" : "locations";
 
-    const response = await axios.get(`${endpoint}?${new URLSearchParams({
-      page: page.toString(),
-      search: search.value,
-      ...(filters.value.type && { type: filters.value.type }),
-      ...(filters.value.status && { status: filters.value.status }),
-      ...(filters.value.dateRange && {
-        start_date: filters.value.dateRange[0],
-        end_date: filters.value.dateRange[1],
-      }),
-    }).toString()}`);
+    const response = await axios.get(
+      `${endpoint}?${new URLSearchParams({
+        page: page.toString(),
+        search: search.value,
+        ...(filters.value.type && { type: filters.value.type }),
+        ...(filters.value.status && { status: filters.value.status }),
+        ...(filters.value.dateRange && {
+          start_date: filters.value.dateRange[0],
+          end_date: filters.value.dateRange[1],
+        }),
+      }).toString()}`
+    );
 
     if (activeTab.value === "correction") {
       corrections.value = response.data.data;
