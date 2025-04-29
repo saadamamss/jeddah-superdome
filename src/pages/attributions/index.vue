@@ -25,13 +25,12 @@ const activeTab = ref("assigned");
 const searchQuery = ref("");
 const showRemoveAssignmentModal = ref(false);
 const selectedItemForRemoval = ref(null);
-
-const statusItems = [
-  { title: "الكل", value: "all" },
-  { title: "حاضر", value: "attendance" },
-  { title: "غائب", value: "absents" },
+const availableTypes = ref([
+  { title: "مخيم", value: "all" },
+  { title: "مسكن", value: "attendance" },
   // { title: "متأخر", value: "late" },
-];
+]);
+const type_render = ref("all");
 
 const filters = reactive({
   user_id: undefined,
@@ -49,7 +48,7 @@ const filters = reactive({
 const formatDate = (date) => {
   if (!date) return "";
 
-  // Create a date object with timezone handling
+  // Create a date object with tiintegrationsmezone handling
   const dateObj = new Date(date);
 
   // Format to YYYY-MM-DD without adding extra day
@@ -393,25 +392,8 @@ const viewDetails = (item) => {
   // router.push(`/attributions/${item.id}`)
 };
 
-const actionItems = [
-  { title: "عرض", icon: "mdi-eye-outline", action: "view" },
-  {
-    title: "إسناد جديد",
-    action: "new-assignment",
-
-    icon: "mdi-plus",
-  },
-];
-
-const handleAction = (action, item) => {
-  if (action === "view") {
-    router.push(`/attributions/${item.id}`);
-  } else if (action === "remove") {
-    selectedItemForRemoval.value = item;
-    showRemoveAssignmentModal.value = true;
-  } else if (action === "new-assignment") {
-    router.push(`/attributions/new`);
-  }
+const handleViewDt = (action, item) => {
+  router.push(`/attributions/residence/6`);
 };
 
 const handleRemoveAssignment = async () => {
@@ -437,7 +419,7 @@ const handleRemoveAssignment = async () => {
 </script>
 
 <template>
-  <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+  <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2 pt-0">
     <div class="mb-2">
       <v-breadcrumbs
         divider=">"
@@ -499,26 +481,40 @@ const handleRemoveAssignment = async () => {
             </div>
           </div>
 
-          <div
-            class="d-flex gap-2 border px-2 py-1"
-            style="border-radius: 16px; max-width: fit-content"
-          >
-            <v-btn
-              v-for="tab in [
-                { id: 'assigned', label: 'المواقع المسندة' },
-                { id: 'unassigned', label: 'المواقع غير المسندة' },
-              ]"
-              :key="tab.id"
-              elevation="0"
-              class="rounded-lg font-weight-bold"
-              :class="{
-                'bg-light-gray text-primary': activeTab === tab.id,
-                'bg-white text-gray-1': activeTab !== tab.id,
-              }"
-              @click="activeTab = tab.id"
+          <div class="d-flex justify-space-between align-center">
+            <div
+              class="d-flex gap-2 border px-2 py-1"
+              style="border-radius: 16px; max-width: fit-content"
             >
-              <span class="responsive-text">{{ tab.label }}</span>
-            </v-btn>
+              <v-btn
+                v-for="tab in [
+                  { id: 'assigned', label: 'المواقع المسندة' },
+                  { id: 'unassigned', label: 'المواقع غير المسندة' },
+                ]"
+                :key="tab.id"
+                elevation="0"
+                class="rounded-lg font-weight-bold"
+                :class="{
+                  'bg-light-gray text-primary': activeTab === tab.id,
+                  'bg-white text-gray-1': activeTab !== tab.id,
+                }"
+                @click="activeTab = tab.id"
+              >
+                <span class="responsive-text">{{ tab.label }}</span>
+              </v-btn>
+            </div>
+
+            <div>
+              <v-select
+                v-model="type_render"
+                :items="availableTypes"
+                variant="outlined"
+                density="comfortable"
+                placeholder="اختر المشرف"
+                hide-details
+                class="rounded-lg bg-grey-lighten-4 px-2"
+              />
+            </div>
           </div>
         </div>
       </v-card-title>
@@ -569,30 +565,40 @@ const handleRemoveAssignment = async () => {
             </template>
 
             <template #[`item.actions`]="{ item }">
-              <v-menu>
-                <template v-slot:activator="{ props }">
-                  <v-btn icon variant="text" v-bind="props" size="small">
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
-                </template>
-
-                <v-list>
-                  <v-list-item
-                    v-for="action in actionItems"
-                    :key="action.action"
-                    :class="{ 'text-error': action.color === 'error' }"
-                    @click="handleAction(action.action, item)"
-                  >
-                    <template v-slot:prepend>
-                      <template v-if="action.isSvg"> </template>
-                      <v-icon v-else :color="action.color" size="20">{{
-                        action.icon
-                      }}</v-icon>
-                    </template>
-                    <v-list-item-title>{{ action.title }}</v-list-item-title>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
+              <div @click="handleViewDt('view', item)" class="cursor-pointer">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 40 40"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M10.667 0.333008H29.333C35.0399 0.333008 39.667 4.96005 39.667 10.667V29.333C39.667 35.0399 35.0399 39.667 29.333 39.667H10.667C4.96005 39.667 0.333008 35.0399 0.333008 29.333V10.667C0.333008 4.96005 4.96005 0.333008 10.667 0.333008Z"
+                    stroke="#E9EBEC"
+                    stroke-width="0.666667"
+                  />
+                  <path
+                    opacity="0.4"
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M26.6673 20.0007C26.6673 19.7903 26.566 19.6482 26.3633 19.364C25.4526 18.0869 23.1268 15.334 20.0007 15.334C16.8745 15.334 14.5487 18.0869 13.638 19.364C13.4353 19.6482 13.334 19.7903 13.334 20.0007C13.334 20.211 13.4353 20.3531 13.638 20.6373C14.5487 21.9144 16.8745 24.6673 20.0007 24.6673C23.1268 24.6673 25.4526 21.9144 26.3633 20.6373C26.566 20.3531 26.6673 20.211 26.6673 20.0007ZM20.0007 18.0007C21.1052 18.0007 22.0007 18.8961 22.0007 20.0007C22.0007 21.1052 21.1052 22.0007 20.0007 22.0007C18.8961 22.0007 18.0007 21.1052 18.0007 20.0007C18.0007 18.8961 18.8961 18.0007 20.0007 18.0007Z"
+                    fill="#B69265"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M20.0007 22.5007C18.6199 22.5007 17.5007 21.3814 17.5007 20.0007C17.5007 18.6199 18.6199 17.5007 20.0007 17.5007C21.3814 17.5007 22.5007 18.6199 22.5007 20.0007C22.5007 21.3814 21.3814 22.5007 20.0007 22.5007ZM18.5007 20.0007C18.5007 20.8291 19.1722 21.5007 20.0007 21.5007C20.8291 21.5007 21.5007 20.8291 21.5007 20.0007C21.5007 19.1722 20.8291 18.5007 20.0007 18.5007C19.1722 18.5007 18.5007 19.1722 18.5007 20.0007Z"
+                    fill="#B69265"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M20.0007 14.834C18.2869 14.834 16.818 15.5883 15.6809 16.476C14.5427 17.3645 13.7015 18.4138 13.2309 19.0737L13.1954 19.1231C13.0267 19.3579 12.834 19.6258 12.834 20.0007C12.834 20.3755 13.0267 20.6434 13.1954 20.8782L13.2309 20.9276C13.7015 21.5875 14.5427 22.6368 15.6809 23.5253C16.818 24.413 18.2869 25.1673 20.0007 25.1673C21.7144 25.1673 23.1834 24.413 24.3204 23.5253C25.4586 22.6368 26.2998 21.5875 26.7704 20.9276L26.8059 20.8782C26.9746 20.6434 27.1673 20.3755 27.1673 20.0007C27.1673 19.6258 26.9746 19.3579 26.8059 19.1231L26.7704 19.0737C26.2998 18.4138 25.4586 17.3645 24.3204 16.476C23.1833 15.5883 21.7144 14.834 20.0007 14.834ZM14.0451 19.6543C14.4852 19.0371 15.2622 18.0714 16.2962 17.2642C17.3312 16.4562 18.5882 15.834 20.0007 15.834C21.4131 15.834 22.6701 16.4562 23.7051 17.2642C24.7391 18.0714 25.5161 19.0371 25.9562 19.6543C26.0651 19.807 26.1169 19.8815 26.1478 19.9409C26.1674 19.9786 26.1674 19.9889 26.1673 19.9991L26.1673 20.0007L26.1673 20.0022C26.1674 20.0124 26.1674 20.0227 26.1478 20.0604C26.1169 20.1198 26.0651 20.1943 25.9562 20.347C25.5161 20.9642 24.7391 21.9299 23.7051 22.7371C22.6701 23.5451 21.4131 24.1673 20.0007 24.1673C18.5882 24.1673 17.3312 23.5451 16.2962 22.7371C15.2622 21.9299 14.4852 20.9642 14.0451 20.347C13.9362 20.1943 13.8844 20.1198 13.8535 20.0604C13.8339 20.0227 13.8339 20.0124 13.834 20.0022L13.834 20.0007L13.834 19.9991C13.8339 19.9889 13.8339 19.9786 13.8535 19.9409C13.8844 19.8815 13.9362 19.807 14.0451 19.6543Z"
+                    fill="#B69265"
+                  />
+                </svg>
+              </div>
             </template>
           </dataTable>
 

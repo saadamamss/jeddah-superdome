@@ -632,7 +632,7 @@ const exportData = async () => {
 
 <template>
   <div>
-    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2">
+    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2 pt-0">
       <div>
         <v-row>
           <v-col cols="12" md="6">
