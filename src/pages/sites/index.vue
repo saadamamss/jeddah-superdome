@@ -677,7 +677,11 @@ const exportData = async () => {
         </div>
         <v-row>
           <v-col cols="12" md="6">
-            <StatsWidget title="المساكن" :number="housing_count">
+            <StatsWidget
+              title="المساكن"
+              :number="housing_count?.toLocaleString()"
+              :loading="isLoading"
+            >
               <template #icon>
                 <svg
                   width="2.2rem"
@@ -708,7 +712,11 @@ const exportData = async () => {
             </StatsWidget>
           </v-col>
           <v-col cols="12" md="6">
-            <StatsWidget title="المخيمات" :number="camp_count">
+            <StatsWidget
+              title="المخيمات"
+              :number="camp_count?.toLocaleString()"
+              :loading="isLoading"
+            >
               <template #icon>
                 <svg
                   width="2.2rem"
@@ -827,88 +835,93 @@ const exportData = async () => {
                     </VBtn>
                   </template>
 
-                  <v-card class="pa-4 rounded-lg filter-menu-card">
-                    <v-card-title
-                      class="px-0 pt-0 d-flex justify-space-between align-center"
-                    >
-                      <span class="text-subtitle-1 font-weight-bold"
-                        >فلترة البيانات</span
+                  <div class="h-100 overflow-auto pa-2 bg-white rounded-lg">
+                    <v-card class="px-2 py-4 rounded-lg filter-menu-card">
+                      <v-card-title
+                        class="px-0 pt-0 d-flex justify-space-between align-center"
                       >
-                      <v-btn
-                        variant="text"
-                        color="primary"
-                        size="small"
-                        :disabled="!hasActiveFilters"
-                        @click="resetFilters"
-                      >
-                        إعادة تعيين
-                        <v-icon right>mdi-refresh</v-icon>
-                      </v-btn>
-                    </v-card-title>
-
-                    <v-divider class="mb-4"></v-divider>
-
-                    <v-card-text class="px-0 pb-0">
-                      <!-- Date Filter -->
-                      <div class="mb-4">
-                        <v-label class="text-body-2 mb-1 d-block"
-                          >التاريخ</v-label
+                        <span class="text-subtitle-1 font-weight-bold"
+                          >فلترة البيانات</span
                         >
-                        <v-date-picker
-                          v-model="tempDateFilter"
-                          density="compact"
-                          elevation="0"
-                          hide-details
-                          class="rounded-lg border"
-                          width="100%"
-                        ></v-date-picker>
-                      </div>
+                        <v-btn
+                          variant="text"
+                          color="primary"
+                          size="small"
+                          :disabled="!hasActiveFilters"
+                          @click="resetFilters"
+                        >
+                          إعادة تعيين
+                          <v-icon right>mdi-refresh</v-icon>
+                        </v-btn>
+                      </v-card-title>
 
-                      <!-- Location Type Filter -->
-                      <div class="mb-4">
-                        <v-select
-                          v-model="filters.location_type_id"
-                          label="نوع الموقع"
-                          :items="siteTypes"
-                          item-title="name"
-                          item-value="id"
-                          variant="outlined"
-                          hide-details
-                          density="comfortable"
-                          class="mb-3 rounded-lg bg-grey-lighten-4"
-                        ></v-select>
-                      </div>
+                      <v-divider></v-divider>
 
-                      <!-- Location Sub Type Filter -->
-                      <div class="mb-4">
-                        <v-select
-                          v-model="filters.location_sub_type_id"
-                          label="نوع الموقع الفرعي"
-                          :items="locationSubTypes"
-                          item-title="name"
-                          item-value="id"
-                          variant="outlined"
-                          hide-details
-                          density="comfortable"
-                          class="mb-3 rounded-lg bg-grey-lighten-4"
-                        ></v-select>
-                      </div>
-                    </v-card-text>
-
-                    <v-card-actions class="px-0 pt-4">
-                      <v-spacer></v-spacer>
-                      <v-btn
-                        variant="text"
-                        color="error"
-                        @click="filterMenu = false"
+                      <v-card-text
+                        class="h-100 overflow-y-scroll px-0 pt-1 pb-0"
+                        style="height: calc(100% - 200px)"
                       >
-                        إلغاء
-                      </v-btn>
-                      <v-btn color="primary" @click="applyFilters">
-                        تطبيق الفلتر
-                      </v-btn>
-                    </v-card-actions>
-                  </v-card>
+                        <!-- Date Filter -->
+                        <div class="mb-4">
+                          <v-label class="text-body-2 mb-1 d-block"
+                            >التاريخ</v-label
+                          >
+                          <v-date-picker
+                            v-model="tempDateFilter"
+                            density="compact"
+                            elevation="0"
+                            hide-header
+                            hide-details
+                            class="rounded-lg border"
+                            width="100%"
+                          ></v-date-picker>
+                        </div>
+
+                        <!-- Location Type Filter -->
+                        <div class="mb-4">
+                          <v-select
+                            v-model="filters.location_type_id"
+                            label="نوع الموقع"
+                            :items="siteTypes"
+                            item-title="name"
+                            item-value="id"
+                            variant="outlined"
+                            hide-details
+                            density="comfortable"
+                            class="mb-3 rounded-lg bg-grey-lighten-4"
+                          ></v-select>
+                        </div>
+
+                        <!-- Location Sub Type Filter -->
+                        <div class="mb-4">
+                          <v-select
+                            v-model="filters.location_sub_type_id"
+                            label="نوع الموقع الفرعي"
+                            :items="locationSubTypes"
+                            item-title="name"
+                            item-value="id"
+                            variant="outlined"
+                            hide-details
+                            density="comfortable"
+                            class="mb-3 rounded-lg bg-grey-lighten-4"
+                          ></v-select>
+                        </div>
+                      </v-card-text>
+                      <v-card-actions class="px-0">
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          variant="text"
+                          color="error"
+                          @click="filterMenu = false"
+                        >
+                          إلغاء
+                        </v-btn>
+                        <v-btn color="primary" @click="applyFilters">
+                          تطبيق الفلتر
+                        </v-btn>
+                      </v-card-actions>
+                    </v-card>
+                  </div>
                 </v-menu>
                 <!-- export -->
                 <VBtn
