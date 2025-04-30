@@ -21,6 +21,7 @@ const formState = reactive({
   parent_company_ids: [],
   contract_ids: [],
   supervisor_ids: [],
+  inspector_ids: [],
   email: "",
   phone: "",
   role_id: null,
@@ -43,6 +44,7 @@ const resetFormState = () => {
     parent_company_ids: [],
     contract_ids: [],
     supervisor_ids: [],
+    inspector_ids: [],
     email: "",
     phone: "",
     role_id: null,
@@ -92,6 +94,7 @@ const populateEditForm = (user) => {
     parent_company_ids: user.parent_companies?.map((c) => c.id) || [],
     contract_ids: user.contracts?.map((c) => c.id) || [],
     supervisor_ids: user.supervisors?.map((c) => c.id) || [],
+    inspector_ids: user.inspectors?.map((c) => c.id) || [],
     email: user.email || "",
     phone: user.phone || "",
     role_id: user.role?.id || null,
@@ -280,6 +283,19 @@ onMounted(() => {
               <SearchableAutocomplete
                 search-url="/users?role_id=2"
                 v-model="formState.supervisor_ids"
+                item-title="label"
+                :item-title-concat="['firstname', 'lastname']"
+                item-value="id"
+                clearable
+                multiple
+                :return-object="false"
+              />
+            </v-col>
+            <v-col cols="12">
+              <label class="mb-2 d-block">المراقب</label>
+              <SearchableAutocomplete
+                search-url="/users?role_id=3"
+                v-model="formState.inspector_ids"
                 item-title="label"
                 :item-title-concat="['firstname', 'lastname']"
                 item-value="id"
