@@ -84,7 +84,7 @@ const fetchRatings = async () => {
 
     ratings.value = response.data?.data?.ratings || [];
     statistics.value = response.data?.data?.statistics || {};
-    const ratingsPagination = response.data?.pagination || {};
+    const ratingsPagination = response.data?.data?.pagination || {};
 
     pagination.page = ratingsPagination.i_current_page;
     pagination.per_page = ratingsPagination.i_per_page;
