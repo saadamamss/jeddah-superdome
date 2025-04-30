@@ -16,6 +16,7 @@ const formState = reactive({
   parent_company_ids: [],
   contract_ids: [],
   supervisor_ids: [],
+  inspector_ids: [],
   email: "",
   phone: "",
   password: "",
@@ -38,6 +39,7 @@ const resetFormState = () => {
     parent_company_ids: [],
     contract_ids: [],
     supervisor_ids: [],
+    inspector_ids: [],
     email: "",
     phone: "",
     password: "",
@@ -258,6 +260,19 @@ const closeDialog = () => {
               <SearchableAutocomplete
                 search-url="/users?role_id=2"
                 v-model="formState.supervisor_ids"
+                item-title="label"
+                :item-title-concat="['firstname', 'lastname']"
+                item-value="id"
+                clearable
+                multiple
+                :return-object="false"
+              />
+            </v-col>
+            <v-col cols="12">
+              <label class="mb-2 d-block">المراقب</label>
+              <SearchableAutocomplete
+                search-url="/users?role_id=3"
+                v-model="formState.inspector_ids"
                 item-title="label"
                 :item-title-concat="['firstname', 'lastname']"
                 item-value="id"
