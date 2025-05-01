@@ -32,7 +32,7 @@ export default [
   //   title: "إدارة الشركات",
   //   to: { name: "companies" },
   //   icon: CompanyIcon,
-  //   permission: true,
+  //   permission: "companies.view",
   // },
   {
     title: "⁠⁠إدارة الفرق الميدانية",
@@ -56,7 +56,7 @@ export default [
     title: "الإسنادات",
     to: { name: "attributions" },
     icon: AttributionsIcon,
-    permission: true,
+    permission: "assign_locations.view",
   },
   {
     title: "إدارة الاستبيانات",
@@ -110,7 +110,7 @@ export default [
     title: "اداره الورديات",
     to: { name: "shifts" },
     icon: ShiftsIcon,
-    permission: true,
+    permission: "shifts.view",
   },
   // --------------
 
@@ -122,6 +122,6 @@ export default [
   //     { title: "Product_Preparation", to: { name: "login" } },
   //     { title: "Product_Size", to: { name: "login" } },
   //   ],
-  //   permission: true,
+  //   permission: "settings.view",
   // },
 ];

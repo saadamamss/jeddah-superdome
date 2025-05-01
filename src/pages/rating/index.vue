@@ -723,6 +723,13 @@ onMounted(() => {
                         قيد المراجعة
                       </v-chip>
                       <v-chip
+                        v-else-if="rating.status === 'WAITING_FINAL_APPROVAL'"
+                        color="warning"
+                        size="small"
+                      >
+                        بانتظار الاعتماد النهائي
+                      </v-chip>
+                      <v-chip
                         v-else-if="rating.status === 'APPROVED'"
                         color="success"
                         size="small"
