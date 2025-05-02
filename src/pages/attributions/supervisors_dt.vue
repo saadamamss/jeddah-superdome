@@ -6,11 +6,13 @@ import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import dataTable from "@/components/dataTable.vue";
 import axios from "@/plugins/axios";
 import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
-import { ref, computed, reactive, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, reactive, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import AddSiteModal from "./components/siteAssignmentModal.vue";
 
 const appStore = useAppStore();
+const router = useRouter();
+const route = useRoute();
 const isLoading = ref(true);
 const perPage = ref(6);
 const currentPage = ref(1);
@@ -21,11 +23,15 @@ const isGettingFilters = ref(false);
 const isDatepickerMenu = ref(false);
 const attendanceDataa = ref([]);
 const debouncedSearch = ref(null);
-const router = useRouter();
 const searchQuery = ref("");
 const showRemoveAssignmentModal = ref(false);
 const showNewAssignmentModal = ref(false);
 const selectedItemForRemoval = ref(null);
+const inspectorData = ref({
+  id: null,
+  name: "",
+  locations: [],
+});
 const availableTypes = ref([
   { title: "مخيم", value: "all" },
   { title: "مسكن", value: "attendance" },
@@ -68,7 +74,7 @@ const displayFormattedDate = (date) => {
 
 const onClearDateFilter = () => {
   filters.created_at = undefined;
-  fetchAttendance(); // Trigger data refresh when clearing the date filter
+  fetchInspectorLocations(); // Trigger data refresh when clearing the date filter
 };
 
 const handleTableUpdate = (options) => {
@@ -79,19 +85,17 @@ const handleTableUpdate = (options) => {
 
 const tableHeaders = [
   { title: "اسم الموقع", key: "siteName", sortable: false },
-  { title: "شركة تقديم الخدمة", key: "street" },
-  { title: "الحي", key: "district" },
-  { title: "العنوان", key: "address" },
-  { title: "الشارع", key: "street" },
-
-  { title: "رقم التصريح/ المخيم", key: "permitNumber" },
-  { title: "عدد الحجاج", key: "technical" },
+  { title: "شركة تقديم الخدمة", key: "serviceCompany" },
+  { title: "الشركة الأم", key: "ekramCompany" },
+  { title: "نوع الموقع", key: "district" },
+  { title: "رقم المخيم/المسكن", key: "permitNumber" },
+  { title: "جنسية الحجاج", key: "technical" },
   { title: "الإجراءات", key: "actions" },
 ];
 
 // Watch for changes in currentPage or perPage
 watch([currentPage, perPage], () => {
-  fetchAttendance();
+  fetchInspectorLocations();
 });
 
 // Watch for filter changes
@@ -105,7 +109,7 @@ watch(
     filters.created_at,
   ],
   () => {
-    fetchAttendance();
+    fetchInspectorLocations();
   },
   { deep: true }
 );
@@ -115,26 +119,28 @@ watch(
   () => dateFilter.value,
   (newValue) => {
     if (newValue) {
-      fetchAttendance();
+      fetchInspectorLocations();
     }
   }
 );
 
-const fetchAttendance = async () => {
+const fetchInspectorLocations = async () => {
   try {
     isLoading.value = true;
 
-    // Prepare query parameters with formatted date
+    // Get inspector_id from route params
+    const inspectorId = route.params.id;
+
+    if (!inspectorId) {
+      throw new Error("Inspector ID is required");
+    }
+
+    // Prepare query parameters
     const params = {
+      inspector_id: inspectorId,
       per_page: perPage.value,
       page: currentPage.value,
-      ...filters,
     };
-
-    // Format the created_at date properly if it exists
-    if (params.created_at) {
-      params.created_at = formatDate(params.created_at);
-    }
 
     // Remove undefined values
     Object.keys(params).forEach((key) => {
@@ -143,39 +149,49 @@ const fetchAttendance = async () => {
       }
     });
 
-    const response = await axios.get("attendance", { params });
+    const response = await axios.get("inspector-locations/details", { params });
 
     if (response.data?.status?.success) {
-      // Map API response to expected format for the table
-      attendanceDataa.value = response.data.data.map((item) => ({
-        id: item.id,
-        name: `${item.user.firstname} ${item.user.lastname}`,
-        role:
-          item.user.role.title === "INSPECTOR"
-            ? "مراقب"
-            : item.user.role.title === "SUPERVISOR"
-            ? "مشرف"
-            : item.user.role.title,
-        id_number: item.user.sa_id,
-        shift: item.shift?.name || "",
-        checkIn: item.attendance_datetime
-          ? formatTime(item.attendance_datetime)
-          : "-",
-        checkOut: item.departure_datetime
-          ? formatTime(item.departure_datetime)
-          : "-",
-        attendanceDays: item.attendance_days?.toString(),
-        absenceDays: item.absence_days?.toString(),
+      // Extract data from response
+      const locationsData = response.data.data || [];
 
-        supervisor: item.supervisor
-          ? `${item.supervisor.firstname} ${item.supervisor.lastname}`
-          : "-",
-        checkedBy: item.attendance_by
-          ? `${item.attendance_by.firstname} ${item.attendance_by.lastname}`
-          : "-",
-        avatar: item.user.avatar_url || "/imgs/person.svg",
-        raw: item, // Store the raw data for reference if needed
-      }));
+      // Get inspector info from the first location item if available
+      if (locationsData.length > 0 && locationsData[0].inspector) {
+        const inspector = locationsData[0].inspector;
+        inspectorData.value = {
+          id: inspector.id,
+          name:
+            inspector.fullname ||
+            `${inspector.firstname || ""} ${inspector.lastname || ""}`,
+          locations: locationsData,
+        };
+      } else if (route.query?.inspector_name) {
+        // If no locations found but we have inspector name in query params
+        inspectorData.value = {
+          id: inspectorId,
+          name: route.query.inspector_name,
+          locations: [],
+        };
+      }
+
+      // Map API response to expected format for the table
+      dummyData.splice(
+        0,
+        dummyData.length,
+        ...locationsData.map((item) => ({
+          id: item.id,
+          siteName: item.location?.name || "غير محدد",
+          street: item.location?.street || "-",
+          address: item.location?.address || "-",
+          district: item.location?.location_type?.title || "-",
+          serviceCompany: item.company?.name || "-",
+          ekramCompany: item.company?.parent_company_name || "-",
+          permitNumber:
+            item.location?.camp_number || item.location?.license_no || "-",
+          technical: item.company?.pligrims_nationality || "-",
+          raw: item, // Store the raw data for reference
+        }))
+      );
 
       // Handle pagination data
       if (response.data.pagination) {
@@ -184,16 +200,26 @@ const fetchAttendance = async () => {
         currentPage.value =
           response.data.pagination.i_current_page || currentPage.value;
       } else {
-        totalItems.value =
-          response.data.meta?.total || response.data.data.length;
+        totalItems.value = locationsData.length;
       }
+    } else {
+      throw new Error(
+        response.data?.message || "حدث خطأ أثناء جلب بيانات المواقع"
+      );
     }
   } catch (error) {
-    console.error("Error fetching attendance:", error);
+    console.error("Error fetching inspector locations:", error);
     appStore.showSnackbar({
-      message: error.response?.data?.message || "حدث خطأ أثناء جلب البيانات",
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "حدث خطأ أثناء جلب بيانات المواقع",
       color: "error",
     });
+
+    // Clear data on error
+    dummyData.splice(0, dummyData.length);
+    totalItems.value = 0;
   } finally {
     isLoading.value = false;
   }
@@ -222,7 +248,7 @@ watch(
     if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
     debouncedSearch.value = setTimeout(() => {
       currentPage.value = 1; // Reset to first page when searching
-      fetchAttendance();
+      fetchInspectorLocations();
     }, 500); // 500ms debounce
   }
 );
@@ -303,7 +329,7 @@ const getUtilities = async () => {
 };
 
 onMounted(() => {
-  fetchAttendance();
+  fetchInspectorLocations();
   getUtilities();
 });
 
@@ -347,14 +373,11 @@ const filteredData = computed(() => {
         item.address.toLowerCase().includes(query) ||
         item.district.toLowerCase().includes(query) ||
         item.serviceCompany.toLowerCase().includes(query) ||
-        item.ekramCompany.toLowerCase().includes(query)
+        item.permitNumber.toLowerCase().includes(query)
     );
   }
 
-  return data.slice(
-    (currentPage.value - 1) * perPage.value,
-    currentPage.value * perPage.value
-  );
+  return data;
 });
 
 const totalPages = computed(() => {
@@ -383,55 +406,134 @@ const handleAction = (action, item) => {
 
 const handleRemoveAssignment = async () => {
   try {
+    // Get inspector_id from route params
+    const inspectorId = route.params.id;
+
+    if (!inspectorId || !selectedItemForRemoval.value?.id) {
+      throw new Error("Missing required data for unassignment");
+    }
+
+    // Prepare request body
+    const requestData = {
+      assign_id: selectedItemForRemoval.value.id,
+      inspector_id: parseInt(inspectorId),
+    };
+
     // Call API to remove the assignment
-    await axios.delete(`/attributions/${selectedItemForRemoval.value.id}`);
+    const response = await axios.post(
+      "/un-assign-inspector-location",
+      requestData
+    );
+
+    // Close the modal first to prevent UI issues
     showRemoveAssignmentModal.value = false;
-    selectedItemForRemoval.value = null;
-    // Refresh the data
-    await fetchAttendance();
-    appStore.showSnackbar({
-      message: "تم إلغاء الإسناد بنجاح",
-      color: "success",
-    });
+
+    if (response.data?.status?.success) {
+      appStore.showSnackbar({
+        message: "تم إلغاء الإسناد بنجاح",
+        color: "success",
+      });
+
+      // Store the name for reference in case all items are removed
+      const inspectorName = inspectorData.value.name;
+
+      // Add a small delay to ensure the backend has processed the change
+      setTimeout(async () => {
+        try {
+          // Pass inspector name in query params in case all items are removed
+          if (!route.query.inspector_name) {
+            router.replace({
+              path: route.path,
+              query: { ...route.query, inspector_name: inspectorName },
+            });
+          }
+
+          // Refresh the data
+          await fetchInspectorLocations();
+
+          // Clear selection after successful data refresh
+          selectedItemForRemoval.value = null;
+        } catch (refreshError) {
+          console.error(
+            "Error refreshing data after unassignment:",
+            refreshError
+          );
+        }
+      }, 500);
+    } else {
+      throw new Error(response.data?.message || "حدث خطأ أثناء إلغاء الإسناد");
+    }
   } catch (error) {
     console.error("Error removing assignment:", error);
     appStore.showSnackbar({
-      message: "حدث خطأ أثناء إلغاء الإسناد",
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "حدث خطأ أثناء إلغاء الإسناد",
       color: "error",
     });
   }
 };
 
-const handleNewAssignment = (formData) => {
-  // Here you would typically make an API call to save the new item
-  console.log("New assignment data:", formData);
-  // Add to dummy data for now
-  dummyData.push({
-    id: dummyData.length + 1,
-    ...formData,
-  });
-  // Reset form
-  showNewAssignmentModal.value = false;
+const handleNewAssignment = async (formData) => {
+  try {
+    // Get inspector_id from route params
+    const inspectorId = route.params.id;
+
+    // Create assignment data
+    const assignmentData = {
+      inspector_id: inspectorId,
+      location_id: formData.location_id,
+      company_id: formData.company_id,
+    };
+
+    // Call API to create the assignment
+    const response = await axios.post("/inspector-locations", assignmentData);
+
+    if (response.data?.status?.success) {
+      appStore.showSnackbar({
+        message: "تم إسناد الموقع بنجاح",
+        color: "success",
+      });
+
+      // Refresh the data
+      await fetchInspectorLocations();
+    }
+
+    // Reset form
+    showNewAssignmentModal.value = false;
+  } catch (error) {
+    console.error("Error creating assignment:", error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || "حدث خطأ أثناء إسناد الموقع",
+      color: "error",
+    });
+  }
 };
+
+// Update breadcrumb title with inspector name
+const breadcrumbItems = computed(() => [
+  {
+    title: "الرئيسية",
+    disabled: false,
+    to: "/",
+  },
+  {
+    title: "الإسنادات",
+    disabled: false,
+    to: "/attributions",
+  },
+  {
+    title: `المواقع المسندة للمراقب ${inspectorData.value.name}`,
+    disabled: true,
+  },
+]);
 </script>
 
 <template>
   <v-container fluid class="px-0 px-sm-4 px-xl-0 py-2 pt-0">
     <div class="mb-2">
-      <v-breadcrumbs
-        divider=">"
-        :items="[
-          {
-            title: 'الرئيسية',
-            disabled: false,
-            to: '/',
-          },
-          {
-            title: 'المواقع المسندة للمراقب محمد عبدالله',
-            disabled: true,
-          },
-        ]"
-      >
+      <v-breadcrumbs divider=">" :items="breadcrumbItems">
         <template v-slot:prepend>
           <svg
             width="20"
@@ -460,7 +562,7 @@ const handleNewAssignment = (formData) => {
               class="d-flex align-start justify-space-between gap-4 flex-wrap w-100"
             >
               <h2 class="text-h6 font-weight-bold">
-                المواقع المسندة للمراقب محمد عبدالله
+                المواقع المسندة للمراقب {{ inspectorData.name }}
               </h2>
 
               <div class="align-center ga-2 flex-wrap d-flex gap-4">
@@ -596,6 +698,7 @@ const handleNewAssignment = (formData) => {
     <!-- New Assignment Modal -->
     <AddSiteModal
       v-model="showNewAssignmentModal"
+      :inspector-id="route.params.id"
       @save="handleNewAssignment"
     />
 
@@ -643,6 +746,13 @@ const handleNewAssignment = (formData) => {
           </div>
           <div class="text-h6 mb-2">
             هل أنت متأكد من إلغاء إسناد هذا الموقع للمراقب؟
+          </div>
+          <div v-if="selectedItemForRemoval" class="text-subtitle-1 mb-2">
+            <strong>اسم الموقع:</strong> {{ selectedItemForRemoval.siteName }}
+          </div>
+          <div v-if="selectedItemForRemoval" class="text-subtitle-1 mb-2">
+            <strong>شركة تقديم الخدمة:</strong>
+            {{ selectedItemForRemoval.serviceCompany }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
             بمجرد تأكيدك، سيتم إزالة ارتباط المراقب بهذا الموقع ولن يكون مسؤولاً

@@ -50,6 +50,89 @@ const search = ref("");
 const teamMembers = computed(() => residenceData.value.inspectors || []);
 const fieldTeamMembers = ref([]);
 
+// Variables for inspector assignment
+const addInspectorDialog = ref(false);
+const availableInspectors = ref([]);
+const selectedInspectors = ref([]);
+const isLoadingInspectors = ref(false);
+const isAssigning = ref(false);
+
+// Fetch available inspectors
+async function fetchAvailableInspectors() {
+  try {
+    isLoadingInspectors.value = true;
+    const response = await axios.get("/inspectors");
+    if (response.data.status?.success) {
+      availableInspectors.value = response.data.data || [];
+    } else {
+      appStore.showSnackbar({
+        message: "حدث خطأ أثناء تحميل بيانات المراقبين",
+        color: "error",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching inspectors:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء تحميل بيانات المراقبين",
+      color: "error",
+    });
+  } finally {
+    isLoadingInspectors.value = false;
+  }
+}
+
+// Assign inspectors to location
+async function assignInspectorsToLocation() {
+  if (!selectedInspectors.value.length) {
+    appStore.showSnackbar({
+      message: "الرجاء اختيار مراقب واحد على الأقل",
+      color: "warning",
+    });
+    return;
+  }
+
+  try {
+    isAssigning.value = true;
+    const locationId = route.query.location_id;
+    const companyId = route.query.company_id;
+
+    const response = await axios.post("/assign-inspectors-to-location", {
+      inspector_ids: selectedInspectors.value,
+      location_id: locationId,
+      company_id: companyId,
+    });
+
+    if (response.data.status?.success) {
+      appStore.showSnackbar({
+        message: "تم إسناد المراقبين بنجاح",
+        color: "success",
+      });
+      addInspectorDialog.value = false;
+      selectedInspectors.value = [];
+      fetchResidenceDetails();
+    } else {
+      appStore.showSnackbar({
+        message: response.data.message || "حدث خطأ أثناء إسناد المراقبين",
+        color: "error",
+      });
+    }
+  } catch (error) {
+    console.error("Error assigning inspectors:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء إسناد المراقبين",
+      color: "error",
+    });
+  } finally {
+    isAssigning.value = false;
+  }
+}
+
+// Open dialog to add inspectors
+function openAddInspectorDialog() {
+  fetchAvailableInspectors();
+  addInspectorDialog.value = true;
+}
+
 // Fetch residence details
 async function fetchResidenceDetails() {
   try {
@@ -238,6 +321,7 @@ function handlePageSizeChange(newSize) {
                     color="primary"
                     class="rounded-lg text-none"
                     prepend-icon="mdi-plus"
+                    @click="openAddInspectorDialog"
                   >
                     إضافة مراقب
                   </v-btn>
@@ -275,6 +359,69 @@ function handlePageSizeChange(newSize) {
         </v-container>
       </div>
     </v-container>
+
+    <!-- Add Inspector Dialog -->
+    <v-dialog v-model="addInspectorDialog" max-width="600">
+      <v-card>
+        <v-card-title class="text-h6 pa-4">إضافة مراقب</v-card-title>
+        <v-card-text class="pa-4">
+          <v-progress-linear
+            v-if="isLoadingInspectors"
+            indeterminate
+            color="primary"
+          ></v-progress-linear>
+
+          <div v-if="!isLoadingInspectors">
+            <v-autocomplete
+              v-model="selectedInspectors"
+              :items="availableInspectors"
+              item-title="name"
+              item-value="id"
+              label="اختر المراقبين"
+              multiple
+              chips
+              closable-chips
+              clearable
+              variant="outlined"
+              class="mb-4"
+            >
+              <template v-slot:item="{ props, item }">
+                <v-list-item v-bind="props">
+                  <v-list-item-title>
+                    {{
+                      item.raw.name ||
+                      `${item.raw.firstname} ${item.raw.lastname}`
+                    }}
+                  </v-list-item-title>
+                  <v-list-item-subtitle v-if="item.raw.sa_id">
+                    {{ item.raw.sa_id }}
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </template>
+            </v-autocomplete>
+          </div>
+        </v-card-text>
+        <v-card-actions class="pa-4">
+          <v-spacer></v-spacer>
+          <v-btn
+            color="grey-darken-1"
+            variant="text"
+            @click="addInspectorDialog = false"
+          >
+            إلغاء
+          </v-btn>
+          <v-btn
+            color="primary"
+            variant="elevated"
+            @click="assignInspectorsToLocation"
+            :loading="isAssigning"
+            :disabled="isAssigning"
+          >
+            إسناد
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
