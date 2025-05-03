@@ -9,6 +9,7 @@ import ResidenceObserversCard from "./components/rasidance_Observers_card.vue";
 import ResidenceSupervisorsCard from "./components/rasidance_supervisors_card.vue";
 import axios from "@axios";
 import { useAppStore } from "@/stores/app";
+import AddSiteModal from "./components/siteAssignmentModal.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -56,6 +57,13 @@ const availableInspectors = ref([]);
 const selectedInspectors = ref([]);
 const isLoadingInspectors = ref(false);
 const isAssigning = ref(false);
+
+// New Assignment Modal
+const showNewAssignmentModal = ref(false);
+const locations = ref([]);
+const companies = ref([]);
+const isLoadingLocations = ref(false);
+const isLoadingCompanies = ref(false);
 
 // Fetch available inspectors
 async function fetchAvailableInspectors() {
@@ -145,6 +153,91 @@ async function fetchResidenceDetails() {
     // Construct URL with both parameters if available
     let url = `/assign-location/details?company_id=${companyId}&location_id=${locationId}`;
 
+    // Add pagination parameters
+    url += `&page=${inspectorsPagination.value.currentPage}&per_page=${inspectorsPagination.value.itemsPerPage}`;
+
+    // Add search parameter if it exists
+    if (search.value) {
+      url += `&search=${encodeURIComponent(search.value)}`;
+    }
+
+    const response = await axios.get(url);
+
+    if (response.data.status?.success) {
+      const data = response.data.data;
+
+      // Map the response data to our structure
+      residenceData.value = {
+        name: data.location?.name || "",
+        location: data.location || {
+          id: 0,
+          name: "",
+          location_type: { title: "" },
+          camp_number: "",
+          gate_number: "",
+          service_center_no: "",
+          delegate_name: "",
+          delegate_phone: "",
+          service_center_phone: "",
+          latitude: "",
+          longitude: "",
+        },
+        company: data.company || {
+          id: 0,
+          name: "",
+          license_no: "",
+          parent_company_name: "",
+          parent_company: null,
+          pligrims_nationality: "",
+          ratings_count: 0,
+          latest_raters: [],
+        },
+        supervisors: data.supervisors || [],
+        inspectors: data.inspectors_data?.map((item) => item.inspector) || [],
+      };
+
+      inspectorsPagination.value.totalItems =
+        data.pagination?.i_total_objects || 0;
+      inspectorsPagination.value.currentPage =
+        data.pagination?.i_current_page || 1;
+      inspectorsPagination.value.itemsPerPage =
+        data.pagination?.i_per_page || 6;
+    } else {
+      appStore.showSnackbar({
+        message: "حدث خطأ أثناء تحميل بيانات المسكن",
+        color: "error",
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching residence details:", error);
+    appStore.showSnackbar({
+      message: "حدث خطأ أثناء تحميل بيانات المسكن",
+      color: "error",
+    });
+  } finally {
+    isLoading.value = false;
+  }
+}
+// Fetch 100 of inspectors residence details
+async function fetchInspectorsList() {
+  try {
+    isLoading.value = true;
+    // Get id from route params and company_id from query params
+    const id = route.params.id;
+    const companyId = route.query.company_id;
+    const locationId = route.query.location_id;
+
+    // Construct URL with both parameters if available
+    let url = `/assign-location/details?company_id=${companyId}&location_id=${locationId}`;
+
+    // Add pagination parameters
+    url += `&page=${inspectorsPagination.value.currentPage}&per_page=1000`;
+
+    // Add search parameter if it exists
+    if (search.value) {
+      url += `&search=${encodeURIComponent(search.value)}`;
+    }
+
     const response = await axios.get(url);
 
     if (response.data.status?.success) {
@@ -208,18 +301,8 @@ onMounted(() => {
   fetchResidenceDetails();
 });
 
-const filteredTeamMembers = computed(() => {
-  if (!search.value) return teamMembers.value;
-
-  const searchTerm = search.value.toLowerCase();
-  return teamMembers.value.filter((member) => {
-    return (
-      member.firstname?.toLowerCase().includes(searchTerm) ||
-      member.lastname?.toLowerCase().includes(searchTerm) ||
-      member.sa_id?.toLowerCase().includes(searchTerm)
-    );
-  });
-});
+// Instead of filtering locally, we now get filtered results from the API
+const filteredTeamMembers = computed(() => teamMembers.value);
 
 const breadcrumbItems = computed(() => [
   {
@@ -242,11 +325,30 @@ const inspectorsPagination = ref({
   totalItems: 0,
 });
 
-// Update totalItems when teamMembers changes
+// Watch for pagination changes to refetch data
 watch(
-  () => teamMembers.value.length,
-  (newCount) => {
-    inspectorsPagination.value.totalItems = newCount;
+  () => inspectorsPagination.value.currentPage,
+  () => fetchResidenceDetails()
+);
+
+watch(
+  () => inspectorsPagination.value.itemsPerPage,
+  () => {
+    inspectorsPagination.value.currentPage = 1;
+    fetchResidenceDetails();
+  }
+);
+
+// Watch for search input changes with debounce
+let searchTimeout = null;
+watch(
+  () => search.value,
+  () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      inspectorsPagination.value.currentPage = 1;
+      fetchResidenceDetails();
+    }, 500); // 500ms debounce
   }
 );
 
@@ -254,6 +356,41 @@ function handlePageSizeChange(newSize) {
   inspectorsPagination.value.itemsPerPage = newSize;
   inspectorsPagination.value.currentPage = 1;
 }
+
+const handleNewAssignment = async (formData) => {
+  try {
+    const assignmentData = {
+      inspector_ids: formData.inspector_ids,
+      location_id: formData.location_id,
+      company_id: formData.company_id,
+    };
+
+    const response = await axios.post(
+      "/assign-inspectors-to-location",
+      assignmentData
+    );
+
+    if (response.data.status?.success) {
+      appStore.showSnackbar({
+        message: "تم إسناد الموقع بنجاح",
+        color: "success",
+      });
+      showNewAssignmentModal.value = false;
+      fetchResidenceDetails();
+    } else {
+      throw new Error(response.data?.message || "حدث خطأ أثناء إسناد الموقع");
+    }
+  } catch (error) {
+    console.error("Error assigning location:", error);
+    appStore.showSnackbar({
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "حدث خطأ أثناء إسناد الموقع",
+      color: "error",
+    });
+  }
+};
 </script>
 
 <template>
@@ -422,6 +559,19 @@ function handlePageSizeChange(newSize) {
         </v-card-actions>
       </v-card>
     </v-dialog>
+
+    <!-- New Assignment Modal -->
+    <AddSiteModal
+      :model-value="showNewAssignmentModal"
+      @update:model-value="showNewAssignmentModal = $event"
+      :inspector-id="route.params.id"
+      :locations="locations"
+      :companies="companies"
+      :loading-locations="isLoadingLocations"
+      :loading-companies="isLoadingCompanies"
+      :show-inspector-select="false"
+      @save="handleNewAssignment"
+    />
   </div>
 </template>
 

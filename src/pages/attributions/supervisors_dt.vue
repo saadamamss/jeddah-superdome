@@ -51,6 +51,12 @@ const filters = reactive({
   tap: "daily",
 });
 
+// New state variables for locations and companies
+const locations = ref([]);
+const companies = ref([]);
+const isLoadingLocations = ref(false);
+const isLoadingCompanies = ref(false);
+
 // Helper function to format date for API
 const formatDate = (date) => {
   if (!date) return "";
@@ -85,11 +91,11 @@ const handleTableUpdate = (options) => {
 
 const tableHeaders = [
   { title: "اسم الموقع", key: "siteName", sortable: false },
+  { title: "نوع الموقع", key: "locationType" },
+  { title: "رقم الرخصة/المخيم", key: "licenseNumber" },
+  { title: "جنسية الحجاج", key: "pilgrimsNationality" },
   { title: "شركة تقديم الخدمة", key: "serviceCompany" },
-  { title: "الشركة الأم", key: "ekramCompany" },
-  { title: "نوع الموقع", key: "district" },
-  { title: "رقم المخيم/المسكن", key: "permitNumber" },
-  { title: "جنسية الحجاج", key: "technical" },
+  { title: "الشركة الأم", key: "parentCompany" },
   { title: "الإجراءات", key: "actions" },
 ];
 
@@ -132,7 +138,10 @@ const fetchInspectorLocations = async () => {
     const inspectorId = route.params.id;
 
     if (!inspectorId) {
-      throw new Error("Inspector ID is required");
+      console.warn("Inspector ID is missing from route params");
+      locations.value = [];
+      totalItems.value = 0;
+      return;
     }
 
     // Prepare query parameters
@@ -175,23 +184,17 @@ const fetchInspectorLocations = async () => {
       }
 
       // Map API response to expected format for the table
-      dummyData.splice(
-        0,
-        dummyData.length,
-        ...locationsData.map((item) => ({
-          id: item.id,
-          siteName: item.location?.name || "غير محدد",
-          street: item.location?.street || "-",
-          address: item.location?.address || "-",
-          district: item.location?.location_type?.title || "-",
-          serviceCompany: item.company?.name || "-",
-          ekramCompany: item.company?.parent_company_name || "-",
-          permitNumber:
-            item.location?.camp_number || item.location?.license_no || "-",
-          technical: item.company?.pligrims_nationality || "-",
-          raw: item, // Store the raw data for reference
-        }))
-      );
+      locations.value = locationsData.map((item) => ({
+        id: item.id,
+        siteName: item.location?.name || "غير محدد",
+        locationType: item.location?.location_type?.title || "-",
+        licenseNumber:
+          item.location?.license_no || item.location?.camp_number || "-",
+        serviceCompany: item.company?.name || "-",
+        parentCompany: item.company?.parent_company_name || "-",
+        pilgrimsNationality: item.company?.pligrims_nationality || "-",
+        raw: item, // Store the raw data for reference
+      }));
 
       // Handle pagination data
       if (response.data.pagination) {
@@ -202,23 +205,28 @@ const fetchInspectorLocations = async () => {
       } else {
         totalItems.value = locationsData.length;
       }
-    } else {
-      throw new Error(
-        response.data?.message || "حدث خطأ أثناء جلب بيانات المواقع"
-      );
+    } else if (response.data?.message) {
+      // Only show error toast if there's an actual error message from the API
+      appStore.showSnackbar({
+        message: response.data.message,
+        color: "error",
+      });
     }
   } catch (error) {
     console.error("Error fetching inspector locations:", error);
-    appStore.showSnackbar({
-      message:
-        error.response?.data?.message ||
-        error.message ||
-        "حدث خطأ أثناء جلب بيانات المواقع",
-      color: "error",
-    });
+    // Only show error toast for actual errors, not for empty data
+    if (error.response?.status !== 404) {
+      appStore.showSnackbar({
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "حدث خطأ أثناء جلب بيانات المواقع",
+        color: "error",
+      });
+    }
 
     // Clear data on error
-    dummyData.splice(0, dummyData.length);
+    locations.value = [];
     totalItems.value = 0;
   } finally {
     isLoading.value = false;
@@ -328,9 +336,79 @@ const getUtilities = async () => {
   }
 };
 
+// Fetch locations data
+const fetchLocations = async () => {
+  try {
+    isLoadingLocations.value = true;
+    const response = await axios.get("/locations", {
+      params: {
+        per_page: 1000,
+      },
+    });
+
+    if (response.data?.status?.success) {
+      locations.value = response.data.data.map((location) => ({
+        id: location.id,
+        name: location.name,
+        location_type: location.location_type,
+        license_no: location.license_no,
+        camp_number: location.camp_number,
+        delegate_name: location.delegate_name,
+        delegate_phone: location.delegate_phone,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching locations:", error);
+    appStore.showSnackbar({
+      message:
+        error.response?.data?.message || "حدث خطأ أثناء جلب بيانات المواقع",
+      color: "error",
+    });
+  } finally {
+    isLoadingLocations.value = false;
+  }
+};
+
+// Fetch companies data
+const fetchCompanies = async () => {
+  try {
+    isLoadingCompanies.value = true;
+    const response = await axios.get("/companies", {
+      params: {
+        per_page: 1000,
+      },
+    });
+
+    if (response.data?.status?.success) {
+      companies.value = response.data.data.map((company) => ({
+        id: company.id,
+        name: company.name,
+        parent_company_name: company.parent_company_name,
+        pligrims_nationality: company.pligrims_nationality,
+        contact_name: company.contact_name,
+        phone: company.phone,
+        email: company.email,
+      }));
+    }
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    appStore.showSnackbar({
+      message:
+        error.response?.data?.message || "حدث خطأ أثناء جلب بيانات الشركات",
+      color: "error",
+    });
+  } finally {
+    isLoadingCompanies.value = false;
+  }
+};
+
 onMounted(() => {
   fetchInspectorLocations();
   getUtilities();
+  fetchLocations();
+  fetchCompanies();
 });
 
 // New dummy data to match screenshot
@@ -362,7 +440,7 @@ const dummyData = [
 
 // Computed
 const filteredData = computed(() => {
-  let data = [...dummyData];
+  let data = [...locations.value];
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
@@ -381,13 +459,13 @@ const filteredData = computed(() => {
 });
 
 const totalPages = computed(() => {
-  return Math.ceil(dummyData.length / perPage.value);
+  return Math.ceil(locations.value.length / perPage.value);
 });
 
 const paginationInfo = computed(() => {
   const start = (currentPage.value - 1) * perPage.value + 1;
-  const end = Math.min(start + perPage.value - 1, dummyData.length);
-  return `${start} إلى ${end} من أصل ${dummyData.length}`;
+  const end = Math.min(start + perPage.value - 1, locations.value.length);
+  return `${start} إلى ${end} من أصل ${locations.value.length}`;
 });
 
 // Methods
@@ -482,9 +560,9 @@ const handleNewAssignment = async (formData) => {
 
     // Create assignment data
     const assignmentData = {
-      inspector_id: inspectorId,
-      location_id: formData.location_id,
-      company_id: formData.company_id,
+      inspector_ids: [parseInt(inspectorId)], // Changed to inspector_ids as an array
+      location_id: formData.location_id?.id || formData.location_id,
+      company_id: formData.company_id?.id || formData.company_id,
     };
 
     // Call API to create the assignment
@@ -498,6 +576,8 @@ const handleNewAssignment = async (formData) => {
 
       // Refresh the data
       await fetchInspectorLocations();
+    } else {
+      throw new Error(response.data?.message || "حدث خطأ أثناء إسناد الموقع");
     }
 
     // Reset form
@@ -505,7 +585,10 @@ const handleNewAssignment = async (formData) => {
   } catch (error) {
     console.error("Error creating assignment:", error);
     appStore.showSnackbar({
-      message: error.response?.data?.message || "حدث خطأ أثناء إسناد الموقع",
+      message:
+        error.response?.data?.message ||
+        error.message ||
+        "حدث خطأ أثناء إسناد الموقع",
       color: "error",
     });
   }
@@ -528,6 +611,66 @@ const breadcrumbItems = computed(() => [
     disabled: true,
   },
 ]);
+
+const openAssignmentModal = () => {
+  showNewAssignmentModal.value = true;
+};
+
+// Add these computed properties after other computed properties
+const formattedLocations = computed(() => {
+  return locations.value.map((location) => ({
+    value: location.id,
+    title: location.name,
+    raw: {
+      ...location,
+      type: location.location_type?.title || "-",
+      license: location.license_no || location.camp_number || "-",
+      delegate: location.delegate_name || "-",
+      phone: location.delegate_phone || "-",
+    },
+  }));
+});
+
+const formattedCompanies = computed(() => {
+  return companies.value.map((company) => ({
+    value: company.id,
+    title: company.name,
+    raw: {
+      ...company,
+      parentCompany: company.parent_company_name || "-",
+      nationality: company.pligrims_nationality || "-",
+      contact: company.contact_name || "-",
+      phone: company.phone || "-",
+    },
+  }));
+});
+
+// Add these methods after other methods
+const getLocationDetails = (locationId) => {
+  const location = formattedLocations.value.find(
+    (loc) => loc.value === locationId
+  );
+  return location?.raw || null;
+};
+
+const getCompanyDetails = (companyId) => {
+  const company = formattedCompanies.value.find(
+    (comp) => comp.value === companyId
+  );
+  return company?.raw || null;
+};
+
+const formatLocationDisplay = (location) => {
+  if (!location) return "-";
+  return `${location.name} (${location.location_type?.title || "-"})`;
+};
+
+const formatCompanyDisplay = (company) => {
+  if (!company) return "-";
+  return `${company.name} ${
+    company.parent_company_name ? `- ${company.parent_company_name}` : ""
+  }`;
+};
 </script>
 
 <template>
@@ -580,7 +723,7 @@ const breadcrumbItems = computed(() => [
                 />
                 <v-btn
                   color="primary"
-                  @click="showNewAssignmentModal = true"
+                  @click="openAssignmentModal"
                   prepend-icon="mdi-plus"
                 >
                   إسناد موقع
@@ -617,15 +760,38 @@ const breadcrumbItems = computed(() => [
             :headers="tableHeaders"
             @update:options="handleTableUpdate"
           >
-            <template #[`item.name`]="{ item }">
+            <template #[`item.siteName`]="{ item }">
               <div class="d-flex align-center gap-2">
-                <v-avatar size="32" rounded="lg">
-                  <v-img :src="item.observerAvatar || '/imgs/person.svg'" />
-                </v-avatar>
                 <div>
-                  <div>{{ item.siteName }}</div>
+                  <div class="font-weight-medium">{{ item.siteName }}</div>
+                  <div class="text-caption text-medium-emphasis">
+                    {{ item.delegateName }} - {{ item.delegatePhone }}
+                  </div>
                 </div>
               </div>
+            </template>
+
+            <template #[`item.serviceCompany`]="{ item }">
+              <div>
+                <div class="font-weight-medium">{{ item.serviceCompany }}</div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ item.parentCompany }}
+                </div>
+              </div>
+            </template>
+
+            <template #[`item.locationType`]="{ item }">
+              <v-chip
+                size="small"
+                :color="item.locationType === 'مخيم' ? 'primary' : 'success'"
+                variant="flat"
+              >
+                {{ item.locationType }}
+              </v-chip>
+            </template>
+
+            <template #[`item.licenseNumber`]="{ item }">
+              <div class="font-weight-medium">{{ item.licenseNumber }}</div>
             </template>
 
             <template #pagination>
@@ -646,7 +812,6 @@ const breadcrumbItems = computed(() => [
                 style="background-color: #faeeeb; color: #c62800"
               >
                 إلغاء الإسناد
-
                 <svg
                   class="ms-1"
                   width="17"
@@ -697,8 +862,13 @@ const breadcrumbItems = computed(() => [
 
     <!-- New Assignment Modal -->
     <AddSiteModal
-      v-model="showNewAssignmentModal"
+      :model-value="showNewAssignmentModal"
+      @update:model-value="showNewAssignmentModal = $event"
       :inspector-id="route.params.id"
+      :locations="locations"
+      :companies="companies"
+      :loading-locations="isLoadingLocations"
+      :loading-companies="isLoadingCompanies"
       @save="handleNewAssignment"
     />
 
@@ -753,6 +923,14 @@ const breadcrumbItems = computed(() => [
           <div v-if="selectedItemForRemoval" class="text-subtitle-1 mb-2">
             <strong>شركة تقديم الخدمة:</strong>
             {{ selectedItemForRemoval.serviceCompany }}
+          </div>
+          <div v-if="selectedItemForRemoval" class="text-subtitle-1 mb-2">
+            <strong>نوع الموقع:</strong>
+            {{ selectedItemForRemoval.locationType }}
+          </div>
+          <div v-if="selectedItemForRemoval" class="text-subtitle-1 mb-2">
+            <strong>جنسية الحجاج:</strong>
+            {{ selectedItemForRemoval.pilgrimsNationality }}
           </div>
           <div class="text-body-1 text-medium-emphasis">
             بمجرد تأكيدك، سيتم إزالة ارتباط المراقب بهذا الموقع ولن يكون مسؤولاً

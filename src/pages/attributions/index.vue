@@ -101,6 +101,7 @@ const tableHeaders = [
 watch(
   () => activeTab.value,
   () => {
+    currentPage.value = 1; // Reset to first page when switching tabs
     fetchAttendance();
   }
 );
@@ -109,8 +110,6 @@ watch(
 watch(
   [currentPage, perPage],
   () => {
-    // Only fetch data if we're not doing a local search
-    // If filters.search is set, then we're already doing server-side filtering
     fetchAttendance();
   },
   { immediate: false }
@@ -123,22 +122,26 @@ watch(
     filters.user_id,
     filters.attendance_by_user_id,
     filters.tap,
-    filters.search,
     filters.created_at,
+    filters.location_type_id,
   ],
   () => {
+    currentPage.value = 1; // Reset to first page when filters change
     fetchAttendance();
   },
   { deep: true }
 );
 
-// Separate watch for date filter to handle date-specific logic
+// Separate watch for search filter with debounce
 watch(
-  () => dateFilter.value,
+  () => searchQuery.value,
   (newValue) => {
-    if (newValue) {
+    if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+    debouncedSearch.value = setTimeout(() => {
+      filters.search = newValue;
+      currentPage.value = 1; // Reset to first page when searching
       fetchAttendance();
-    }
+    }, 500); // 500ms debounce
   }
 );
 
@@ -151,6 +154,7 @@ watch(
     } else {
       filters.location_type_id = newValue;
     }
+    currentPage.value = 1; // Reset to first page when type changes
     fetchAttendance();
   }
 );
@@ -171,7 +175,7 @@ const fetchAttendance = async () => {
       params.created_at = formatDate(params.created_at);
     }
 
-    // Remove undefined values
+    // Remove undefined values and empty strings
     Object.keys(params).forEach((key) => {
       if (params[key] === undefined || params[key] === "") {
         delete params[key];
@@ -237,16 +241,21 @@ const fetchAttendance = async () => {
         return mappedItem;
       });
 
-      // Handle pagination data
+      // Handle pagination data from API response
       if (response.data.pagination) {
         totalItems.value = response.data.pagination.i_total_objects || 0;
         totalPages.value = response.data.pagination.i_total_pages || 1;
         perPage.value = response.data.pagination.i_per_page || perPage.value;
         currentPage.value =
           response.data.pagination.i_current_page || currentPage.value;
+      } else if (response.data.meta) {
+        totalItems.value = response.data.meta.total || 0;
+        totalPages.value = response.data.meta.last_page || 1;
+        perPage.value = response.data.meta.per_page || perPage.value;
+        currentPage.value =
+          response.data.meta.current_page || currentPage.value;
       } else {
-        totalItems.value =
-          response.data.meta?.total || response.data.data.length;
+        totalItems.value = response.data.data.length;
         totalPages.value = Math.ceil(totalItems.value / perPage.value);
       }
     }
@@ -256,6 +265,10 @@ const fetchAttendance = async () => {
       message: error.response?.data?.message || "حدث خطأ أثناء جلب البيانات",
       color: "error",
     });
+    // Reset data on error
+    attendanceDataa.value = [];
+    totalItems.value = 0;
+    totalPages.value = 1;
   } finally {
     isLoading.value = false;
   }
@@ -276,19 +289,6 @@ const formatTime = (datetime) => {
 
   return `${displayHours}:${formattedMinutes} ${suffix}`;
 };
-
-// Watch for changes in searchQuery and pass it to the filters
-watch(
-  () => searchQuery.value,
-  (newValue) => {
-    if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
-    debouncedSearch.value = setTimeout(() => {
-      filters.search = newValue;
-      currentPage.value = 1; // Reset to first page when searching
-      fetchAttendance();
-    }, 500); // 500ms debounce
-  }
-);
 
 const exportData = async () => {
   try {
@@ -410,41 +410,10 @@ const dummyData = [
   },
 ];
 
-// Separate watcher for filteredData to address rendering issues
-watch(
-  () => attendanceDataa.value,
-  (newValue) => {
-    // Ensure proper rendering when data changes
-    if (newValue && newValue.length === 0 && currentPage.value > 1) {
-      // If we're on a page with no data, go back to page 1
-      currentPage.value = 1;
-    }
-  }
-);
-
-// Replace the filteredData computed property to handle data better
+// Update the filteredData computed property to simplify it since we're doing server-side filtering
 const filteredData = computed(() => {
-  // When using API data, apply local filtering only for the search query
   if (attendanceDataa.value && attendanceDataa.value.length > 0) {
-    let data = [...attendanceDataa.value];
-
-    // Only filter locally if there's a search query AND we're not already filtering on the server
-    // This avoids double filtering
-    if (searchQuery.value && !filters.search) {
-      const query = searchQuery.value.toLowerCase();
-      data = data.filter(
-        (item) =>
-          (item.siteName && item.siteName.toLowerCase().includes(query)) ||
-          (item.observerName &&
-            item.observerName.toLowerCase().includes(query)) ||
-          (item.mainCompany &&
-            item.mainCompany.toLowerCase().includes(query)) ||
-          (item.pilgrimsNationality &&
-            item.pilgrimsNationality.toLowerCase().includes(query))
-      );
-    }
-
-    return data;
+    return attendanceDataa.value;
   }
 
   // Fallback to dummy data if API data is not available
