@@ -10,7 +10,7 @@
       <div class="flex-grow-1">
         <div class="d-flex justify-space-between align-center mb-1">
           <h3 class="text-subtitle-1 font-weight-medium mb-0">
-            {{ user.firstname }} {{ user.lastname }}
+            {{ user.fullname }}
           </h3>
           <div class="d-flex align-center gap-2">
             <button
@@ -73,7 +73,7 @@
           </div>
         </div>
         <p class="text-body-2 text-medium-emphasis mb-0">
-          {{ user.role.title }}
+          {{ user.role?.title || "مراقب" }}
         </p>
       </div>
     </div>
@@ -97,33 +97,43 @@
 <script setup lang="ts">
 import { hasPermission } from "@core/utils/permissions";
 import { computed } from "vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const props = defineProps({
   user: {
     type: Object,
     required: true,
     default: () => ({
+      fullname: "",
       firstname: "",
       lastname: "",
       role: { title: "مراقب" },
       sa_id: "",
       avatar_url: null,
+      daily_visits_count: 0,
     }),
   },
   visitCount: {
     type: Number,
-    default: 4,
+    default: 0,
   },
 });
 
 const getInitials = computed(() => {
+  if (props.user.fullname) {
+    const nameParts = props.user.fullname.split(" ");
+    if (nameParts.length >= 2) {
+      return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`;
+    }
+    return props.user.fullname.charAt(0);
+  }
+
   if (!props.user.firstname || !props.user.lastname) return "";
   return `${props.user.firstname.charAt(0)}${props.user.lastname.charAt(0)}`;
 });
 
-// defineEmits(["ShowSupervisorsDt"]);
-
-const router = useRouter();
 const ShowSupervisorsDt = (id) => {
   router.push(`/attributions/supervisors_dt/${id}`);
 };
@@ -139,5 +149,9 @@ const canDelete = hasPermission("teams.delete");
 
 .v-avatar {
   border: 2px solid rgb(var(--v-theme-warning));
+}
+
+.border {
+  border: 1px solid #e9ebec;
 }
 </style>

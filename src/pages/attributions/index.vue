@@ -15,6 +15,7 @@ const perPage = ref(6);
 const currentPage = ref(1);
 const dateFilter = ref(null);
 const totalItems = ref(20);
+const totalPages = ref(1);
 const isExporting = ref(false);
 const isGettingFilters = ref(false);
 const isDatepickerMenu = ref(false);
@@ -26,9 +27,9 @@ const searchQuery = ref("");
 const showRemoveAssignmentModal = ref(false);
 const selectedItemForRemoval = ref(null);
 const availableTypes = ref([
-  { title: "مخيم", value: "all" },
-  { title: "مسكن", value: "attendance" },
-  // { title: "متأخر", value: "late" },
+  { title: "الكل", value: "all" },
+  { title: "مخيم", value: "1" },
+  { title: "مسكن", value: "2" },
 ]);
 const type_render = ref("all");
 
@@ -71,27 +72,48 @@ const onClearDateFilter = () => {
 };
 
 const handleTableUpdate = (options) => {
-  currentPage.value = options.page;
-  perPage.value = options.itemsPerPage;
-  // You can add additional logic here for sorting or filtering
+  // Update pagination values and trigger data reload
+  if (options.page !== currentPage.value) {
+    currentPage.value = options.page;
+  }
+
+  if (options.itemsPerPage !== perPage.value) {
+    perPage.value = options.itemsPerPage;
+  }
+
+  // Don't trigger fetchAttendance here - the watchers will handle it
 };
 
 const tableHeaders = [
   { title: "اسم الموقع", key: "siteName", sortable: false },
-  { title: "اسم الراقب", key: "observerName" },
-  { title: "رقم جوال الراقب", key: "observerPhone" },
+  { title: "نوع الموقع", key: "locationType" },
+  { title: "رقم المخيم", key: "campNumber" },
+  { title: "رقم البوابة", key: "gateNumber" },
+  { title: "اسم المراقب", key: "observerName" },
+  { title: "رقم جوال المراقب", key: "observerPhone" },
   { title: "اسم الشركة الرئيسية", key: "mainCompany" },
-  { title: "رقم التصريح", key: "permitNumber" },
   { title: "جنسية الحجاج", key: "pilgrimsNationality" },
-  { title: "عدد الحجاج", key: "pilgrimsCount" },
-  { title: "عدد تقييمات الموقع", key: "ratingsCount" },
+  { title: "عدد التقييمات", key: "ratingsCount" },
   { title: "الإجراءات", key: "actions" },
 ];
 
+// Watch for changes in activeTab
+watch(
+  () => activeTab.value,
+  () => {
+    currentPage.value = 1; // Reset to first page when switching tabs
+    fetchAttendance();
+  }
+);
+
 // Watch for changes in currentPage or perPage
-watch([currentPage, perPage], () => {
-  fetchAttendance();
-});
+watch(
+  [currentPage, perPage],
+  () => {
+    fetchAttendance();
+  },
+  { immediate: false }
+);
 
 // Watch for filter changes
 watch(
@@ -100,22 +122,40 @@ watch(
     filters.user_id,
     filters.attendance_by_user_id,
     filters.tap,
-    filters.search,
     filters.created_at,
+    filters.location_type_id,
   ],
   () => {
+    currentPage.value = 1; // Reset to first page when filters change
     fetchAttendance();
   },
   { deep: true }
 );
 
-// Separate watch for date filter to handle date-specific logic
+// Separate watch for search filter with debounce
 watch(
-  () => dateFilter.value,
+  () => searchQuery.value,
   (newValue) => {
-    if (newValue) {
+    if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
+    debouncedSearch.value = setTimeout(() => {
+      filters.search = newValue;
+      currentPage.value = 1; // Reset to first page when searching
       fetchAttendance();
+    }, 500); // 500ms debounce
+  }
+);
+
+// Watch for type filter changes
+watch(
+  () => type_render.value,
+  (newValue) => {
+    if (newValue === "all") {
+      filters.location_type_id = "";
+    } else {
+      filters.location_type_id = newValue;
     }
+    currentPage.value = 1; // Reset to first page when type changes
+    fetchAttendance();
   }
 );
 
@@ -135,64 +175,100 @@ const fetchAttendance = async () => {
       params.created_at = formatDate(params.created_at);
     }
 
-    // Remove undefined values
+    // Remove undefined values and empty strings
     Object.keys(params).forEach((key) => {
-      if (params[key] === undefined) {
+      if (params[key] === undefined || params[key] === "") {
         delete params[key];
       }
     });
 
-    const response = await axios.get("attendance", { params });
+    // Use different endpoints based on the active tab
+    const endpoint =
+      activeTab.value === "assigned"
+        ? "assign-locations"
+        : "un-assign-locations";
+
+    const response = await axios.get(endpoint, { params });
 
     if (response.data?.status?.success) {
       // Map API response to expected format for the table
-      attendanceDataa.value = response.data.data.map((item) => ({
-        id: item.id,
-        name: `${item.user.firstname} ${item.user.lastname}`,
-        role:
-          item.user.role.title === "INSPECTOR"
-            ? "مراقب"
-            : item.user.role.title === "SUPERVISOR"
-            ? "مشرف"
-            : item.user.role.title,
-        id_number: item.user.sa_id,
-        shift: item.shift?.name || "",
-        checkIn: item.attendance_datetime
-          ? formatTime(item.attendance_datetime)
-          : "-",
-        checkOut: item.departure_datetime
-          ? formatTime(item.departure_datetime)
-          : "-",
-        attendanceDays: item.attendance_days?.toString(),
-        absenceDays: item.absence_days?.toString(),
+      attendanceDataa.value = response.data.data.map((item) => {
+        // Get location type from the location_type object if available
+        const locationType =
+          item.location?.location_type?.title ||
+          (item.location?.location_type_id === 1
+            ? "مخيم"
+            : item.location?.location_type_id === 2
+            ? "مسكن"
+            : "");
 
-        supervisor: item.supervisor
-          ? `${item.supervisor.firstname} ${item.supervisor.lastname}`
-          : "-",
-        checkedBy: item.attendance_by
-          ? `${item.attendance_by.firstname} ${item.attendance_by.lastname}`
-          : "-",
-        avatar: item.user.avatar_url || "/imgs/person.svg",
-        raw: item, // Store the raw data for reference if needed
-      }));
+        // Common properties for both assigned and unassigned
+        const mappedItem = {
+          id: item.id,
+          siteName: item.location?.name || "",
+          locationType: locationType,
+          mainCompany:
+            item.company?.parent_company?.name ||
+            item.company?.parent_company_name ||
+            "",
+          permitNumber: item.location?.license_no || "",
+          pilgrimsNationality: item.company?.pligrims_nationality || "",
+          campNumber: item.location?.camp_number || "",
+          squareNumber: item.location?.square_number || "",
+          gateNumber: item.location?.gate_number || "",
+          delegateName: item.location?.delegate_name || "",
+          delegatePhone: item.location?.delegate_phone || "",
+          serviceCenterNo: item.location?.service_center_no || "",
+          serviceCenterPhone: item.location?.service_center_phone || "",
+          ratingsCount: item.total_ratings || item.company?.ratings_count || 0,
+          raw: item, // Store the raw data for reference if needed
+        };
 
-      // Handle pagination data
+        // Add observer (inspector) data if available (for assigned locations)
+        if (item.inspector) {
+          mappedItem.observerName = `${item.inspector.firstname} ${item.inspector.lastname}`;
+          mappedItem.observerAvatar =
+            item.inspector.avatar_url || "/imgs/person.svg";
+          mappedItem.observerPhone = item.inspector.phone || "";
+          mappedItem.observerId = item.inspector.id;
+        } else {
+          mappedItem.observerName = "";
+          mappedItem.observerAvatar = "/imgs/person.svg";
+          mappedItem.observerPhone = "";
+          mappedItem.observerId = null;
+        }
+
+        return mappedItem;
+      });
+
+      // Handle pagination data from API response
       if (response.data.pagination) {
         totalItems.value = response.data.pagination.i_total_objects || 0;
+        totalPages.value = response.data.pagination.i_total_pages || 1;
         perPage.value = response.data.pagination.i_per_page || perPage.value;
         currentPage.value =
           response.data.pagination.i_current_page || currentPage.value;
+      } else if (response.data.meta) {
+        totalItems.value = response.data.meta.total || 0;
+        totalPages.value = response.data.meta.last_page || 1;
+        perPage.value = response.data.meta.per_page || perPage.value;
+        currentPage.value =
+          response.data.meta.current_page || currentPage.value;
       } else {
-        totalItems.value =
-          response.data.meta?.total || response.data.data.length;
+        totalItems.value = response.data.data.length;
+        totalPages.value = Math.ceil(totalItems.value / perPage.value);
       }
     }
   } catch (error) {
-    console.error("Error fetching attendance:", error);
+    console.error("Error fetching locations:", error);
     appStore.showSnackbar({
       message: error.response?.data?.message || "حدث خطأ أثناء جلب البيانات",
       color: "error",
     });
+    // Reset data on error
+    attendanceDataa.value = [];
+    totalItems.value = 0;
+    totalPages.value = 1;
   } finally {
     isLoading.value = false;
   }
@@ -213,18 +289,6 @@ const formatTime = (datetime) => {
 
   return `${displayHours}:${formattedMinutes} ${suffix}`;
 };
-
-// Handle search input with debounce
-watch(
-  () => filters.search,
-  (newValue) => {
-    if (debouncedSearch.value) clearTimeout(debouncedSearch.value);
-    debouncedSearch.value = setTimeout(() => {
-      currentPage.value = 1; // Reset to first page when searching
-      fetchAttendance();
-    }, 500); // 500ms debounce
-  }
-);
 
 const exportData = async () => {
   try {
@@ -346,37 +410,21 @@ const dummyData = [
   },
 ];
 
-// Computed
+// Update the filteredData computed property to simplify it since we're doing server-side filtering
 const filteredData = computed(() => {
-  let data = [...dummyData];
-
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    data = data.filter(
-      (item) =>
-        item.siteName.toLowerCase().includes(query) ||
-        item.observerName.toLowerCase().includes(query) ||
-        item.mainCompany.toLowerCase().includes(query)
-    );
+  if (attendanceDataa.value && attendanceDataa.value.length > 0) {
+    return attendanceDataa.value;
   }
 
-  // Filter based on active tab
-  data = data.filter((item) => {
+  // Fallback to dummy data if API data is not available
+  return dummyData.filter((item) => {
+    // Apply filtering based on active tab
     if (activeTab.value === "assigned") {
-      return item.observerName; // Has observer assigned
+      return Boolean(item.observerName); // Has observer assigned
     } else {
-      return !item.observerName; // No observer assigned
+      return !Boolean(item.observerName); // No observer assigned
     }
   });
-
-  const start = (currentPage.value - 1) * perPage.value;
-  const end = start + perPage.value;
-
-  return data.slice(start, end);
-});
-
-const totalPages = computed(() => {
-  return Math.ceil(dummyData.length / perPage.value);
 });
 
 const paginationInfo = computed(() => {
@@ -393,7 +441,16 @@ const viewDetails = (item) => {
 };
 
 const handleViewDt = (action, item) => {
-  router.push(`/attributions/residence/6`);
+  // Use the raw item id from the API data
+  const locationId = item.raw?.location_id || item.raw?.location?.id || item.id;
+  const companyId = item.raw?.company_id || item.raw?.company?.id;
+  router.push({
+    path: `/attributions/residence/${locationId}`,
+    query: {
+      company_id: companyId,
+      location_id: locationId,
+    },
+  });
 };
 
 const handleRemoveAssignment = async () => {
@@ -510,9 +567,10 @@ const handleRemoveAssignment = async () => {
                 :items="availableTypes"
                 variant="outlined"
                 density="comfortable"
-                placeholder="اختر المشرف"
+                placeholder="نوع الموقع"
                 hide-details
                 class="rounded-lg bg-grey-lighten-4 px-2"
+                style="min-width: 150px"
               />
             </div>
           </div>
@@ -535,75 +593,8 @@ const handleRemoveAssignment = async () => {
           </v-col>
         </v-row>
         <template v-else>
-          <dataTable
-            v-if="filteredData.length"
-            :items="filteredData"
-            :loading="isLoading"
-            :page="currentPage"
-            :items-per-page="perPage"
-            :total-items="totalItems"
-            :headers="tableHeaders"
-            @update:options="handleTableUpdate"
-          >
-            <template #[`item.name`]="{ item }">
-              <div class="d-flex align-center gap-2">
-                <v-avatar size="32" rounded="lg">
-                  <v-img :src="item.observerAvatar || '/imgs/person.svg'" />
-                </v-avatar>
-                <div>
-                  <div>{{ item.siteName }}</div>
-                </div>
-              </div>
-            </template>
-
-            <template #pagination>
-              <Pagination
-                :total-items="totalItems"
-                v-model:per-page="perPage"
-                v-model:page="currentPage"
-              />
-            </template>
-
-            <template #[`item.actions`]="{ item }">
-              <div @click="handleViewDt('view', item)" class="cursor-pointer">
-                <svg
-                  width="40"
-                  height="40"
-                  viewBox="0 0 40 40"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10.667 0.333008H29.333C35.0399 0.333008 39.667 4.96005 39.667 10.667V29.333C39.667 35.0399 35.0399 39.667 29.333 39.667H10.667C4.96005 39.667 0.333008 35.0399 0.333008 29.333V10.667C0.333008 4.96005 4.96005 0.333008 10.667 0.333008Z"
-                    stroke="#E9EBEC"
-                    stroke-width="0.666667"
-                  />
-                  <path
-                    opacity="0.4"
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M26.6673 20.0007C26.6673 19.7903 26.566 19.6482 26.3633 19.364C25.4526 18.0869 23.1268 15.334 20.0007 15.334C16.8745 15.334 14.5487 18.0869 13.638 19.364C13.4353 19.6482 13.334 19.7903 13.334 20.0007C13.334 20.211 13.4353 20.3531 13.638 20.6373C14.5487 21.9144 16.8745 24.6673 20.0007 24.6673C23.1268 24.6673 25.4526 21.9144 26.3633 20.6373C26.566 20.3531 26.6673 20.211 26.6673 20.0007ZM20.0007 18.0007C21.1052 18.0007 22.0007 18.8961 22.0007 20.0007C22.0007 21.1052 21.1052 22.0007 20.0007 22.0007C18.8961 22.0007 18.0007 21.1052 18.0007 20.0007C18.0007 18.8961 18.8961 18.0007 20.0007 18.0007Z"
-                    fill="#B69265"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M20.0007 22.5007C18.6199 22.5007 17.5007 21.3814 17.5007 20.0007C17.5007 18.6199 18.6199 17.5007 20.0007 17.5007C21.3814 17.5007 22.5007 18.6199 22.5007 20.0007C22.5007 21.3814 21.3814 22.5007 20.0007 22.5007ZM18.5007 20.0007C18.5007 20.8291 19.1722 21.5007 20.0007 21.5007C20.8291 21.5007 21.5007 20.8291 21.5007 20.0007C21.5007 19.1722 20.8291 18.5007 20.0007 18.5007C19.1722 18.5007 18.5007 19.1722 18.5007 20.0007Z"
-                    fill="#B69265"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M20.0007 14.834C18.2869 14.834 16.818 15.5883 15.6809 16.476C14.5427 17.3645 13.7015 18.4138 13.2309 19.0737L13.1954 19.1231C13.0267 19.3579 12.834 19.6258 12.834 20.0007C12.834 20.3755 13.0267 20.6434 13.1954 20.8782L13.2309 20.9276C13.7015 21.5875 14.5427 22.6368 15.6809 23.5253C16.818 24.413 18.2869 25.1673 20.0007 25.1673C21.7144 25.1673 23.1834 24.413 24.3204 23.5253C25.4586 22.6368 26.2998 21.5875 26.7704 20.9276L26.8059 20.8782C26.9746 20.6434 27.1673 20.3755 27.1673 20.0007C27.1673 19.6258 26.9746 19.3579 26.8059 19.1231L26.7704 19.0737C26.2998 18.4138 25.4586 17.3645 24.3204 16.476C23.1833 15.5883 21.7144 14.834 20.0007 14.834ZM14.0451 19.6543C14.4852 19.0371 15.2622 18.0714 16.2962 17.2642C17.3312 16.4562 18.5882 15.834 20.0007 15.834C21.4131 15.834 22.6701 16.4562 23.7051 17.2642C24.7391 18.0714 25.5161 19.0371 25.9562 19.6543C26.0651 19.807 26.1169 19.8815 26.1478 19.9409C26.1674 19.9786 26.1674 19.9889 26.1673 19.9991L26.1673 20.0007L26.1673 20.0022C26.1674 20.0124 26.1674 20.0227 26.1478 20.0604C26.1169 20.1198 26.0651 20.1943 25.9562 20.347C25.5161 20.9642 24.7391 21.9299 23.7051 22.7371C22.6701 23.5451 21.4131 24.1673 20.0007 24.1673C18.5882 24.1673 17.3312 23.5451 16.2962 22.7371C15.2622 21.9299 14.4852 20.9642 14.0451 20.347C13.9362 20.1943 13.8844 20.1198 13.8535 20.0604C13.8339 20.0227 13.8339 20.0124 13.834 20.0022L13.834 20.0007L13.834 19.9991C13.8339 19.9889 13.8339 19.9786 13.8535 19.9409C13.8844 19.8815 13.9362 19.807 14.0451 19.6543Z"
-                    fill="#B69265"
-                  />
-                </svg>
-              </div>
-            </template>
-          </dataTable>
-
           <div
-            v-else
+            v-if="filteredData.length === 0 && !isLoading"
             class="d-flex flex-column align-center justify-center py-16 min-h-500"
           >
             <svg
@@ -616,12 +607,143 @@ const handleRemoveAssignment = async () => {
               <!-- ... SVG path data ... -->
             </svg>
             <div class="text-h6 font-weight-medium mt-4">
-              لم يتم العثور على أي إسنادات.
+              {{
+                searchQuery
+                  ? "لم يتم العثور على أي مواقع تطابق معايير البحث."
+                  : "لم يتم العثور على أي إسنادات."
+              }}
             </div>
             <div class="text-body-1 text-medium-emphasis">
-              لا توجد إسنادات متاحة في الوقت الحالي.
+              {{
+                activeTab === "assigned"
+                  ? "لا توجد مواقع مسندة متاحة في الوقت الحالي."
+                  : "لا توجد مواقع غير مسندة متاحة في الوقت الحالي."
+              }}
             </div>
           </div>
+
+          <dataTable
+            v-else
+            :items="filteredData"
+            :loading="isLoading"
+            :page="currentPage"
+            :items-per-page="perPage"
+            :total-items="totalItems"
+            :headers="tableHeaders"
+            @update:options="handleTableUpdate"
+          >
+            <template #[`item.siteName`]="{ item }">
+              <div class="d-flex align-center gap-2">
+                <div class="font-weight-medium">{{ item.siteName }}</div>
+              </div>
+            </template>
+
+            <template #[`item.locationType`]="{ item }">
+              <v-chip
+                size="small"
+                :color="item.locationType === 'مخيم' ? 'primary' : 'secondary'"
+                variant="outlined"
+                class="font-weight-medium"
+              >
+                {{ item.locationType }}
+              </v-chip>
+            </template>
+
+            <template #[`item.campNumber`]="{ item }">
+              <div>{{ item.campNumber || "-" }}</div>
+            </template>
+
+            <template #[`item.gateNumber`]="{ item }">
+              <div>{{ item.gateNumber || "-" }}</div>
+            </template>
+
+            <template #[`item.observerName`]="{ item }">
+              <div class="d-flex align-center gap-2" v-if="item.observerName">
+                <v-avatar size="32" rounded="lg">
+                  <v-img :src="item.observerAvatar || '/imgs/person.svg'" />
+                </v-avatar>
+                <div>{{ item.observerName }}</div>
+              </div>
+              <div v-else class="text-medium-emphasis">غير مسند</div>
+            </template>
+
+            <template #[`item.observerPhone`]="{ item }">
+              <div v-if="item.observerPhone">{{ item.observerPhone }}</div>
+              <div v-else class="text-medium-emphasis">-</div>
+            </template>
+
+            <template #[`item.mainCompany`]="{ item }">
+              <div>{{ item.mainCompany || "-" }}</div>
+            </template>
+
+            <template #[`item.pilgrimsNationality`]="{ item }">
+              <div>{{ item.pilgrimsNationality || "-" }}</div>
+            </template>
+
+            <template #[`item.ratingsCount`]="{ item }">
+              <div class="d-flex align-center">
+                {{ item.ratingsCount }}
+              </div>
+            </template>
+
+            <template #pagination>
+              <div class="d-flex justify-end py-3">
+                <Pagination
+                  :total-items="totalItems"
+                  :total-pages="totalPages"
+                  v-model:per-page="perPage"
+                  v-model:page="currentPage"
+                />
+              </div>
+            </template>
+
+            <template #[`item.actions`]="{ item }">
+              <div class="d-flex align-center">
+                <v-tooltip text="عرض التفاصيل" location="top">
+                  <template v-slot:activator="{ props }">
+                    <div
+                      v-bind="props"
+                      @click="handleViewDt('view', item)"
+                      class="cursor-pointer mx-1"
+                    >
+                      <svg
+                        width="32"
+                        height="32"
+                        viewBox="0 0 40 40"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M10.667 0.333008H29.333C35.0399 0.333008 39.667 4.96005 39.667 10.667V29.333C39.667 35.0399 35.0399 39.667 29.333 39.667H10.667C4.96005 39.667 0.333008 35.0399 0.333008 29.333V10.667C0.333008 4.96005 4.96005 0.333008 10.667 0.333008Z"
+                          stroke="#E9EBEC"
+                          stroke-width="0.666667"
+                        />
+                        <path
+                          opacity="0.4"
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M26.6673 20.0007C26.6673 19.7903 26.566 19.6482 26.3633 19.364C25.4526 18.0869 23.1268 15.334 20.0007 15.334C16.8745 15.334 14.5487 18.0869 13.638 19.364C13.4353 19.6482 13.334 19.7903 13.334 20.0007C13.334 20.211 13.4353 20.3531 13.638 20.6373C14.5487 21.9144 16.8745 24.6673 20.0007 24.6673C23.1268 24.6673 25.4526 21.9144 26.3633 20.6373C26.566 20.3531 26.6673 20.211 26.6673 20.0007ZM20.0007 18.0007C21.1052 18.0007 22.0007 18.8961 22.0007 20.0007C22.0007 21.1052 21.1052 22.0007 20.0007 22.0007C18.8961 22.0007 18.0007 21.1052 18.0007 20.0007C18.0007 18.8961 18.8961 18.0007 20.0007 18.0007Z"
+                          fill="#B69265"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M20.0007 22.5007C18.6199 22.5007 17.5007 21.3814 17.5007 20.0007C17.5007 18.6199 18.6199 17.5007 20.0007 17.5007C21.3814 17.5007 22.5007 18.6199 22.5007 20.0007C22.5007 21.3814 21.3814 22.5007 20.0007 22.5007ZM18.5007 20.0007C18.5007 20.8291 19.1722 21.5007 20.0007 21.5007C20.8291 21.5007 21.5007 20.8291 21.5007 20.0007C21.5007 19.1722 20.8291 18.5007 20.0007 18.5007C19.1722 18.5007 18.5007 19.1722 18.5007 20.0007Z"
+                          fill="#B69265"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M20.0007 14.834C18.2869 14.834 16.818 15.5883 15.6809 16.476C14.5427 17.3645 13.7015 18.4138 13.2309 19.0737L13.1954 19.1231C13.0267 19.3579 12.834 19.6258 12.834 20.0007C12.834 20.3755 13.0267 20.6434 13.1954 20.8782L13.2309 20.9276C13.7015 21.5875 14.5427 22.6368 15.6809 23.5253C16.818 24.413 18.2869 25.1673 20.0007 25.1673C21.7144 25.1673 23.1834 24.413 24.3204 23.5253C25.4586 22.6368 26.2998 21.5875 26.7704 20.9276L26.8059 20.8782C26.9746 20.6434 27.1673 20.3755 27.1673 20.0007C27.1673 19.6258 26.9746 19.3579 26.8059 19.1231L26.7704 19.0737C26.2998 18.4138 25.4586 17.3645 24.3204 16.476C23.1833 15.5883 21.7144 14.834 20.0007 14.834ZM14.0451 19.6543C14.4852 19.0371 15.2622 18.0714 16.2962 17.2642C17.3312 16.4562 18.5882 15.834 20.0007 15.834C21.4131 15.834 22.6701 16.4562 23.7051 17.2642C24.7391 18.0714 25.5161 19.0371 25.9562 19.6543C26.0651 19.807 26.1169 19.8815 26.1478 19.9409C26.1674 19.9786 26.1674 19.9889 26.1673 19.9991L26.1673 20.0007L26.1673 20.0022C26.1674 20.0124 26.1674 20.0227 26.1478 20.0604C26.1169 20.1198 26.0651 20.1943 25.9562 20.347C25.5161 20.9642 24.7391 21.9299 23.7051 22.7371C22.6701 23.5451 21.4131 24.1673 20.0007 24.1673C18.5882 24.1673 17.3312 23.5451 16.2962 22.7371C15.2622 21.9299 14.4852 20.9642 14.0451 20.347C13.9362 20.1943 13.8844 20.1198 13.8535 20.0604C13.8339 20.0227 13.8339 20.0124 13.834 20.0022L13.834 20.0007L13.834 19.9991C13.8339 19.9889 13.8339 19.9786 13.8535 19.9409C13.8844 19.8815 13.9362 19.807 14.0451 19.6543Z"
+                          fill="#B69265"
+                        />
+                      </svg>
+                    </div>
+                  </template>
+                </v-tooltip>
+              </div>
+            </template>
+          </dataTable>
         </template>
       </v-card>
     </VCard>

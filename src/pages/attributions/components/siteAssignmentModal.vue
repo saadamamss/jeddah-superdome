@@ -1,122 +1,288 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
+import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
 
 const props = defineProps({
   modelValue: {
     type: Boolean,
     required: true,
   },
+  inspectorId: {
+    type: [String, Number],
+    default: null,
+  },
+  showInspectorSelect: {
+    type: Boolean,
+    default: false,
+  },
+  inspectors: {
+    type: Array,
+    default: () => [],
+  },
+  locations: {
+    type: Array,
+    default: () => [],
+  },
+  companies: {
+    type: Array,
+    default: () => [],
+  },
+  loadingLocations: {
+    type: Boolean,
+    default: false,
+  },
+  loadingCompanies: {
+    type: Boolean,
+    default: false,
+  },
+  loadingInspectors: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "save"]);
 
-const selectedSite = ref(null);
-const selectedServices = ref([]);
-const isOpen = ref(props.modelValue);
+const formData = ref({
+  location_id: null,
+  company_id: null,
+  inspector_ids: [],
+});
 
-// Watch for changes in modelValue prop
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    isOpen.value = newValue;
-  }
-);
+const selectedLocation = ref(null);
+const selectedCompany = ref(null);
+const selectedInspectors = ref([]);
+const searchLocation = ref("");
+const searchCompany = ref("");
+const searchInspector = ref("");
 
-// Watch for changes in local isOpen
-watch(
-  () => isOpen.value,
-  (newValue) => {
-    emit("update:modelValue", newValue);
-  }
-);
+const locationItems = computed(() => {
+  return props.locations.map((location) => ({
+    label: `${location?.name || "غير محدد"} ${
+      location?.location_type?.title ? `(${location.location_type.title})` : ""
+    }`,
+    value: location?.id,
+    sublabel: `رقم الرخصة: ${
+      location?.license_no || location?.camp_number || "-"
+    } | المندوب: ${location?.delegate_name || "-"} | جوال: ${
+      location?.delegate_phone || "-"
+    }`,
+    raw: location,
+  }));
+});
 
-// Static data for selects
-const siteOptions = [
-  { title: "إسناد موقع الرافعي في قباء", value: 1 },
-  { title: "إسناد موقع في قباء", value: 2 },
-  { title: "إسناد موقع الجعفري", value: 3 },
-  { title: "إسناد موقع محمد عبدالله", value: 4 },
-];
+const companyItems = computed(() => {
+  return props.companies.map((company) => ({
+    label: company.name,
+    value: company.id,
+    sublabel: company.parent_company_name
+      ? `${company.parent_company_name} - ${
+          company.pligrims_nationality || "-"
+        }`
+      : "-",
+    raw: company,
+  }));
+});
 
-const serviceOptions = [
-  { title: "خدمة السكن", value: 1 },
-  { title: "خدمة الطعام", value: 2 },
-  { title: "خدمة النقل", value: 3 },
-  { title: "خدمة الإرشاد", value: 4 },
-];
+const inspectorItems = computed(() => {
+  return props.inspectors.map((inspector) => ({
+    label: inspector.name || `${inspector.firstname} ${inspector.lastname}`,
+    value: inspector.id,
+    sublabel: inspector.sa_id ? `رقم الهوية: ${inspector.sa_id}` : "",
+    raw: inspector,
+  }));
+});
+
+const filteredLocations = computed(() => {
+  if (!searchLocation.value) return locationItems.value;
+  const search = searchLocation.value.toLowerCase();
+  return locationItems.value.filter(
+    (item) =>
+      item.label.toLowerCase().includes(search) ||
+      item.sublabel.toLowerCase().includes(search)
+  );
+});
+
+const filteredCompanies = computed(() => {
+  if (!searchCompany.value) return companyItems.value;
+  const search = searchCompany.value.toLowerCase();
+  return companyItems.value.filter(
+    (item) =>
+      item.label.toLowerCase().includes(search) ||
+      item.sublabel.toLowerCase().includes(search)
+  );
+});
+
+const filteredInspectors = computed(() => {
+  if (!searchInspector.value) return inspectorItems.value;
+  const search = searchInspector.value.toLowerCase();
+  return inspectorItems.value.filter(
+    (item) =>
+      item.label.toLowerCase().includes(search) ||
+      (item.raw.sa_id && item.raw.sa_id.toLowerCase().includes(search))
+  );
+});
+
+const resetForm = () => {
+  formData.value = {
+    location_id: null,
+    company_id: null,
+    inspector_ids: [],
+  };
+  selectedLocation.value = null;
+  selectedCompany.value = null;
+  selectedInspectors.value = [];
+  searchLocation.value = "";
+  searchCompany.value = "";
+  searchInspector.value = "";
+};
 
 const handleSave = () => {
-  emit("save", {
-    site: selectedSite.value,
-    services: selectedServices.value,
-  });
-  // Reset form
-  selectedSite.value = null;
-  selectedServices.value = [];
-  isOpen.value = false;
+  const data = {
+    ...formData.value,
+    location_details: selectedLocation.value?.raw,
+    company_details: selectedCompany.value?.raw,
+  };
+
+  // If not showing inspector select but have inspectorId, use it
+  if (!props.showInspectorSelect && props.inspectorId) {
+    data.inspector_ids = [props.inspectorId];
+  }
+  // If showing inspector select, use selected inspectors
+  else if (props.showInspectorSelect) {
+    data.inspector_ids = selectedInspectors.value.map((item) => item.value);
+    data.inspector_details = selectedInspectors.value.map(
+      (inspector) => inspector.raw
+    );
+  }
+
+  emit("save", data);
+  resetForm();
 };
 
-const closeModal = () => {
-  // Reset form
-  selectedSite.value = null;
-  selectedServices.value = [];
-  isOpen.value = false;
+const handleClose = () => {
+  emit("update:modelValue", false);
+  resetForm();
 };
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (!newVal) {
+      resetForm();
+    }
+  }
+);
+
+// Watch for inspector selection changes
+watch(
+  () => selectedInspectors.value,
+  (newVal) => {
+    formData.value.inspector_ids = newVal.map((item) => item.value);
+  }
+);
 </script>
 
 <template>
   <v-dialog
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
-    max-width="500px"
+    @update:model-value="handleClose"
+    max-width="600px"
+    persistent
   >
     <v-card class="rounded-lg">
-      <v-card-title class="text-h6 pa-4">إسناد موقع</v-card-title>
+      <v-card-title class="text-h5 pa-4"> إسناد موقع جديد </v-card-title>
 
       <v-card-text class="pa-4">
-        <div class="mb-4">
-          <label class="text-body-2 font-weight-medium mb-2 d-block"
-            >اسم الموقع</label
-          >
-          <v-select
-            v-model="selectedSite"
-            :items="siteOptions"
-            item-title="title"
-            item-value="value"
-            placeholder="إسناد موقع الرافعي في قباء"
-            variant="outlined"
-            density="comfortable"
-            class="mb-4"
-            hide-details
-          />
-        </div>
+        <v-form @submit.prevent="handleSave">
+          <v-row>
+            <!-- Inspector Selection - Only show if showInspectorSelect is true -->
+            <v-col cols="12" v-if="showInspectorSelect">
+              <CustomVAutocomplete
+                v-model="selectedInspectors"
+                v-model:search="searchInspector"
+                :items="filteredInspectors"
+                label="اختر المراقبين"
+                :loading="loadingInspectors"
+                placeholder="ابحث عن مراقبين..."
+                no-data-text="لا توجد نتائج"
+                multiple
+                chips
+                closable-chips
+              >
+                <template #item="{ item }">
+                  <v-list-item>
+                    <v-list-item-title>{{ item.raw.label }}</v-list-item-title>
+                    <v-list-item-subtitle>{{
+                      item.raw.sublabel
+                    }}</v-list-item-subtitle>
+                  </v-list-item>
+                </template>
+              </CustomVAutocomplete>
+            </v-col>
 
-        <div class="mb-4">
-          <label class="text-body-2 font-weight-medium mb-2 d-block"
-            >اسم مركز الخدمه</label
-          >
-          <v-select
-            v-model="selectedServices"
-            :items="serviceOptions"
-            item-title="title"
-            item-value="value"
-            placeholder="اختر مركز الخدمه"
-            variant="outlined"
-            density="comfortable"
-            multiple
-            chips
-            hide-details
-          />
-        </div>
+            <v-col cols="12">
+              <CustomVAutocomplete
+                v-model="selectedLocation"
+                v-model:search="searchLocation"
+                :items="filteredLocations"
+                label="اختر الموقع"
+                :loading="loadingLocations"
+                placeholder="ابحث عن موقع..."
+                no-data-text="لا توجد نتائج"
+                @update:model-value="formData.location_id = $event?.value"
+              >
+                <template #item="{ item }">
+                  <v-list-item>
+                    <v-list-item-title>{{ item.raw.label }}</v-list-item-title>
+                    <v-list-item-subtitle>{{
+                      item.raw.sublabel
+                    }}</v-list-item-subtitle>
+                  </v-list-item>
+                </template>
+              </CustomVAutocomplete>
+            </v-col>
+
+            <v-col cols="12">
+              <CustomVAutocomplete
+                v-model="selectedCompany"
+                v-model:search="searchCompany"
+                :items="filteredCompanies"
+                label="اختر الشركة"
+                :loading="loadingCompanies"
+                placeholder="ابحث عن شركة..."
+                no-data-text="لا توجد نتائج"
+                @update:model-value="formData.company_id = $event?.value"
+              >
+                <template #item="{ item }">
+                  <v-list-item>
+                    <v-list-item-title>{{ item.raw.label }}</v-list-item-title>
+                    <v-list-item-subtitle>{{
+                      item.raw.sublabel
+                    }}</v-list-item-subtitle>
+                  </v-list-item>
+                </template>
+              </CustomVAutocomplete>
+            </v-col>
+          </v-row>
+        </v-form>
       </v-card-text>
 
       <v-card-actions class="pa-4">
         <v-spacer></v-spacer>
-        <v-btn color="default" variant="text" @click="closeModal">
+        <v-btn color="default" variant="text" @click="handleClose">
           إلغاء
         </v-btn>
-        <v-btn color="primary" @click="handleSave" :disabled="!selectedSite">
-          إضافة
+        <v-btn
+          color="primary"
+          @click="handleSave"
+          :disabled="
+            !formData.location_id ||
+            !formData.company_id ||
+            (showInspectorSelect && formData.inspector_ids.length === 0)
+          "
+        >
+          حفظ
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -128,10 +294,28 @@ const closeModal = () => {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-:deep(.v-select) {
-  .v-field__input {
-    padding-top: 5px;
-    min-height: 44px;
+:deep(.v-field__input) {
+  padding-top: 5px;
+  min-height: 44px;
+}
+
+:deep(.v-list-item) {
+  min-height: unset;
+  padding: 8px 16px;
+
+  .v-list-item-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 2px;
   }
+
+  .v-list-item-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.7;
+  }
+}
+
+.text-error {
+  color: rgb(var(--v-theme-error)) !important;
 }
 </style>

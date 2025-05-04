@@ -11,14 +11,14 @@
       </v-avatar>
       <div class="d-flex flex-column justify-space-between align-center">
         <div class="d-flex align-center">
-          <h3 class="text-h6 mb-1">{{ user.firstname }} {{ user.lastname }}</h3>
+          <h3 class="text-h6 mb-1">{{ user.fullname }}</h3>
         </div>
 
         <div class="d-flex flex-column align-center">
           <div
-            class="text-body-2 text-medium-emphasis mb-4 d-flex align-center"
+            class="text-body-2 text-medium-emphasis mb-4 d-flex align-center ms-4"
           >
-            {{ user.role.title }} -
+            <!-- {{ user }} -->
             <div class="text-body-1">{{ user.sa_id }}</div>
           </div>
         </div>
@@ -64,21 +64,26 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { hasPermission } from "@core/utils/permissions";
+import { useRouter } from "vue-router";
 
 defineOptions({
   name: "ResidenceSupervisorsCard",
 });
+
+const router = useRouter();
 
 const props = defineProps({
   user: {
     type: Object,
     required: true,
     default: () => ({
-      firstname: "",
-      lastname: "",
-      role: { title: "مشرف" },
+      fullname: "",
       sa_id: "",
       avatar_url: null,
+      phone: "",
+      email: "",
+      gender: "",
+      nationality: "",
     }),
   },
   visitCount: {
@@ -88,20 +93,30 @@ const props = defineProps({
 });
 
 const superSupervisorsDt = () => {
-  console.log("superSupervisorsDt");
+  if (props.user && props.user.id) {
+    router.push(`/attributions/supervisors_dt/${props.user.id}`);
+  }
 };
 
 const canEdit = hasPermission("teams.update");
 const canDelete = hasPermission("teams.delete");
 
 const getInitials = computed(() => {
-  if (!props.user.firstname || !props.user.lastname) return "";
-  return `${props.user.firstname.charAt(0)}${props.user.lastname.charAt(0)}`;
+  if (!props.user.fullname) return "";
+  const nameParts = props.user.fullname.split(" ");
+  if (nameParts.length >= 2) {
+    return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`;
+  }
+  return props.user.fullname.charAt(0);
 });
 </script>
 
 <style lang="scss" scoped>
 .v-avatar {
   border: 2px solid rgb(var(--v-theme-warning));
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>
