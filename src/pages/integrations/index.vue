@@ -9,6 +9,7 @@ import StatsWidget from "@/@core/components/widgets/StatsWidget";
 import dataTable from "@/components/dataTable.vue";
 import NoteCard from "@/components/NoteCard.vue";
 import NoteItem from "@/components/NoteItem.vue";
+import { exportData } from "@core/utils/helpers";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
@@ -139,7 +140,7 @@ const tableHeaders = [
   // { title: "اسم الراقب", key: "reporter", align: "center" },
   { title: "الحالة", key: "status", align: "center" },
   { title: "سبب الرفض", key: "cancel_reason", align: "center" },
-  { title: "الإجراء", key: "actions", align: "center" },
+  // { title: "الإجراء", key: "actions", align: "center" },
 ];
 
 // Fetch ratings with pagination and search
@@ -346,36 +347,50 @@ onMounted(() => {
 });
 
 // Add export function
-const exportData = async () => {
+const exportIntegrationsData = async () => {
   try {
     isExporting.value = true;
-    const response = await axios.post(
-      `/rating-integrations-excel?type=${type_render.value}`,
-      {},
-      {
-        responseType: "blob",
-      }
-    );
 
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    const fileName = "ratings.xlsx";
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Export failed:", error);
-    appStore.showSnackbar({
-      message: "حدث خطأ أثناء تصدير البيانات",
-      color: "error",
+    await exportData("/rating-integrations-excel", {
+      type: type_render.value,
+      status: tempStatusFilter.value,
     });
+  } catch (error) {
+    console.error("export failed:", error);
   } finally {
     isExporting.value = false;
   }
 };
+// const exportData = async () => {
+//   try {
+//     isExporting.value = true;
+//     const response = await axios.post(
+//       `/rating-integrations-excel?type=${type_render.value}`,
+//       {},
+//       {
+//         responseType: "blob",
+//       }
+//     );
+
+//     const url = window.URL.createObjectURL(new Blob([response.data]));
+//     const link = document.createElement("a");
+//     link.href = url;
+//     const fileName = "ratings.xlsx";
+//     link.setAttribute("download", fileName);
+//     document.body.appendChild(link);
+//     link.click();
+//     link.remove();
+//     window.URL.revokeObjectURL(url);
+//   } catch (error) {
+//     console.error("Export failed:", error);
+//     appStore.showSnackbar({
+//       message: "حدث خطأ أثناء تصدير البيانات",
+//       color: "error",
+//     });
+//   } finally {
+//     isExporting.value = false;
+//   }
+// };
 
 // Override the default status styling for the notes component
 const getStatusStyle = (status) => {
@@ -393,60 +408,60 @@ const getStatusStyle = (status) => {
 
 // Add this in the script setup section
 const staticNotes = ref([
-  {
-    id: 1,
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-    sector: "القطاع الجنوبي",
-    date: "07/02",
-    time: "09:15 ص",
-  },
-  {
-    id: 2,
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-    sector: "القطاع الجنوبي",
-    date: "07/02",
-    time: "09:15 ص",
-  },
-  {
-    id: 3,
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-    sector: "القطاع الجنوبي",
-    date: "07/02",
-    time: "09:15 ص",
-  },
-  {
-    id: 4,
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-    sector: "القطاع الجنوبي",
-    date: "07/02",
-    time: "09:15 ص",
-  },
-  {
-    id: 5,
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-    sector: "القطاع الجنوبي",
-    date: "07/02",
-    time: "09:15 ص",
-  },
-  {
-    id: 6,
-    description:
-      "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
-    location: "مخيم النور 3",
-    sector: "القطاع الجنوبي",
-    date: "07/02",
-    time: "09:15 ص",
-  },
+  // {
+  //   id: 1,
+  //   description:
+  //     "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
+  //   location: "مخيم النور 3",
+  //   sector: "القطاع الجنوبي",
+  //   date: "07/02",
+  //   time: "09:15 ص",
+  // },
+  // {
+  //   id: 2,
+  //   description:
+  //     "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
+  //   location: "مخيم النور 3",
+  //   sector: "القطاع الجنوبي",
+  //   date: "07/02",
+  //   time: "09:15 ص",
+  // },
+  // {
+  //   id: 3,
+  //   description:
+  //     "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
+  //   location: "مخيم النور 3",
+  //   sector: "القطاع الجنوبي",
+  //   date: "07/02",
+  //   time: "09:15 ص",
+  // },
+  // {
+  //   id: 4,
+  //   description:
+  //     "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
+  //   location: "مخيم النور 3",
+  //   sector: "القطاع الجنوبي",
+  //   date: "07/02",
+  //   time: "09:15 ص",
+  // },
+  // {
+  //   id: 5,
+  //   description:
+  //     "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
+  //   location: "مخيم النور 3",
+  //   sector: "القطاع الجنوبي",
+  //   date: "07/02",
+  //   time: "09:15 ص",
+  // },
+  // {
+  //   id: 6,
+  //   description:
+  //     "تم رصد انقطاع التيار الكهربائي في مخيم النور 3 منذ أكثر من ساعتين، مما تسبب في تعطل أجهزة",
+  //   location: "مخيم النور 3",
+  //   sector: "القطاع الجنوبي",
+  //   date: "07/02",
+  //   time: "09:15 ص",
+  // },
 ]);
 </script>
 
@@ -695,7 +710,7 @@ const staticNotes = ref([
                 height="42"
                 elevation="0"
                 class="px-4 bg-white rounded-xl"
-                @click="exportData"
+                @click="exportIntegrationsData"
               >
                 <div class="d-flex align-center ga-2">
                   <span>تصدير</span>
@@ -788,17 +803,14 @@ const staticNotes = ref([
                   </div>
                 </template>
 
-                <template #[`item.actions`]="{ item }">
+                <!-- <template #[`item.actions`]="{ item }">
                   <div class="d-flex align-center justify-center gap-2">
-                    <!-- <v-btn icon variant="text" size="small" class="eye-btn">
-                      <v-icon>mdi-eye-outline</v-icon>
-                    </v-btn> -->
                     <button class="escalate-btn py-2 rounded-pill">
                       <v-icon>mdi-arrow-up-right</v-icon>
                       <span class="ms-2">تصعيد</span>
                     </button>
                   </div>
-                </template>
+                </template> -->
               </dataTable>
             </v-window-item>
 

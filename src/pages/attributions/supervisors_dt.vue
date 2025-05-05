@@ -347,17 +347,20 @@ const fetchLocations = async () => {
     });
 
     if (response.data?.status?.success) {
-      locations.value = response.data.data.map((location) => ({
-        id: location.id,
-        name: location.name,
-        location_type: location.location_type,
-        license_no: location.license_no,
-        camp_number: location.camp_number,
-        delegate_name: location.delegate_name,
-        delegate_phone: location.delegate_phone,
-        latitude: location.latitude,
-        longitude: location.longitude,
-      }));
+      locations.value = response.data.locations;
+      console.log();
+
+      // .map((location) => ({
+      //   id: location.id,
+      //   name: location.name,
+      //   location_type: location.location_type,
+      //   license_no: location.license_no,
+      //   camp_number: location.camp_number,
+      //   delegate_name: location.delegate_name,
+      //   delegate_phone: location.delegate_phone,
+      //   latitude: location.latitude,
+      //   longitude: location.longitude,
+      // }));
     }
   } catch (error) {
     console.error("Error fetching locations:", error);
