@@ -10,6 +10,7 @@ import dataTable from "@/components/dataTable.vue";
 import NoteCard from "@/components/NoteCard.vue";
 import NoteItem from "@/components/NoteItem.vue";
 import { exportData } from "@core/utils/helpers";
+import DisplayAttachment from "./components/DisplayAttachment.vue";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
@@ -125,6 +126,7 @@ watch(filterMenu, (isOpen) => {
 
 // Table headers for ratings
 const tableHeaders = [
+  { title: "رقم التذكرة", key: "rating_id", sortable: true, align: "right" },
   { title: "البند", key: "question", sortable: true, align: "right" },
   {
     title: "اسم الشركة الرئيسية",
@@ -140,7 +142,7 @@ const tableHeaders = [
   // { title: "اسم الراقب", key: "reporter", align: "center" },
   { title: "الحالة", key: "status", align: "center" },
   { title: "سبب الرفض", key: "cancel_reason", align: "center" },
-  // { title: "الإجراء", key: "actions", align: "center" },
+  { title: "المرفق", key: "attachment", align: "center" },
 ];
 
 // Fetch ratings with pagination and search
@@ -191,6 +193,7 @@ const fetchRatings = async () => {
     // Ensure we have an array before mapping
     if (Array.isArray(responseData)) {
       ratings.value = responseData.map((item) => ({
+        rating_id: item.rating_id,
         id: item.id,
         question: item.question,
         company: {
@@ -215,6 +218,7 @@ const fetchRatings = async () => {
             ? "مرفوض"
             : item.status,
         cancel_reason: item.cancel_reason || "-",
+        attachment: item.attachment,
       }));
 
       // Handle pagination
@@ -245,66 +249,128 @@ const fetchNotes = async () => {
   try {
     isLoading.value = true;
     // Simulating API call with mock data for demonstration
-    setTimeout(() => {
-      notes.value = [
-        {
-          id: 1,
-          report_type: { title: "طلب صيانة" },
-          status: "PENDING",
-          description: "هناك مشكلة في نظام التكييف في الغرفة 205",
-          report_date: "2023-11-15",
-          report_time: "14:30",
-          address: "مكة المكرمة - العزيزية",
-          reportBy: {
-            firstname: "أحمد",
-            lastname: "محمد",
-          },
-          latitude: 21.3891,
-          longitude: 39.8579,
-          created_at: "2023-11-15T14:30:00",
-        },
-        {
-          id: 2,
-          report_type: { title: "مشكلة في النظافة" },
-          status: "APPROVED",
-          description: "الممرات تحتاج إلى تنظيف عاجل",
-          report_date: "2023-11-16",
-          report_time: "09:15",
-          address: "المدينة المنورة - باب السلام",
-          reportBy: {
-            firstname: "خالد",
-            lastname: "العتيبي",
-          },
-          latitude: 24.4672,
-          longitude: 39.6051,
-          created_at: "2023-11-16T09:15:00",
-        },
-        {
-          id: 3,
-          report_type: { title: "انقطاع المياه" },
-          status: "REJECTED",
-          description: "انقطاع المياه منذ الصباح في المبنى بالكامل",
-          report_date: "2023-11-17",
-          report_time: "11:20",
-          address: "مكة المكرمة - العزيزية",
-          reportBy: {
-            firstname: "سارة",
-            lastname: "الأحمد",
-          },
-          latitude: 21.3891,
-          longitude: 39.8579,
-          created_at: "2023-11-17T11:20:00",
-        },
-      ];
-      totalNotes.value = notes.value.length;
-      noteTypes.value = [
-        { id: 1, title: "طلب صيانة", total_reports: 12 },
-        { id: 2, title: "مشكلة في النظافة", total_reports: 8 },
-        { id: 3, title: "انقطاع المياه", total_reports: 5 },
-        { id: 4, title: "مشكلة في الكهرباء", total_reports: 9 },
-      ];
-      isLoading.value = false;
-    }, 1000);
+    const response = await axios.get("/reports-integrations", {
+      params: {
+        type: type_render.value,
+        page: currentPage.value,
+        per_page: perPage.value,
+        search: search.value || undefined,
+      },
+    });
+    console.log({ response });
+
+    const notesItems = (response.data.data.reports = []);
+
+    console.log({ notesItems });
+    notes.value = notesItems;
+    //     {
+    //     "id": 2,
+    //     "report_type_id": null,
+    //     "report_type": null,
+    //     "report_by_id": 56,
+    //     "report_by": {
+    //         "id": 56,
+    //         "fullname": "مراقب تجريبي 2",
+    //         "firstname": "مراقب",
+    //         "lastname": "تجريبي 2",
+    //         "email": "fmr332095@bb4.com",
+    //         "phone": "0589412346",
+    //         "sa_id": "1000000044",
+    //         "avatar_url": null,
+    //         "role": {
+    //             "id": 3,
+    //             "title": "INSPECTOR"
+    //         },
+    //         "parent_companies": [],
+    //         "locations_count": 0,
+    //         "daily_visits_count": 0
+    //     },
+    //     "description": "test new attachments",
+    //     "lat": 21.38909989047112,
+    //     "long": 39.85789988189936,
+    //     "address": "9VQ5+J5J, Makkah, Makkah Principality, Makkah Province, Saudi Arabia",
+    //     "report_date": "2025-04-12",
+    //     "report_time": "12:03:27",
+    //     "status": "APPROVED",
+    //     "approved_by_id": null,
+    //     "approved_by": null,
+    //     "rejected_by_id": null,
+    //     "rejected_by": null,
+    //     "approved_at": "2025-04-12 17:57:37",
+    //     "rejected_at": null,
+    //     "rejection_reason": null,
+    //     "attachments": [
+    //         "https://app-gcs.imtithal1446.com/reports/2025/04/12/1744452185_ZJSrT5B5nt.jpg"
+    //     ],
+    //     "created_at": "2025-04-12 13:03:28",
+    //     "updated_at": "2025-04-12 17:57:37"
+    // }
+
+    // Handle pagination
+    totalRatings.value = response.data?.data?.pagination?.i_total_objects || 0;
+    perPage.value = response.data?.data?.pagination?.i_per_page || 6;
+    currentPage.value = response.data?.data?.pagination?.i_current_page || 1;
+
+    // setTimeout(() => {
+    //   notes.value = [
+    //     {
+    //       id: 1,
+    //       report_type: { title: "طلب صيانة" },
+    //       status: "PENDING",
+    //       description: "هناك مشكلة في نظام التكييف في الغرفة 205",
+    //       report_date: "2023-11-15",
+    //       report_time: "14:30",
+    //       address: "مكة المكرمة - العزيزية",
+    //       reportBy: {
+    //         firstname: "أحمد",
+    //         lastname: "محمد",
+    //       },
+    //       latitude: 21.3891,
+    //       longitude: 39.8579,
+    //       created_at: "2023-11-15T14:30:00",
+    //     },
+    //     {
+    //       id: 2,
+    //       report_type: { title: "مشكلة في النظافة" },
+    //       status: "APPROVED",
+    //       description: "الممرات تحتاج إلى تنظيف عاجل",
+    //       report_date: "2023-11-16",
+    //       report_time: "09:15",
+    //       address: "المدينة المنورة - باب السلام",
+    //       reportBy: {
+    //         firstname: "خالد",
+    //         lastname: "العتيبي",
+    //       },
+    //       latitude: 24.4672,
+    //       longitude: 39.6051,
+    //       created_at: "2023-11-16T09:15:00",
+    //     },
+    //     {
+    //       id: 3,
+    //       report_type: { title: "انقطاع المياه" },
+    //       status: "REJECTED",
+    //       description: "انقطاع المياه منذ الصباح في المبنى بالكامل",
+    //       report_date: "2023-11-17",
+    //       report_time: "11:20",
+    //       address: "مكة المكرمة - العزيزية",
+    //       reportBy: {
+    //         firstname: "سارة",
+    //         lastname: "الأحمد",
+    //       },
+    //       latitude: 21.3891,
+    //       longitude: 39.8579,
+    //       created_at: "2023-11-17T11:20:00",
+    //     },
+    //   ];
+    //   totalNotes.value = notes.value.length;
+    //   noteTypes.value = [
+    //     { id: 1, title: "طلب صيانة", total_reports: 12 },
+    //     { id: 2, title: "مشكلة في النظافة", total_reports: 8 },
+    //     { id: 3, title: "انقطاع المياه", total_reports: 5 },
+    //     { id: 4, title: "مشكلة في الكهرباء", total_reports: 9 },
+    //   ];
+    //   isLoading.value = false;
+    // }, 1000);
   } catch (error) {
     console.error("Error fetching notes:", error);
     appStore.showSnackbar({
@@ -313,6 +379,7 @@ const fetchNotes = async () => {
     });
     notes.value = [];
     totalNotes.value = 0;
+  } finally {
     isLoading.value = false;
   }
 };
@@ -335,6 +402,14 @@ watch(type_render, () => {
 
 // Watch for page changes
 watch(currentPage, () => {
+  if (activeTab.value === "notes") {
+    fetchNotes();
+  } else {
+    fetchRatings();
+  }
+});
+
+watch(activeTab, () => {
   if (activeTab.value === "notes") {
     fetchNotes();
   } else {
@@ -463,6 +538,31 @@ const staticNotes = ref([
   //   time: "09:15 ص",
   // },
 ]);
+
+const isDisplayAttachment = ref(false);
+const currentFileUrl = ref(null);
+const displayAttachement = (item) => {
+  isDisplayAttachment.value = true;
+  currentFileUrl.value = item.attachment;
+};
+
+// watch(
+//   () => activeTab,
+//   (tab) => {
+//     if (tab == "notes") {
+//       getNotes();
+//     }
+//   }
+// );
+
+// const getNotes = async () => {
+//   // activeTab
+//   try {
+//     const response = await axios.get("/reports-integrations", { params });
+//   } catch (error) {
+
+//   }
+// };
 </script>
 
 <template>
@@ -485,11 +585,7 @@ const staticNotes = ref([
       <v-col cols="6" md="3">
         <StatsWidget
           title="عدد التقييمات المرسلة"
-          :number="
-            type_render === 'sahab'
-              ? statistics.ratings_sahab_count
-              : totalRatings
-          "
+          :number="statistics.ratings_sahab_count?.toLocaleString()"
         >
           <template #icon>
             <svg
@@ -517,7 +613,7 @@ const staticNotes = ref([
       <v-col cols="6" md="3">
         <StatsWidget
           title="عدد الملاحظات المرسلة"
-          :number="type_render === 'sahab' ? statistics.reports_sahab_count : 0"
+          :number="statistics.reports_sahab_count?.toLocaleString()"
         >
           <template #icon>
             <svg
@@ -539,7 +635,7 @@ const staticNotes = ref([
       <v-col cols="6" md="3">
         <StatsWidget
           title="إغلاق منصة سحاب"
-          :number="statistics.sahab_close_count"
+          :number="statistics.sahab_close_count?.toLocaleString()"
         >
           <template #icon>
             <svg
@@ -561,7 +657,7 @@ const staticNotes = ref([
       <v-col cols="6" md="3">
         <StatsWidget
           title="إغلاق منصة الرصد و التحكم"
-          :number="statistics.command_center_close_count"
+          :number="statistics.command_center_close_count?.toLocaleString()"
         >
           <template #icon>
             <svg
@@ -771,6 +867,18 @@ const staticNotes = ref([
                 v-model:page="currentPage"
                 :hide-default-footer="true"
               >
+                <template #[`item.attachment`]="{ item }">
+                  <div class="text-center">
+                    <v-btn
+                      variant="outlined"
+                      size="xs"
+                      class="pa-1 text-xs"
+                      @click="displayAttachement(item)"
+                    >
+                      عرض المرفق
+                    </v-btn>
+                  </div>
+                </template>
                 <template #[`item.company.parent_company.name`]="{ item }">
                   <div class="text-center">
                     {{ item.company?.parent_company?.name || "-" }}
@@ -839,6 +947,12 @@ const staticNotes = ref([
         </v-card-title>
       </VCard>
     </v-container>
+
+    <DisplayAttachment
+      v-model="isDisplayAttachment"
+      :attachmentUrl="currentFileUrl"
+      @close="isDisplayAttachment = false"
+    />
   </div>
 </template>
 

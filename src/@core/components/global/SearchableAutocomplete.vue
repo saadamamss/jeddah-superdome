@@ -6,6 +6,7 @@ const props = defineProps({
   items: Object,
   selectedItems: Object,
   itemTitleConcat: Array,
+  responseDataKey: String,
 });
 
 const searchedItems = ref([]);
@@ -53,7 +54,10 @@ const searchItems = async (keywords) => {
       isSelectedItemsAssigned.value = true;
     }
 
-    const itemsData = (data?.data || [])
+    const responseDataItems = props.responseDataKey
+      ? data?.data[props.responseDataKey] || []
+      : data?.data || [];
+    const itemsData = responseDataItems
       .map((item) => {
         if (
           Array.isArray(props.itemTitleConcat) &&

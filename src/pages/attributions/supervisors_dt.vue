@@ -14,6 +14,8 @@ const appStore = useAppStore();
 const router = useRouter();
 const route = useRoute();
 const isLoading = ref(true);
+const isSubmitting = ref(false);
+
 const perPage = ref(6);
 const currentPage = ref(1);
 const dateFilter = ref(null);
@@ -131,106 +133,97 @@ watch(
 );
 
 const fetchInspectorLocations = async () => {
-  try {
-    isLoading.value = true;
-
-    // Get inspector_id from route params
-    const inspectorId = route.params.id;
-
-    if (!inspectorId) {
-      console.warn("Inspector ID is missing from route params");
-      locations.value = [];
-      totalItems.value = 0;
-      return;
-    }
-
-    // Prepare query parameters
-    const params = {
-      inspector_id: inspectorId,
-      per_page: perPage.value,
-      page: currentPage.value,
-    };
-
-    // Remove undefined values
-    Object.keys(params).forEach((key) => {
-      if (params[key] === undefined) {
-        delete params[key];
-      }
-    });
-
-    const response = await axios.get("inspector-locations/details", { params });
-
-    if (response.data?.status?.success) {
-      // Extract data from response
-      const locationsData = response.data.data || [];
-
-      // Get inspector info from the first location item if available
-      if (locationsData.length > 0 && locationsData[0].inspector) {
-        const inspector = locationsData[0].inspector;
-        inspectorData.value = {
-          id: inspector.id,
-          name:
-            inspector.fullname ||
-            `${inspector.firstname || ""} ${inspector.lastname || ""}`,
-          locations: locationsData,
-        };
-      } else if (route.query?.inspector_name) {
-        // If no locations found but we have inspector name in query params
-        inspectorData.value = {
-          id: inspectorId,
-          name: route.query.inspector_name,
-          locations: [],
-        };
-      }
-
-      // Map API response to expected format for the table
-      locations.value = locationsData.map((item) => ({
-        id: item.id,
-        siteName: item.location?.name || "غير محدد",
-        locationType: item.location?.location_type?.title || "-",
-        licenseNumber:
-          item.location?.license_no || item.location?.camp_number || "-",
-        serviceCompany: item.company?.name || "-",
-        parentCompany: item.company?.parent_company_name || "-",
-        pilgrimsNationality: item.company?.pligrims_nationality || "-",
-        raw: item, // Store the raw data for reference
-      }));
-
-      // Handle pagination data
-      if (response.data.pagination) {
-        totalItems.value = response.data.pagination.i_total_objects || 0;
-        perPage.value = response.data.pagination.i_per_page || perPage.value;
-        currentPage.value =
-          response.data.pagination.i_current_page || currentPage.value;
-      } else {
-        totalItems.value = locationsData.length;
-      }
-    } else if (response.data?.message) {
-      // Only show error toast if there's an actual error message from the API
-      appStore.showSnackbar({
-        message: response.data.message,
-        color: "error",
-      });
-    }
-  } catch (error) {
-    console.error("Error fetching inspector locations:", error);
-    // Only show error toast for actual errors, not for empty data
-    if (error.response?.status !== 404) {
-      appStore.showSnackbar({
-        message:
-          error.response?.data?.message ||
-          error.message ||
-          "حدث خطأ أثناء جلب بيانات المواقع",
-        color: "error",
-      });
-    }
-
-    // Clear data on error
-    locations.value = [];
-    totalItems.value = 0;
-  } finally {
-    isLoading.value = false;
-  }
+  // try {
+  //   isLoading.value = true;
+  //   // Get inspector_id from route params
+  //   const inspectorId = route.params.id;
+  //   // if (!inspectorId) {
+  //   //   console.warn("Inspector ID is missing from route params");
+  //   //   locations.value = [];
+  //   //   totalItems.value = 0;
+  //   //   return;
+  //   // }
+  //   // Prepare query parameters
+  //   const params = {
+  //     inspector_id: inspectorId,
+  //     per_page: perPage.value,
+  //     page: currentPage.value,
+  //   };
+  //   console.log({ params });
+  //   // // Remove undefined values
+  //   // Object.keys(params).forEach((key) => {
+  //   //   if (params[key] === undefined) {
+  //   //     delete params[key];
+  //   //   }
+  //   // });
+  //   const response = await axios.get("inspector-locations/details", { params });
+  //   if (response.data?.status?.success) {
+  //     // Extract data from response
+  //     const locationsData = response.data.data || [];
+  //     console.log({ locationsData });
+  //     // Get inspector info from the first location item if available
+  //     if (locationsData.length > 0 && locationsData[0].inspector) {
+  //       const inspector = locationsData[0].inspector;
+  //       inspectorData.value = {
+  //         id: inspector.id,
+  //         name:
+  //           inspector.fullname ||
+  //           `${inspector.firstname || ""} ${inspector.lastname || ""}`,
+  //         locations: locationsData,
+  //       };
+  //     } else if (route.query?.inspector_name) {
+  //       // If no locations found but we have inspector name in query params
+  //       inspectorData.value = {
+  //         id: inspectorId,
+  //         name: route.query.inspector_name,
+  //         locations: [],
+  //       };
+  //     }
+  //     // locations.value = locationsData;
+  //     // Map API response to expected format for the table
+  //     locations.value = locationsData.map((item) => ({
+  //       id: item.id,
+  //       siteName: item.location?.name || "غير محدد",
+  //       locationType: item.location?.location_type?.title || "-",
+  //       licenseNumber:
+  //         item.location?.license_no || item.location?.camp_number || "-",
+  //       serviceCompany: item.company?.name || "-",
+  //       parentCompany: item.company?.parent_company_name || "-",
+  //       pilgrimsNationality: item.company?.pligrims_nationality || "-",
+  //       raw: item, // Store the raw data for reference
+  //     }));
+  //     // Handle pagination data
+  //     if (response.data.pagination) {
+  //       totalItems.value = response.data.pagination.i_total_objects || 0;
+  //       perPage.value = response.data.pagination.i_per_page || perPage.value;
+  //       currentPage.value =
+  //         response.data.pagination.i_current_page || currentPage.value;
+  //     }
+  //   } else if (response.data?.message) {
+  //     // Only show error toast if there's an actual error message from the API
+  //     appStore.showSnackbar({
+  //       message: response.data.message,
+  //       color: "error",
+  //     });
+  //   }
+  // } catch (error) {
+  //   console.error("Error fetching inspector locations:", error);
+  //   // Only show error toast for actual errors, not for empty data
+  //   if (error.response?.status !== 404) {
+  //     appStore.showSnackbar({
+  //       message:
+  //         error.response?.data?.message ||
+  //         error.message ||
+  //         "حدث خطأ أثناء جلب بيانات المواقع",
+  //       color: "error",
+  //     });
+  //   }
+  //   // Clear data on error
+  //   locations.value = [];
+  //   totalItems.value = 0;
+  // } finally {
+  //   isLoading.value = false;
+  // }
 };
 
 // Helper function to format time from datetime
@@ -348,8 +341,6 @@ const fetchLocations = async () => {
 
     if (response.data?.status?.success) {
       locations.value = response.data.locations;
-      console.log();
-
       // .map((location) => ({
       //   id: location.id,
       //   name: location.name,
@@ -407,43 +398,45 @@ const fetchCompanies = async () => {
   }
 };
 
-onMounted(() => {
-  fetchInspectorLocations();
-  getUtilities();
-  fetchLocations();
-  fetchCompanies();
-});
-
-// New dummy data to match screenshot
-const dummyData = [
-  {
-    id: 1,
-    siteName: "حسن سالم الجعفري",
-    street: "قباء مدينة الزائر",
-    address: "مسجد ذو القبلتين",
-    district: "قباء",
-    serviceCompany: "إكرام الضيف للسياحة",
-    ekramCompany: "إكرام الضيف للسياحة",
-    permitNumber: "87 998",
-    technical: "التقني",
-  },
-  {
-    id: 2,
-    siteName: "حسن سالم الجعفري",
-    street: "قباء مدينة الزائر",
-    address: "مسجد ذو القبلتين",
-    district: "قباء",
-    serviceCompany: "إكرام الضيف للسياحة",
-    ekramCompany: "إكرام الضيف للسياحة",
-    permitNumber: "87 998",
-    technical: "التقني",
-  },
-  // Add more dummy items as needed
-];
+// // New dummy data to match screenshot
+// const dummyData = [
+//   {
+//     id: 1,
+//     siteName: "حسن سالم الجعفري",
+//     street: "قباء مدينة الزائر",
+//     address: "مسجد ذو القبلتين",
+//     district: "قباء",
+//     serviceCompany: "إكرام الضيف للسياحة",
+//     ekramCompany: "إكرام الضيف للسياحة",
+//     permitNumber: "87 998",
+//     technical: "التقني",
+//   },
+//   {
+//     id: 2,
+//     siteName: "حسن سالم الجعفري",
+//     street: "قباء مدينة الزائر",
+//     address: "مسجد ذو القبلتين",
+//     district: "قباء",
+//     serviceCompany: "إكرام الضيف للسياحة",
+//     ekramCompany: "إكرام الضيف للسياحة",
+//     permitNumber: "87 998",
+//     technical: "التقني",
+//   },
+//   // Add more dummy items as needed
+// ];
 
 // Computed
 const filteredData = computed(() => {
-  let data = [...locations.value];
+  return locations.value || [];
+  console.log("locations.value", locations.value);
+
+  let data = locations.value;
+
+  // console.log("=>", locations.value);
+
+  // if (locations.value) {
+  //   data = JSON.parse(JSON.stringify(locations.value));
+  // }
 
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
@@ -461,22 +454,22 @@ const filteredData = computed(() => {
   return data;
 });
 
-const totalPages = computed(() => {
-  return Math.ceil(locations.value.length / perPage.value);
-});
+// const totalPages = computed(() => {
+//   return Math.ceil(locations.value.length / perPage.value);
+// });
 
-const paginationInfo = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value + 1;
-  const end = Math.min(start + perPage.value - 1, locations.value.length);
-  return `${start} إلى ${end} من أصل ${locations.value.length}`;
-});
+// const paginationInfo = computed(() => {
+//   const start = (currentPage.value - 1) * perPage.value + 1;
+//   const end = Math.min(start + perPage.value - 1, locations.value.length);
+//   return `${start} إلى ${end} من أصل ${locations.value.length}`;
+// });
 
-// Methods
-const viewDetails = (item) => {
-  console.log("View details for:", item);
-  // Will implement navigation to details page later
-  // router.push(`/attributions/${item.id}`)
-};
+// // Methods
+// const viewDetails = (item) => {
+//   console.log("View details for:", item);
+//   // Will implement navigation to details page later
+//   // router.push(`/attributions/${item.id}`)
+// };
 
 const handleAction = (action, item) => {
   if (action === "remove") {
@@ -569,7 +562,10 @@ const handleNewAssignment = async (formData) => {
     };
 
     // Call API to create the assignment
-    const response = await axios.post("/inspector-locations", assignmentData);
+    const response = await axios.post(
+      "/assign-inspectors-to-location",
+      assignmentData
+    );
 
     if (response.data?.status?.success) {
       appStore.showSnackbar({
@@ -619,61 +615,156 @@ const openAssignmentModal = () => {
   showNewAssignmentModal.value = true;
 };
 
-// Add these computed properties after other computed properties
-const formattedLocations = computed(() => {
-  return locations.value.map((location) => ({
-    value: location.id,
-    title: location.name,
-    raw: {
-      ...location,
-      type: location.location_type?.title || "-",
-      license: location.license_no || location.camp_number || "-",
-      delegate: location.delegate_name || "-",
-      phone: location.delegate_phone || "-",
-    },
-  }));
+// // Add these computed properties after other computed properties
+// const formattedLocations = computed(() => {
+//   return locations.value.map((location) => ({
+//     value: location.id,
+//     title: location.name,
+//     raw: {
+//       ...location,
+//       type: location.location_type?.title || "-",
+//       license: location.license_no || location.camp_number || "-",
+//       delegate: location.delegate_name || "-",
+//       phone: location.delegate_phone || "-",
+//     },
+//   }));
+// });
+
+// const formattedCompanies = computed(() => {
+//   return companies.value.map((company) => ({
+//     value: company.id,
+//     title: company.name,
+//     raw: {
+//       ...company,
+//       parentCompany: company.parent_company_name || "-",
+//       nationality: company.pligrims_nationality || "-",
+//       contact: company.contact_name || "-",
+//       phone: company.phone || "-",
+//     },
+//   }));
+// });
+
+// // Add these methods after other methods
+// const getLocationDetails = (locationId) => {
+//   const location = formattedLocations.value.find(
+//     (loc) => loc.value === locationId
+//   );
+//   return location?.raw || null;
+// };
+
+// const getCompanyDetails = (companyId) => {
+//   const company = formattedCompanies.value.find(
+//     (comp) => comp.value === companyId
+//   );
+//   return company?.raw || null;
+// };
+
+// const formatLocationDisplay = (location) => {
+//   if (!location) return "-";
+//   return `${location.name} (${location.location_type?.title || "-"})`;
+// };
+
+// const formatCompanyDisplay = (company) => {
+//   if (!company) return "-";
+//   return `${company.name} ${
+//     company.parent_company_name ? `- ${company.parent_company_name}` : ""
+//   }`;
+// };
+
+const unAssignAllIntegrations = async () => {
+  isSubmitting.value = true;
+  try {
+    const { data } = await axios.post("un-assign-inspector-location", {
+      inspector_id: route.params.id,
+      delete_all: true,
+    });
+    console.log(data.status.message);
+    appStore.showSnackbar({
+      message: data.status.message,
+    });
+  } catch (error) {
+    console.error(error);
+    appStore.showSnackbar({
+      message: error.response?.data?.message || error.message || "حدث خطأ ",
+      color: "error",
+    });
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const getData = async () => {
+  isLoading.value = true;
+  try {
+    const response = await axios.get("inspector-locations/details", {
+      params: {
+        inspector_id: route.params.id,
+        per_page: perPage.value,
+        page: currentPage.value,
+      },
+    });
+    console.log(response);
+    const locationsData = response.data.data || [];
+
+    console.log({ locationsData });
+
+    // Get inspector info from the first location item if available
+    if (locationsData.length > 0 && locationsData[0].inspector) {
+      const inspector = locationsData[0].inspector;
+      inspectorData.value = {
+        id: inspector.id,
+        name:
+          inspector.fullname ||
+          `${inspector.firstname || ""} ${inspector.lastname || ""}`,
+        locations: locationsData,
+      };
+    } else if (route.query?.inspector_name) {
+      // If no locations found but we have inspector name in query params
+      inspectorData.value = {
+        id: inspectorId,
+        name: route.query.inspector_name,
+        locations: [],
+      };
+    }
+
+    // locations.value = locationsData;
+
+    // Map API response to expected format for the table
+    locations.value = locationsData.map((item) => ({
+      id: item.id,
+      siteName: item.location?.name || "غير محدد",
+      locationType: item.location?.location_type?.title || "-",
+      licenseNumber:
+        item.location?.license_no || item.location?.camp_number || "-",
+      serviceCompany: item.company?.name || "-",
+      parentCompany: item.company?.parent_company_name || "-",
+      pilgrimsNationality: item.company?.pligrims_nationality || "-",
+      raw: item, // Store the raw data for reference
+    }));
+
+    // Handle pagination data
+    if (response.data.pagination) {
+      totalItems.value = response.data.pagination.i_total_objects || 0;
+      perPage.value = response.data.pagination.i_per_page || perPage.value;
+      currentPage.value =
+        response.data.pagination.i_current_page || currentPage.value;
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchInspectorLocations();
+  getUtilities();
+  fetchLocations();
+  fetchCompanies();
+
+  // new
+  getData();
 });
-
-const formattedCompanies = computed(() => {
-  return companies.value.map((company) => ({
-    value: company.id,
-    title: company.name,
-    raw: {
-      ...company,
-      parentCompany: company.parent_company_name || "-",
-      nationality: company.pligrims_nationality || "-",
-      contact: company.contact_name || "-",
-      phone: company.phone || "-",
-    },
-  }));
-});
-
-// Add these methods after other methods
-const getLocationDetails = (locationId) => {
-  const location = formattedLocations.value.find(
-    (loc) => loc.value === locationId
-  );
-  return location?.raw || null;
-};
-
-const getCompanyDetails = (companyId) => {
-  const company = formattedCompanies.value.find(
-    (comp) => comp.value === companyId
-  );
-  return company?.raw || null;
-};
-
-const formatLocationDisplay = (location) => {
-  if (!location) return "-";
-  return `${location.name} (${location.location_type?.title || "-"})`;
-};
-
-const formatCompanyDisplay = (company) => {
-  if (!company) return "-";
-  return `${company.name} ${
-    company.parent_company_name ? `- ${company.parent_company_name}` : ""
-  }`;
-};
 </script>
 
 <template>
@@ -726,8 +817,16 @@ const formatCompanyDisplay = (company) => {
                 />
                 <v-btn
                   color="primary"
+                  @click="unAssignAllIntegrations"
+                  :loading="isSubmitting"
+                  :disabled="isSubmitting"
+                >
+                  <span> تصفير الاسنادات</span>
+                </v-btn>
+                <v-btn
+                  color="primary"
                   @click="openAssignmentModal"
-                  prepend-icon="mdi-plus"
+                  append-icon="mdi-plus"
                 >
                   إسناد موقع
                 </v-btn>
@@ -753,16 +852,16 @@ const formatCompanyDisplay = (company) => {
           </v-col>
         </v-row>
         <template v-else>
+          <!-- v-if="filteredData?.length" -->
           <dataTable
-            v-if="filteredData.length"
-            :items="filteredData"
+            :items="locations"
             :loading="isLoading"
-            :page="currentPage"
-            :items-per-page="perPage"
-            :total-items="totalItems"
             :headers="tableHeaders"
-            @update:options="handleTableUpdate"
           >
+            <!-- :page="currentPage"
+            :items-per-page="perPage"
+            :total-items="totalItems" -->
+            <!-- @update:options="handleTableUpdate" -->
             <template #[`item.siteName`]="{ item }">
               <div class="d-flex align-center gap-2">
                 <div>
@@ -838,8 +937,125 @@ const formatCompanyDisplay = (company) => {
               </v-btn>
             </template>
           </dataTable>
+          <!-- <dataTable
+            :items="filteredData"
+            :loading="isLoading"
+            :headers="tableHeaders"
+          >
+            <template #[`item.siteName`]="{ item }">
+              <div class="d-flex align-center gap-2">
+                <div class="font-weight-medium">{{ item.siteName }}</div>
+              </div>
+            </template>
 
-          <div
+            <template #[`item.locationType`]="{ item }">
+              <v-chip
+                size="small"
+                :color="item.locationType === 'مخيم' ? 'primary' : 'secondary'"
+                variant="outlined"
+                class="font-weight-medium"
+              >
+                {{ item.locationType }}
+              </v-chip>
+            </template>
+
+            <template #[`item.campNumber`]="{ item }">
+              <div>{{ item.campNumber || "-" }}</div>
+            </template>
+
+            <template #[`item.gateNumber`]="{ item }">
+              <div>{{ item.gateNumber || "-" }}</div>
+            </template>
+
+            <template #[`item.observerName`]="{ item }">
+              <div class="d-flex align-center gap-2" v-if="item.observerName">
+                <v-avatar size="32" rounded="lg">
+                  <v-img :src="item.observerAvatar || '/imgs/person.svg'" />
+                </v-avatar>
+                <div>{{ item.observerName }}</div>
+              </div>
+              <div v-else class="text-medium-emphasis">غير مسند</div>
+            </template>
+
+            <template #[`item.observerPhone`]="{ item }">
+              <div v-if="item.observerPhone">{{ item.observerPhone }}</div>
+              <div v-else class="text-medium-emphasis">-</div>
+            </template>
+
+            <template #[`item.mainCompany`]="{ item }">
+              <div>{{ item.mainCompany || "-" }}</div>
+            </template>
+
+            <template #[`item.pilgrimsNationality`]="{ item }">
+              <div>{{ item.pilgrimsNationality || "-" }}</div>
+            </template>
+
+            <template #[`item.ratingsCount`]="{ item }">
+              <div class="d-flex align-center">
+                {{ item.ratingsCount }}
+              </div>
+            </template>
+
+            <template #pagination>
+              <div class="d-flex justify-end py-3">
+                <Pagination
+                  :total-items="totalItems"
+                  :total-pages="totalPages"
+                  v-model:per-page="perPage"
+                  v-model:page="currentPage"
+                />
+              </div>
+            </template>
+
+            <template #[`item.actions`]="{ item }">
+              <div class="d-flex align-center">
+                <v-tooltip text="عرض التفاصيل" location="top">
+                  <template v-slot:activator="{ props }">
+                    <div
+                      v-bind="props"
+                      @click="handleViewDt('view', item)"
+                      class="cursor-pointer mx-1"
+                    >
+                      <svg
+                        width="32"
+                        height="32"
+                        viewBox="0 0 40 40"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M10.667 0.333008H29.333C35.0399 0.333008 39.667 4.96005 39.667 10.667V29.333C39.667 35.0399 35.0399 39.667 29.333 39.667H10.667C4.96005 39.667 0.333008 35.0399 0.333008 29.333V10.667C0.333008 4.96005 4.96005 0.333008 10.667 0.333008Z"
+                          stroke="#E9EBEC"
+                          stroke-width="0.666667"
+                        />
+                        <path
+                          opacity="0.4"
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M26.6673 20.0007C26.6673 19.7903 26.566 19.6482 26.3633 19.364C25.4526 18.0869 23.1268 15.334 20.0007 15.334C16.8745 15.334 14.5487 18.0869 13.638 19.364C13.4353 19.6482 13.334 19.7903 13.334 20.0007C13.334 20.211 13.4353 20.3531 13.638 20.6373C14.5487 21.9144 16.8745 24.6673 20.0007 24.6673C23.1268 24.6673 25.4526 21.9144 26.3633 20.6373C26.566 20.3531 26.6673 20.211 26.6673 20.0007ZM20.0007 18.0007C21.1052 18.0007 22.0007 18.8961 22.0007 20.0007C22.0007 21.1052 21.1052 22.0007 20.0007 22.0007C18.8961 22.0007 18.0007 21.1052 18.0007 20.0007C18.0007 18.8961 18.8961 18.0007 20.0007 18.0007Z"
+                          fill="#B69265"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M20.0007 22.5007C18.6199 22.5007 17.5007 21.3814 17.5007 20.0007C17.5007 18.6199 18.6199 17.5007 20.0007 17.5007C21.3814 17.5007 22.5007 18.6199 22.5007 20.0007C22.5007 21.3814 21.3814 22.5007 20.0007 22.5007ZM18.5007 20.0007C18.5007 20.8291 19.1722 21.5007 20.0007 21.5007C20.8291 21.5007 21.5007 20.8291 21.5007 20.0007C21.5007 19.1722 20.8291 18.5007 20.0007 18.5007C19.1722 18.5007 18.5007 19.1722 18.5007 20.0007Z"
+                          fill="#B69265"
+                        />
+                        <path
+                          fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M20.0007 14.834C18.2869 14.834 16.818 15.5883 15.6809 16.476C14.5427 17.3645 13.7015 18.4138 13.2309 19.0737L13.1954 19.1231C13.0267 19.3579 12.834 19.6258 12.834 20.0007C12.834 20.3755 13.0267 20.6434 13.1954 20.8782L13.2309 20.9276C13.7015 21.5875 14.5427 22.6368 15.6809 23.5253C16.818 24.413 18.2869 25.1673 20.0007 25.1673C21.7144 25.1673 23.1834 24.413 24.3204 23.5253C25.4586 22.6368 26.2998 21.5875 26.7704 20.9276L26.8059 20.8782C26.9746 20.6434 27.1673 20.3755 27.1673 20.0007C27.1673 19.6258 26.9746 19.3579 26.8059 19.1231L26.7704 19.0737C26.2998 18.4138 25.4586 17.3645 24.3204 16.476C23.1833 15.5883 21.7144 14.834 20.0007 14.834ZM14.0451 19.6543C14.4852 19.0371 15.2622 18.0714 16.2962 17.2642C17.3312 16.4562 18.5882 15.834 20.0007 15.834C21.4131 15.834 22.6701 16.4562 23.7051 17.2642C24.7391 18.0714 25.5161 19.0371 25.9562 19.6543C26.0651 19.807 26.1169 19.8815 26.1478 19.9409C26.1674 19.9786 26.1674 19.9889 26.1673 19.9991L26.1673 20.0007L26.1673 20.0022C26.1674 20.0124 26.1674 20.0227 26.1478 20.0604C26.1169 20.1198 26.0651 20.1943 25.9562 20.347C25.5161 20.9642 24.7391 21.9299 23.7051 22.7371C22.6701 23.5451 21.4131 24.1673 20.0007 24.1673C18.5882 24.1673 17.3312 23.5451 16.2962 22.7371C15.2622 21.9299 14.4852 20.9642 14.0451 20.347C13.9362 20.1943 13.8844 20.1198 13.8535 20.0604C13.8339 20.0227 13.8339 20.0124 13.834 20.0022L13.834 20.0007L13.834 19.9991C13.8339 19.9889 13.8339 19.9786 13.8535 19.9409C13.8844 19.8815 13.9362 19.807 14.0451 19.6543Z"
+                          fill="#B69265"
+                        />
+                      </svg>
+                    </div>
+                  </template>
+                </v-tooltip>
+              </div>
+            </template>
+          </dataTable> -->
+
+          <!-- <div
             v-else
             class="d-flex flex-column align-center justify-center py-16 min-h-500"
           >
@@ -850,7 +1066,6 @@ const formatCompanyDisplay = (company) => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <!-- ... SVG path data ... -->
             </svg>
             <div class="text-h6 font-weight-medium mt-4">
               لم يتم العثور على أي إسنادات.
@@ -858,14 +1073,14 @@ const formatCompanyDisplay = (company) => {
             <div class="text-body-1 text-medium-emphasis">
               لا توجد إسنادات متاحة في الوقت الحالي.
             </div>
-          </div>
+          </div> -->
         </template>
       </v-card>
     </VCard>
 
     <!-- New Assignment Modal -->
     <AddSiteModal
-      :model-value="showNewAssignmentModal"
+      v-model="showNewAssignmentModal"
       @update:model-value="showNewAssignmentModal = $event"
       :inspector-id="route.params.id"
       :locations="locations"

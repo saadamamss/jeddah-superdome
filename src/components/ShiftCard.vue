@@ -37,7 +37,7 @@
         </div>
 
         <!-- Actions -->
-        <div class="d-flex align-center">
+        <div class="d-flex align-center ga-2">
           <VBtn
             icon
             variant="text"
