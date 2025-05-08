@@ -2,10 +2,10 @@
 import { useAppStore } from "@/stores/app";
 import Pagination from "@/@core/components/Pagination";
 import dayjs from "dayjs";
-import CustomVSelect from "@core/components/global/CustomVSelect.vue";
+// import CustomVSelect from "@core/components/global/CustomVSelect.vue";
 import dataTable from "@/components/dataTable.vue";
 import axios from "@/plugins/axios";
-import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
+// import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
 import { ref, computed, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
@@ -19,7 +19,7 @@ const totalPages = ref(1);
 const isExporting = ref(false);
 const isGettingFilters = ref(false);
 const isDatepickerMenu = ref(false);
-const attendanceDataa = ref([]);
+const attendanceData = ref([]);
 const debouncedSearch = ref(null);
 const router = useRouter();
 const activeTab = ref("assigned");
@@ -42,7 +42,17 @@ const filters = reactive({
   created_at: undefined,
   user_id: undefined,
   attendance_by_user_id: undefined,
-  tap: "daily",
+  // tap: "daily",
+});
+
+watch(currentPage, () => {
+  fetchAttendance();
+});
+
+// Add watcher for perPage changes
+watch(perPage, () => {
+  currentPage.value = 1; // Reset to first page when changing page size
+  fetchAttendance();
 });
 
 // Helper function to format date for API
@@ -71,18 +81,18 @@ const onClearDateFilter = () => {
   fetchAttendance(); // Trigger data refresh when clearing the date filter
 };
 
-const handleTableUpdate = (options) => {
-  // Update pagination values and trigger data reload
-  if (options.page !== currentPage.value) {
-    currentPage.value = options.page;
-  }
+// const handleTableUpdate = (options) => {
+//   // Update pagination values and trigger data reload
+//   if (options.page !== currentPage.value) {
+//     currentPage.value = options.page;
+//   }
 
-  if (options.itemsPerPage !== perPage.value) {
-    perPage.value = options.itemsPerPage;
-  }
+//   if (options.itemsPerPage !== perPage.value) {
+//     perPage.value = options.itemsPerPage;
+//   }
 
-  // Don't trigger fetchAttendance here - the watchers will handle it
-};
+//   // Don't trigger fetchAttendance here - the watchers will handle it
+// };
 
 const tableHeaders = [
   { title: "اسم الموقع", key: "siteName", sortable: false },
@@ -192,7 +202,7 @@ const fetchAttendance = async () => {
 
     if (response.data?.status?.success) {
       // Map API response to expected format for the table
-      attendanceDataa.value = response.data.data.map((item) => {
+      attendanceData.value = response.data.data.map((item) => {
         // Get location type from the location_type object if available
         const locationType =
           item.location?.location_type?.title ||
@@ -241,6 +251,8 @@ const fetchAttendance = async () => {
         return mappedItem;
       });
 
+      console.log(attendanceData.value);
+
       // Handle pagination data from API response
       if (response.data.pagination) {
         totalItems.value = response.data.pagination.i_total_objects || 0;
@@ -248,15 +260,6 @@ const fetchAttendance = async () => {
         perPage.value = response.data.pagination.i_per_page || perPage.value;
         currentPage.value =
           response.data.pagination.i_current_page || currentPage.value;
-      } else if (response.data.meta) {
-        totalItems.value = response.data.meta.total || 0;
-        totalPages.value = response.data.meta.last_page || 1;
-        perPage.value = response.data.meta.per_page || perPage.value;
-        currentPage.value =
-          response.data.meta.current_page || currentPage.value;
-      } else {
-        totalItems.value = response.data.data.length;
-        totalPages.value = Math.ceil(totalItems.value / perPage.value);
       }
     }
   } catch (error) {
@@ -266,7 +269,7 @@ const fetchAttendance = async () => {
       color: "error",
     });
     // Reset data on error
-    attendanceDataa.value = [];
+    attendanceData.value = [];
     totalItems.value = 0;
     totalPages.value = 1;
   } finally {
@@ -275,73 +278,33 @@ const fetchAttendance = async () => {
 };
 
 // Helper function to format time from datetime
-const formatTime = (datetime) => {
-  if (!datetime) return "-";
+// const formatTime = (datetime) => {
+//   if (!datetime) return "-";
 
-  const date = new Date(datetime);
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+//   const date = new Date(datetime);
+//   const hours = date.getHours();
+//   const minutes = date.getMinutes();
+//   const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
 
-  // Arabic format with AM/PM
-  const suffix = hours >= 12 ? "م" : "ص";
-  const displayHours = hours % 12 || 12;
+//   // Arabic format with AM/PM
+//   const suffix = hours >= 12 ? "م" : "ص";
+//   const displayHours = hours % 12 || 12;
 
-  return `${displayHours}:${formattedMinutes} ${suffix}`;
-};
-
-const exportData = async () => {
-  try {
-    isExporting.value = true;
-
-    const response = await axios.post(
-      `/attendance-export?tap=${filters.tap}`,
-      {},
-      {
-        responseType: "blob", // Important to receive binary data
-        ...filters,
-      }
-    );
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-
-    const link = document.createElement("a");
-    link.href = url;
-
-    // Optional: Get file name from headers
-    const disposition = response.headers["content-disposition"];
-    let fileName = "سجل-الحضور-والانصراف.xlsx";
-    if (disposition && disposition.includes("filename=")) {
-      fileName = disposition.split("filename=")[1].replace(/['"]/g, "").trim();
-    }
-
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-
-    // Clean up
-    link.remove();
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error("Download failed:", error);
-    appStore.showSnackbar({
-      message: "فشل تصدير البيانات",
-      color: "error",
-    });
-  } finally {
-    isExporting.value = false;
-  }
-};
+//   return `${displayHours}:${formattedMinutes} ${suffix}`;
+// };
 
 const isGettingUtilities = ref(false);
 const userObservers = ref([]);
 const userOperators = ref([]);
+
 const getUserObservers = async () => {
   return await axios.get(`/users?role_id=0&per_page=1000`);
 };
+
 const getUserOperators = async () => {
   return await axios.get(`/users?role_id=3&per_page=1000`);
 };
+
 const getUtilities = async () => {
   try {
     isGettingUtilities.value = true;
@@ -370,75 +333,76 @@ onMounted(() => {
   getUtilities();
 });
 
-// Dummy data
-const dummyData = [
-  {
-    id: 1,
-    siteName: "حسن سالم الجعفري",
-    observerName: "سعود الغامدي",
-    observerAvatar: "/imgs/person.svg",
-    observerPhone: "+996 542 223 33",
-    mainCompany: "شركة روافد مكة",
-    permitNumber: "87 998",
-    pilgrimsNationality: "مصرية",
-    pilgrimsCount: "87 998",
-    ratingsCount: 45,
-  },
-  {
-    id: 2,
-    siteName: "حسن سالم الجعفري",
-    observerName: "سعود الغامدي",
-    observerAvatar: "/imgs/person.svg",
-    observerPhone: "+996 542 223 33",
-    mainCompany: "الرفادة لخدمات الحجاج",
-    permitNumber: "87 998",
-    pilgrimsNationality: "مصرية",
-    pilgrimsCount: "87 998",
-    ratingsCount: 23,
-  },
-  {
-    id: 3,
-    siteName: "حسن سالم الجعفري",
-    observerName: "سعود الغامدي",
-    observerAvatar: "/imgs/person.svg",
-    observerPhone: "+996 542 223 33",
-    mainCompany: "إكرام الضيف للسياحة",
-    permitNumber: "87 998",
-    pilgrimsNationality: "مصرية",
-    pilgrimsCount: "87 998",
-    ratingsCount: 76,
-  },
-];
+// // Dummy data
+// const dummyData = [
+//   {
+//     id: 1,
+//     siteName: "حسن سالم الجعفري",
+//     observerName: "سعود الغامدي",
+//     observerAvatar: "/imgs/person.svg",
+//     observerPhone: "+996 542 223 33",
+//     mainCompany: "شركة روافد مكة",
+//     permitNumber: "87 998",
+//     pilgrimsNationality: "مصرية",
+//     pilgrimsCount: "87 998",
+//     ratingsCount: 45,
+//   },
+//   {
+//     id: 2,
+//     siteName: "حسن سالم الجعفري",
+//     observerName: "سعود الغامدي",
+//     observerAvatar: "/imgs/person.svg",
+//     observerPhone: "+996 542 223 33",
+//     mainCompany: "الرفادة لخدمات الحجاج",
+//     permitNumber: "87 998",
+//     pilgrimsNationality: "مصرية",
+//     pilgrimsCount: "87 998",
+//     ratingsCount: 23,
+//   },
+//   {
+//     id: 3,
+//     siteName: "حسن سالم الجعفري",
+//     observerName: "سعود الغامدي",
+//     observerAvatar: "/imgs/person.svg",
+//     observerPhone: "+996 542 223 33",
+//     mainCompany: "إكرام الضيف للسياحة",
+//     permitNumber: "87 998",
+//     pilgrimsNationality: "مصرية",
+//     pilgrimsCount: "87 998",
+//     ratingsCount: 76,
+//   },
+// ];
 
 // Update the filteredData computed property to simplify it since we're doing server-side filtering
 const filteredData = computed(() => {
-  if (attendanceDataa.value && attendanceDataa.value.length > 0) {
-    return attendanceDataa.value;
+  if (attendanceData.value && attendanceData.value.length > 0) {
+    return attendanceData.value;
   }
 
-  // Fallback to dummy data if API data is not available
-  return dummyData.filter((item) => {
-    // Apply filtering based on active tab
-    if (activeTab.value === "assigned") {
-      return Boolean(item.observerName); // Has observer assigned
-    } else {
-      return !Boolean(item.observerName); // No observer assigned
-    }
-  });
+  // // Fallback to dummy data if API data is not available
+  // return dummyData.filter((item) => {
+  //   // Apply filtering based on active tab
+  //   if (activeTab.value === "assigned") {
+  //     return Boolean(item.observerName); // Has observer assigned
+  //   } else {
+  //     return !Boolean(item.observerName); // No observer assigned
+  //   }
+  // });
+  return [];
 });
 
-const paginationInfo = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value + 1;
-  const end = Math.min(start + perPage.value - 1, dummyData.length);
-  return `${start} إلى ${end} من أصل ${dummyData.length}`;
-});
+// const paginationInfo = computed(() => {
+//   const start = (currentPage.value - 1) * perPage.value + 1;
+//   const end = Math.min(start + perPage.value - 1, dummyData.length);
+//   return `${start} إلى ${end} من أصل ${dummyData.length}`;
+// });
 
-// Methods
-const viewDetails = (item) => {
-  console.log("View details for:", item);
-  // Will implement navigation to details page later
-  // router.push(`/attributions/${item.id}`)
-};
+// // Methods
+// const viewDetails = (item) => {
+//   console.log("View details for:", item);
+//   // Will implement navigation to details page later
+//   // router.push(`/attributions/${item.id}`)
+// };
 
 const handleViewDt = (action, item) => {
   // Use the raw item id from the API data
@@ -626,12 +590,12 @@ const handleRemoveAssignment = async () => {
             v-else
             :items="filteredData"
             :loading="isLoading"
-            :page="currentPage"
-            :items-per-page="perPage"
-            :total-items="totalItems"
             :headers="tableHeaders"
-            @update:options="handleTableUpdate"
           >
+            <!-- :page="currentPage"
+            :items-per-page="perPage"
+            :total-items="totalItems" -->
+            <!-- @update:options="handleTableUpdate" -->
             <template #[`item.siteName`]="{ item }">
               <div class="d-flex align-center gap-2">
                 <div class="font-weight-medium">{{ item.siteName }}</div>
@@ -659,9 +623,9 @@ const handleRemoveAssignment = async () => {
 
             <template #[`item.observerName`]="{ item }">
               <div class="d-flex align-center gap-2" v-if="item.observerName">
-                <v-avatar size="32" rounded="lg">
+                <!-- <v-avatar size="32" rounded="lg">
                   <v-img :src="item.observerAvatar || '/imgs/person.svg'" />
-                </v-avatar>
+                </v-avatar> -->
                 <div>{{ item.observerName }}</div>
               </div>
               <div v-else class="text-medium-emphasis">غير مسند</div>
@@ -694,6 +658,11 @@ const handleRemoveAssignment = async () => {
                   v-model:per-page="perPage"
                   v-model:page="currentPage"
                 />
+                <!-- <Pagination
+                  :total-items="totalItems"
+                  v-model:per-page="perPage"
+                  v-model:page="currentPage"
+                /> -->
               </div>
             </template>
 

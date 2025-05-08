@@ -1,8 +1,77 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import MapDisplay from "@/components/maps/MapDisplay.vue";
+import { useAppStore } from "@/stores/app";
+
+const appStore = useAppStore();
+
+interface Company {
+  name: string;
+  license_no?: string;
+  parent_company_name?: string;
+  pligrims_nationality?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+interface LocationType {
+  title: string;
+}
+
+interface Location {
+  name: string;
+  location_type?: LocationType;
+  camp_number?: string;
+  gate_number?: string;
+  service_center_no?: string;
+}
+
+defineProps({
+  company: {
+    type: Object as () => Company,
+    required: true,
+    default: () => ({
+      name: "",
+      license_no: "",
+      parent_company_name: "",
+      pligrims_nationality: "",
+      latitude: null,
+      longitude: null,
+    }),
+  },
+  location: {
+    type: Object as () => Location,
+    required: true,
+    default: () => ({
+      name: "",
+      location_type: { title: "" },
+      camp_number: "",
+      gate_number: "",
+      service_center_no: "",
+    }),
+  },
+});
+
+const mapDialog = ref(false);
+
+const openMapDialog = () => {
+  mapDialog.value = true;
+};
+
+const handleMapError = (error: any) => {
+  console.error("Map error:", error);
+  appStore.showSnackbar({
+    message: "حدث خطأ أثناء تحميل الخريطة",
+    color: "error",
+  });
+};
+</script>
+
 <template>
-  <v-row class=" ">
+  <v-row align="stretch">
     <!-- Right Card: Location Info -->
     <v-col cols="6">
-      <v-card elevation="0" class="rounded-lg bg-white pa-4">
+      <v-card elevation="0" class="h-100 rounded-lg bg-white pa-4">
         <div class="d-flex align-center justify-space-between mb-2">
           <div class="text-h6">اسم المسكن</div>
           <v-btn
@@ -216,7 +285,7 @@
 
     <!-- Left Card: Company Info -->
     <v-col cols="6">
-      <v-card elevation="0" class="rounded-lg bg-white pa-4">
+      <v-card elevation="0" class="h-100 rounded-lg bg-white pa-4">
         <div class="d-flex align-center justify-space-between mb-2">
           <div class="text-h6">اسم الشركة</div>
           <v-btn
@@ -332,10 +401,10 @@
         </v-btn>
       </v-card-title>
       <v-card-text class="pa-0">
-        <div v-if="company?.latitude && company?.longitude">
+        <div v-if="location?.latitude && location?.longitude">
           <MapDisplay
-            :latitude="company.latitude"
-            :longitude="company.longitude"
+            :latitude="location.latitude"
+            :longitude="location.longitude"
             :readonly="true"
             height="500px"
             @error="handleMapError"
@@ -351,75 +420,6 @@
     </v-card>
   </v-dialog>
 </template>
-
-<script setup lang="ts">
-import { ref } from "vue";
-import MapDisplay from "@/components/maps/MapDisplay.vue";
-import { useAppStore } from "@/stores/app";
-
-const appStore = useAppStore();
-
-interface Company {
-  name: string;
-  license_no?: string;
-  parent_company_name?: string;
-  pligrims_nationality?: string;
-  latitude?: number | null;
-  longitude?: number | null;
-}
-
-interface LocationType {
-  title: string;
-}
-
-interface Location {
-  name: string;
-  location_type?: LocationType;
-  camp_number?: string;
-  gate_number?: string;
-  service_center_no?: string;
-}
-
-defineProps({
-  company: {
-    type: Object as () => Company,
-    required: true,
-    default: () => ({
-      name: "",
-      license_no: "",
-      parent_company_name: "",
-      pligrims_nationality: "",
-      latitude: null,
-      longitude: null,
-    }),
-  },
-  location: {
-    type: Object as () => Location,
-    required: true,
-    default: () => ({
-      name: "",
-      location_type: { title: "" },
-      camp_number: "",
-      gate_number: "",
-      service_center_no: "",
-    }),
-  },
-});
-
-const mapDialog = ref(false);
-
-const openMapDialog = () => {
-  mapDialog.value = true;
-};
-
-const handleMapError = (error: any) => {
-  console.error("Map error:", error);
-  appStore.showSnackbar({
-    message: "حدث خطأ أثناء تحميل الخريطة",
-    color: "error",
-  });
-};
-</script>
 
 <style lang="scss" scoped>
 .bg-light-gray-1 {

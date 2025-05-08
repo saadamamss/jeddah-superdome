@@ -1,3 +1,64 @@
+<script setup lang="ts">
+import { ref } from "vue";
+import { hasPermission } from "@core/utils/permissions";
+import UnassignConfirmationDialog from "./UnassignConfirmationDialog.vue";
+import { useRouter } from "vue-router";
+import axios from "@/plugins/axios";
+
+const router = useRouter();
+const emit = defineEmits(["update"]);
+
+const props = defineProps({
+  user: {
+    type: Object,
+    required: true,
+    default: () => ({
+      fullname: "",
+      firstname: "",
+      lastname: "",
+      role: { title: "مراقب" },
+      sa_id: "",
+      avatar_url: null,
+      daily_visits_count: 0,
+    }),
+  },
+  visitCount: {
+    type: Number,
+    default: 0,
+  },
+});
+
+const showSupervisorsDt = (id) => {
+  router.push(`/attributions/supervisors_dt/${id}`);
+};
+
+// const canEdit = hasPermission("teams.update");
+// const canDelete = hasPermission("teams.delete");
+const isAssigning = ref(false);
+const isConfirmAssigningDialog = ref(false);
+
+const unAssignInspector = async (user) => {
+  try {
+    isAssigning.value = true;
+
+    console.log(user);
+
+    await axios.post("un-assign-inspector-location", {
+      assign_id: user.assign_id,
+      inspector_id: user.id,
+      // delete_all: true
+    });
+
+    isConfirmAssigningDialog.value = false;
+    emit("update");
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isAssigning.value = false;
+  }
+};
+</script>
+
 <template>
   <v-card elevation="0" class="rounded-lg bg-white pa-4">
     <div class="d-flex align-center gap-4">
@@ -14,7 +75,7 @@
           </h3>
           <div class="d-flex align-center gap-2">
             <button
-              @click="ShowSupervisorsDt(user.id)"
+              @click="showSupervisorsDt(user.id)"
               class="border rounded-lg d-flex align-center justify-center"
               style="width: 40px; height: 40px"
             >
@@ -47,8 +108,10 @@
               </svg>
             </button>
             <button
+              v-if="hasPermission('assign_locations.unassign_inspector')"
               class="border rounded-lg d-flex align-center justify-center"
               style="width: 40px; height: 40px"
+              @click="isConfirmAssigningDialog = true"
             >
               <svg
                 width="15"
@@ -72,9 +135,9 @@
             </button>
           </div>
         </div>
-        <p class="text-body-2 text-medium-emphasis mb-0">
+        <!-- <p class="text-body-2 text-medium-emphasis mb-0">
           {{ user.role?.title || "مراقب" }}
-        </p>
+        </p> -->
       </div>
     </div>
 
@@ -91,56 +154,15 @@
         </div>
       </div>
     </div>
+
+    <UnassignConfirmationDialog
+      v-model="isConfirmAssigningDialog"
+      @close="isConfirmAssigningDialog = false"
+      @confirm="unAssignInspector(user)"
+      :isProcessing="isAssigning"
+    />
   </v-card>
 </template>
-
-<script setup lang="ts">
-import { hasPermission } from "@core/utils/permissions";
-import { computed } from "vue";
-import { useRouter } from "vue-router";
-
-const router = useRouter();
-
-const props = defineProps({
-  user: {
-    type: Object,
-    required: true,
-    default: () => ({
-      fullname: "",
-      firstname: "",
-      lastname: "",
-      role: { title: "مراقب" },
-      sa_id: "",
-      avatar_url: null,
-      daily_visits_count: 0,
-    }),
-  },
-  visitCount: {
-    type: Number,
-    default: 0,
-  },
-});
-
-const getInitials = computed(() => {
-  if (props.user.fullname) {
-    const nameParts = props.user.fullname.split(" ");
-    if (nameParts.length >= 2) {
-      return `${nameParts[0].charAt(0)}${nameParts[1].charAt(0)}`;
-    }
-    return props.user.fullname.charAt(0);
-  }
-
-  if (!props.user.firstname || !props.user.lastname) return "";
-  return `${props.user.firstname.charAt(0)}${props.user.lastname.charAt(0)}`;
-});
-
-const ShowSupervisorsDt = (id) => {
-  router.push(`/attributions/supervisors_dt/${id}`);
-};
-
-const canEdit = hasPermission("teams.update");
-const canDelete = hasPermission("teams.delete");
-</script>
 
 <style lang="scss" scoped>
 .bg-light-gray-1 {

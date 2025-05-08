@@ -10,10 +10,12 @@ import ResidenceSupervisorsCard from "./components/rasidance_supervisors_card.vu
 import axios from "@axios";
 import { useAppStore } from "@/stores/app";
 import AddSiteModal from "./components/siteAssignmentModal.vue";
+import { validationRules } from "@/@core/utils/validators";
 
 const router = useRouter();
 const route = useRoute();
 const appStore = useAppStore();
+const inspectorIds = ref([]);
 
 // Data for residence details
 const residenceData = ref({
@@ -69,7 +71,7 @@ const isLoadingCompanies = ref(false);
 async function fetchAvailableInspectors() {
   try {
     isLoadingInspectors.value = true;
-    const response = await axios.get("/inspectors");
+    const response = await axios.get("/users?role_id=3");
     if (response.data.status?.success) {
       availableInspectors.value = response.data.data || [];
     } else {
@@ -91,10 +93,10 @@ async function fetchAvailableInspectors() {
 
 // Assign inspectors to location
 async function assignInspectorsToLocation() {
-  if (!selectedInspectors.value.length) {
+  if (!inspectorIds.value.length) {
     appStore.showSnackbar({
       message: "الرجاء اختيار مراقب واحد على الأقل",
-      color: "warning",
+      color: "error",
     });
     return;
   }
@@ -105,7 +107,7 @@ async function assignInspectorsToLocation() {
     const companyId = route.query.company_id;
 
     const response = await axios.post("/assign-inspectors-to-location", {
-      inspector_ids: selectedInspectors.value,
+      inspector_ids: inspectorIds.value,
       location_id: locationId,
       company_id: companyId,
     });
@@ -193,7 +195,12 @@ async function fetchResidenceDetails() {
           latest_raters: [],
         },
         supervisors: data.supervisors || [],
-        inspectors: data.inspectors_data?.map((item) => item.inspector) || [],
+        inspectors:
+          data.inspectors_data?.map((item) => {
+            const inspector = item.inspector;
+            inspector.assign_id = item.assign_id;
+            return inspector;
+          }) || [],
       };
 
       inspectorsPagination.value.totalItems =
@@ -440,7 +447,7 @@ const handleNewAssignment = async (formData) => {
                 <div class="d-flex align-center gap-3">
                   <v-text-field
                     v-model="search"
-                    placeholder="البحث باسم الراقب أو رقم الهوية..."
+                    placeholder="البحث باسم المراقب أو رقم الهوية..."
                     rounded="lg"
                     clearable
                     hide-details
@@ -457,10 +464,10 @@ const handleNewAssignment = async (formData) => {
                     v-if="hasPermission('teams.create')"
                     color="primary"
                     class="rounded-lg text-none"
-                    prepend-icon="mdi-plus"
+                    append-icon="mdi-plus"
                     @click="openAddInspectorDialog"
                   >
-                    إضافة مراقب
+                    اسناد مراقب
                   </v-btn>
                 </div>
               </div>
@@ -477,6 +484,7 @@ const handleNewAssignment = async (formData) => {
                     <ResidenceObserversCard
                       :user="inspector"
                       :visit-count="inspector.daily_visits_count"
+                      @update="fetchResidenceDetails()"
                     />
                   </v-col>
                 </v-row>
@@ -500,7 +508,12 @@ const handleNewAssignment = async (formData) => {
     <!-- Add Inspector Dialog -->
     <v-dialog v-model="addInspectorDialog" max-width="600">
       <v-card>
-        <v-card-title class="text-h6 pa-4">إضافة مراقب</v-card-title>
+        <v-card-title class="text-h6 pa-4">
+          <h2>إسناد مراقب</h2>
+          <span class="text-sm text-[#667178]"
+            >قم بإختيار مراقب أو أكثر لإسناد هذا الموقع اليه.</span
+          >
+        </v-card-title>
         <v-card-text class="pa-4">
           <v-progress-linear
             v-if="isLoadingInspectors"
@@ -509,33 +522,17 @@ const handleNewAssignment = async (formData) => {
           ></v-progress-linear>
 
           <div v-if="!isLoadingInspectors">
-            <v-autocomplete
-              v-model="selectedInspectors"
-              :items="availableInspectors"
-              item-title="name"
+            <SearchableAutocomplete
+              search-url="/users?role_id=3"
+              v-model="inspectorIds"
+              item-title="label"
+              :item-title-concat="['firstname', 'lastname']"
               item-value="id"
-              label="اختر المراقبين"
-              multiple
-              chips
-              closable-chips
               clearable
-              variant="outlined"
-              class="mb-4"
-            >
-              <template v-slot:item="{ props, item }">
-                <v-list-item v-bind="props">
-                  <v-list-item-title>
-                    {{
-                      item.raw.name ||
-                      `${item.raw.firstname} ${item.raw.lastname}`
-                    }}
-                  </v-list-item-title>
-                  <v-list-item-subtitle v-if="item.raw.sa_id">
-                    {{ item.raw.sa_id }}
-                  </v-list-item-subtitle>
-                </v-list-item>
-              </template>
-            </v-autocomplete>
+              multiple
+              :return-object="false"
+              :rules="[validationRules.required]"
+            />
           </div>
         </v-card-text>
         <v-card-actions class="pa-4">

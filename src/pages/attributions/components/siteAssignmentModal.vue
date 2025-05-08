@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch, computed } from "vue";
 import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
+import SearchableAutocomplete from "@/@core/components/global/SearchableAutocomplete.vue";
+import { validationRules } from "@/@core/utils/validators";
 
 const props = defineProps({
   modelValue: {
@@ -198,8 +200,9 @@ watch(
           <v-row>
             <!-- Inspector Selection - Only show if showInspectorSelect is true -->
             <v-col cols="12" v-if="showInspectorSelect">
+              <!-- v-model="formData.inspector_ids" -->
               <CustomVAutocomplete
-                v-model="selectedInspectors"
+                v-model="formData.inspector_ids"
                 v-model:search="searchInspector"
                 :items="filteredInspectors"
                 label="اختر المراقبين"
@@ -222,15 +225,24 @@ watch(
             </v-col>
 
             <v-col cols="12">
-              <CustomVAutocomplete
-                v-model="selectedLocation"
-                v-model:search="searchLocation"
-                :items="filteredLocations"
+              <!-- v-model="selectedLocation"
+              v-model:search="searchLocation"
+              :items="filteredLocations"
+              label="اختر الموقع"
+              :loading="loadingLocations"
+              placeholder="ابحث عن موقع..."
+              no-data-text="لا توجد نتائج"
+              @update:model-value="formData.location_id = $event?.value" -->
+              <SearchableAutocomplete
+                v-model="formData.location_id"
+                search-url="/locations"
+                responseDataKey="locations"
                 label="اختر الموقع"
-                :loading="loadingLocations"
-                placeholder="ابحث عن موقع..."
-                no-data-text="لا توجد نتائج"
-                @update:model-value="formData.location_id = $event?.value"
+                item-title="name"
+                item-value="id"
+                clearable
+                :return-object="false"
+                :rules="[validationRules.required]"
               >
                 <template #item="{ item }">
                   <v-list-item>
@@ -240,20 +252,29 @@ watch(
                     }}</v-list-item-subtitle>
                   </v-list-item>
                 </template>
-              </CustomVAutocomplete>
+              </SearchableAutocomplete>
             </v-col>
 
             <v-col cols="12">
-              <CustomVAutocomplete
-                v-model="selectedCompany"
-                v-model:search="searchCompany"
-                :items="filteredCompanies"
+              <!-- v-model="selectedCompany"
+              v-model:search="searchCompany"
+              :items="filteredCompanies"
+              label="اختر الشركة"
+              :loading="loadingCompanies"
+              placeholder="ابحث عن شركة..."
+              no-data-text="لا توجد نتائج"
+              @update:model-value="formData.company_id = $event?.value" -->
+              <SearchableAutocomplete
+                v-model="formData.company_id"
+                search-url="/companies"
+                item-title="name"
+                item-value="id"
                 label="اختر الشركة"
-                :loading="loadingCompanies"
-                placeholder="ابحث عن شركة..."
-                no-data-text="لا توجد نتائج"
-                @update:model-value="formData.company_id = $event?.value"
+                clearable
+                :return-object="false"
+                :rules="[validationRules.required]"
               >
+                <!-- :item-title-concat="['firstname', 'lastname']" -->
                 <template #item="{ item }">
                   <v-list-item>
                     <v-list-item-title>{{ item.raw.label }}</v-list-item-title>
@@ -262,7 +283,7 @@ watch(
                     }}</v-list-item-subtitle>
                   </v-list-item>
                 </template>
-              </CustomVAutocomplete>
+              </SearchableAutocomplete>
             </v-col>
           </v-row>
         </v-form>
@@ -273,17 +294,7 @@ watch(
         <v-btn color="default" variant="text" @click="handleClose">
           إلغاء
         </v-btn>
-        <v-btn
-          color="primary"
-          @click="handleSave"
-          :disabled="
-            !formData.location_id ||
-            !formData.company_id ||
-            (showInspectorSelect && formData.inspector_ids.length === 0)
-          "
-        >
-          حفظ
-        </v-btn>
+        <v-btn color="primary" @click="handleSave"> حفظ </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
