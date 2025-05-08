@@ -1,6 +1,6 @@
 <template>
   <v-card elevation="0" class="note-item rounded-lg pa-4 bg-white">
-    <div class="d-flex justify-space-between align-center mb-2">
+    <div class="d-flex justify-space-between align-center mb-2 border-b pb-2">
       <div class="d-flex align-center">
         <svg
           width="24"
@@ -8,6 +8,7 @@
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
+          class="me-2"
         >
           <rect width="24" height="24" rx="12" fill="#B69265" />
           <path
@@ -15,68 +16,43 @@
             d="M13.5698 6.84606C13.7527 6.66317 13.8441 6.57173 13.8137 6.47257C13.7834 6.37341 13.6623 6.34999 13.4201 6.30317C13.2099 6.26254 12.9952 6.23456 12.7768 6.22004C11.9372 6.16423 11.0613 6.16434 10.2234 6.22004C7.59757 6.39459 5.51418 8.5142 5.34288 11.1648C5.31084 11.6607 5.31084 12.1737 5.34288 12.6695C5.40666 13.6565 5.8372 14.5468 6.31579 15.2692C6.45915 15.5461 6.38446 15.9613 6.11632 16.4695L6.10397 16.4928C6.01387 16.6635 5.92568 16.8305 5.87481 16.9729C5.8209 17.1238 5.76518 17.3634 5.90414 17.6003C6.03183 17.818 6.23583 17.8978 6.40072 17.9297C6.53762 17.9562 6.70549 17.9602 6.86298 17.9639L6.88927 17.9646C7.70562 17.9844 8.28088 17.7487 8.73653 17.4127C8.75607 17.3983 8.77429 17.3849 8.79131 17.3724C8.86004 17.3218 8.8944 17.2966 8.93907 17.291C8.98375 17.2855 9.02301 17.3015 9.10155 17.3335C9.14045 17.3493 9.18419 17.3673 9.23367 17.3877C9.54497 17.5159 9.89856 17.5927 10.2234 17.6143C11.0613 17.67 11.9372 17.6701 12.7768 17.6143C15.4026 17.4398 17.486 15.3202 17.6573 12.6695C17.6894 12.1737 17.6894 11.6607 17.6573 11.1648C17.6195 10.5796 17.4884 10.0202 17.2789 9.5019C17.2004 9.30767 17.1611 9.21056 17.0703 9.19209C16.9795 9.17363 16.902 9.25114 16.747 9.40616L15.4957 10.6575C15.1505 11.0026 14.7427 11.1538 14.4165 11.2371C14.2538 11.2786 14.0937 11.3074 13.9606 11.3304L13.8876 11.3429C13.7795 11.3614 13.6919 11.3764 13.6053 11.3949L13.5697 11.4026C13.4046 11.438 13.1984 11.4823 13.0194 11.4937C12.8118 11.5069 12.4242 11.4929 12.1079 11.1766C11.7916 10.8602 11.7776 10.4727 11.7908 10.2651C11.8022 10.0861 11.8464 9.8799 11.8819 9.71477L11.8895 9.67919C11.908 9.59262 11.9231 9.50498 11.9416 9.39686L11.9541 9.32384C11.9771 9.19074 12.0059 9.0307 12.0474 8.868C12.1307 8.54179 12.2819 8.13395 12.627 7.78883L13.5698 6.84606Z"
             fill="white"
           />
-          <path
-            d="M15.1389 6.49689L13.2369 8.3989C12.9359 8.69991 12.8636 9.12233 12.7927 9.53711C12.774 9.64595 12.7555 9.75427 12.733 9.85973C12.6481 10.2564 12.6057 10.4548 12.7178 10.5669C12.8299 10.6789 13.0282 10.6365 13.4249 10.5517C13.5304 10.5292 13.6387 10.5106 13.7476 10.492C14.1623 10.421 14.5848 10.3488 14.8858 10.0478L16.7878 8.14577C16.9794 7.9541 17.0753 7.85826 17.1328 7.75856C17.2891 7.48801 17.2891 7.15467 17.1328 6.88411C17.0753 6.78441 16.9794 6.68857 16.7878 6.4969C16.5961 6.30523 16.5003 6.20938 16.4006 6.15182C16.13 5.99562 15.7967 5.99562 15.5261 6.15182C15.4264 6.20938 15.3306 6.30522 15.1389 6.49689Z"
-            fill="white"
-          />
-          <path
-            d="M9.2 11.4972C8.88244 11.4972 8.625 11.7546 8.625 12.0722C8.625 12.3897 8.88244 12.6472 9.2 12.6472H9.20516C9.52272 12.6472 9.78016 12.3897 9.78016 12.0722C9.78016 11.7546 9.52272 11.4972 9.20516 11.4972H9.2Z"
-            fill="white"
-          />
-          <path
-            d="M11.4974 11.4972C11.1799 11.4972 10.9224 11.7546 10.9224 12.0722C10.9224 12.3897 11.1799 12.6472 11.4974 12.6472H11.5026C11.8201 12.6472 12.0776 12.3897 12.0776 12.0722C12.0776 11.7546 11.8201 11.4972 11.5026 11.4972H11.4974Z"
-            fill="white"
-          />
         </svg>
-        <span class="text-subtitle-1 font-weight-medium ms-2"
-          >رقم الملاحظة</span
-        >
+        <span class="text-h6 font-weight-medium text-primary">{{
+          note.id
+        }}</span>
       </div>
+      <!-- <div class="status-chip" :class="'status-' + note.status.toLowerCase()">
+        {{ getStatusText(note.status) }}
+      </div> -->
     </div>
 
-    <div class="note-content mb-4">
-      <p class="mb-2" style="font-size: 12px; color: #565a5d">
+    <div class="note-content mb-0">
+      <p class="text-body-1 text-medium-emphasis description-text">
         {{ note.description }}
       </p>
     </div>
 
-    <div class="d-flex align-center gap-2 mb-2">
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          opacity="0.4"
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M14 7.28401C14 4.02215 11.247 1.3335 8 1.3335C4.75296 1.3335 2 4.02215 2 7.28401C2 10.6093 4.8026 12.9079 7.382 14.5046C7.57033 14.6109 7.7833 14.6668 8 14.6668C8.2167 14.6668 8.42967 14.6109 8.618 14.5046C11.2022 12.9233 14 10.5978 14 7.28401ZM8 9.66683C9.28866 9.66683 10.3333 8.62216 10.3333 7.3335C10.3333 6.04483 9.28866 5.00016 8 5.00016C6.71134 5.00016 5.66667 6.04483 5.66667 7.3335C5.66667 8.62216 6.71134 9.66683 8 9.66683Z"
-          fill="#B69265"
-        />
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M8 4.50016C6.43519 4.50016 5.16667 5.76869 5.16667 7.3335C5.16667 8.8983 6.43519 10.1668 8 10.1668C9.56481 10.1668 10.8333 8.8983 10.8333 7.3335C10.8333 5.76869 9.56481 4.50016 8 4.50016ZM6.16667 7.3335C6.16667 6.32097 6.98748 5.50016 8 5.50016C9.01252 5.50016 9.83333 6.32097 9.83333 7.3335C9.83333 8.34602 9.01252 9.16683 8 9.16683C6.98748 9.16683 6.16667 8.34602 6.16667 7.3335Z"
-          fill="#B69265"
-        />
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M8 0.833496C4.48301 0.833496 1.5 3.73986 1.5 7.28401C1.5 9.09898 2.26791 10.6162 3.34459 11.8685C4.41664 13.1153 5.81223 14.1209 7.11883 14.9298L7.12742 14.9351L7.13621 14.94C7.3997 15.0888 7.69736 15.1668 8 15.1668C8.30264 15.1668 8.6003 15.0888 8.86379 14.94L8.87146 14.9357L8.87897 14.9311C10.1903 14.1287 11.5862 13.1199 12.6578 11.8693C13.7335 10.6139 14.5 9.09298 14.5 7.28401C14.5 3.73986 11.517 0.833496 8 0.833496ZM2.5 7.28401C2.5 4.30444 5.02291 1.8335 8 1.8335C10.9771 1.8335 13.5 4.30444 13.5 7.28401C13.5 8.78884 12.8676 10.0876 11.8984 11.2187C10.9272 12.3521 9.63562 13.2951 8.36546 14.073C8.25395 14.1344 8.12816 14.1668 8 14.1668C7.87221 14.1668 7.74679 14.1346 7.63553 14.0735C6.36583 13.2868 5.0745 12.3466 4.10285 11.2165C3.13339 10.089 2.5 8.79429 2.5 7.28401Z"
-          fill="#B69265"
-        />
-      </svg>
-      <div class="d-flex align-center gap-1" style="color: #565a5d">
-        <span class=" text-sm">{{ note.location }}</span>
-        <span class=" text-sm text-grey">-</span>
-        <span class=" text-sm">{{ note.sector }}</span>
+    <div class="d-flex align-center gap-2 mb-3">
+      <div class="d-flex align-center flex-wrap" style="color: #565a5d">
+        <span class="text-body-2">{{
+          note.report_by?.fullname || note.sector
+        }}</span>
+        <span class="text-body-2 mx-2">-</span>
+        <span class="text-body-2 location-text">{{ note.location }}</span>
       </div>
     </div>
 
-    <div class="d-flex align-center text-grey text-caption">
-      {{ formatDate(note.date) }} | {{ note.time }}
+    <div class="d-flex align-center justify-space-between text-grey">
+      <div class="" style="color: #b4b6b7; font-size: 12px">
+        {{ note.time }} | {{ formatDate(note.date) }}
+      </div>
+      <!-- <div
+        v-if="note.attachments && note.attachments.length"
+        class="d-flex align-center gap-2"
+      >
+        <v-icon size="small" color="primary">mdi-paperclip</v-icon>
+        <span class="text-body-2">{{ note.attachments.length }}</span>
+      </div> -->
     </div>
   </v-card>
 </template>
@@ -92,7 +68,18 @@ const props = defineProps({
 });
 
 const formatDate = (date) => {
-  return date; // You can implement proper date formatting here
+  if (!date) return "";
+  const [year, month, day] = date.split("-");
+  return `${day}/${month}/${year}`;
+};
+
+const getStatusText = (status) => {
+  const statusMap = {
+    APPROVED: "معتمد",
+    PENDING: "قيد الانتظار",
+    REJECTED: "مرفوض",
+  };
+  return statusMap[status] || status;
 };
 </script>
 
@@ -100,6 +87,9 @@ const formatDate = (date) => {
 .note-item {
   border: 1px solid #eee;
   transition: all 0.3s ease;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     border-color: #b69265;
@@ -107,17 +97,49 @@ const formatDate = (date) => {
   }
 }
 
-.note-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #fbf7f3;
-  border-radius: 8px;
+.note-content {
+  flex-grow: 1;
 }
 
-.note-content {
+.description-text {
   color: #25343e;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+.location-text {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.text-primary {
+  color: #b69265 !important;
+}
+
+.status-chip {
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-approved {
+  background-color: #e3f0db;
+  color: #7ab55c;
+}
+
+.status-pending {
+  background-color: #fff8df;
+  color: #d4b327;
+}
+
+.status-rejected {
+  background-color: #ffebeb;
+  color: #ff5252;
 }
 </style>
