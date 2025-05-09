@@ -753,7 +753,7 @@ const displayAttachement = (item) => {
                   :items="availableTypes"
                   variant="outlined"
                   density="comfortable"
-                  placeholder="اختر "
+                  placeholder="اختر"
                   hide-details
                   style="min-width: 100px"
                   class="rounded-lg bg-grey-lighten-4 px-2"
