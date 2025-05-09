@@ -248,7 +248,6 @@ const fetchRatings = async () => {
 const fetchNotes = async () => {
   try {
     isLoading.value = true;
-    // Simulating API call with mock data for demonstration
     const response = await axios.get("/reports-integrations", {
       params: {
         type: type_render.value,
@@ -257,120 +256,29 @@ const fetchNotes = async () => {
         search: search.value || undefined,
       },
     });
-    console.log({ response });
 
-    const notesItems = (response.data.data.reports = []);
-
-    console.log({ notesItems });
-    notes.value = notesItems;
-    //     {
-    //     "id": 2,
-    //     "report_type_id": null,
-    //     "report_type": null,
-    //     "report_by_id": 56,
-    //     "report_by": {
-    //         "id": 56,
-    //         "fullname": "مراقب تجريبي 2",
-    //         "firstname": "مراقب",
-    //         "lastname": "تجريبي 2",
-    //         "email": "fmr332095@bb4.com",
-    //         "phone": "0589412346",
-    //         "sa_id": "1000000044",
-    //         "avatar_url": null,
-    //         "role": {
-    //             "id": 3,
-    //             "title": "INSPECTOR"
-    //         },
-    //         "parent_companies": [],
-    //         "locations_count": 0,
-    //         "daily_visits_count": 0
-    //     },
-    //     "description": "test new attachments",
-    //     "lat": 21.38909989047112,
-    //     "long": 39.85789988189936,
-    //     "address": "9VQ5+J5J, Makkah, Makkah Principality, Makkah Province, Saudi Arabia",
-    //     "report_date": "2025-04-12",
-    //     "report_time": "12:03:27",
-    //     "status": "APPROVED",
-    //     "approved_by_id": null,
-    //     "approved_by": null,
-    //     "rejected_by_id": null,
-    //     "rejected_by": null,
-    //     "approved_at": "2025-04-12 17:57:37",
-    //     "rejected_at": null,
-    //     "rejection_reason": null,
-    //     "attachments": [
-    //         "https://app-gcs.imtithal1446.com/reports/2025/04/12/1744452185_ZJSrT5B5nt.jpg"
-    //     ],
-    //     "created_at": "2025-04-12 13:03:28",
-    //     "updated_at": "2025-04-12 17:57:37"
-    // }
+    // Map the reports data to match the NoteItem component props
+    notes.value = response.data.data.reports.map((report) => ({
+      id: report.id,
+      description: report.description,
+      location: report.address,
+      sector: report.report_by?.fullname || "-",
+      date: report.report_date,
+      time: report.report_time,
+      status: report.status,
+      attachments: report.attachments,
+      lat: report.lat,
+      long: report.long,
+      reporter: {
+        name: report.report_by?.fullname,
+        avatar: report.report_by?.avatar_url,
+      },
+    }));
 
     // Handle pagination
-    totalRatings.value = response.data?.data?.pagination?.i_total_objects || 0;
-    perPage.value = response.data?.data?.pagination?.i_per_page || 6;
-    currentPage.value = response.data?.data?.pagination?.i_current_page || 1;
-
-    // setTimeout(() => {
-    //   notes.value = [
-    //     {
-    //       id: 1,
-    //       report_type: { title: "طلب صيانة" },
-    //       status: "PENDING",
-    //       description: "هناك مشكلة في نظام التكييف في الغرفة 205",
-    //       report_date: "2023-11-15",
-    //       report_time: "14:30",
-    //       address: "مكة المكرمة - العزيزية",
-    //       reportBy: {
-    //         firstname: "أحمد",
-    //         lastname: "محمد",
-    //       },
-    //       latitude: 21.3891,
-    //       longitude: 39.8579,
-    //       created_at: "2023-11-15T14:30:00",
-    //     },
-    //     {
-    //       id: 2,
-    //       report_type: { title: "مشكلة في النظافة" },
-    //       status: "APPROVED",
-    //       description: "الممرات تحتاج إلى تنظيف عاجل",
-    //       report_date: "2023-11-16",
-    //       report_time: "09:15",
-    //       address: "المدينة المنورة - باب السلام",
-    //       reportBy: {
-    //         firstname: "خالد",
-    //         lastname: "العتيبي",
-    //       },
-    //       latitude: 24.4672,
-    //       longitude: 39.6051,
-    //       created_at: "2023-11-16T09:15:00",
-    //     },
-    //     {
-    //       id: 3,
-    //       report_type: { title: "انقطاع المياه" },
-    //       status: "REJECTED",
-    //       description: "انقطاع المياه منذ الصباح في المبنى بالكامل",
-    //       report_date: "2023-11-17",
-    //       report_time: "11:20",
-    //       address: "مكة المكرمة - العزيزية",
-    //       reportBy: {
-    //         firstname: "سارة",
-    //         lastname: "الأحمد",
-    //       },
-    //       latitude: 21.3891,
-    //       longitude: 39.8579,
-    //       created_at: "2023-11-17T11:20:00",
-    //     },
-    //   ];
-    //   totalNotes.value = notes.value.length;
-    //   noteTypes.value = [
-    //     { id: 1, title: "طلب صيانة", total_reports: 12 },
-    //     { id: 2, title: "مشكلة في النظافة", total_reports: 8 },
-    //     { id: 3, title: "انقطاع المياه", total_reports: 5 },
-    //     { id: 4, title: "مشكلة في الكهرباء", total_reports: 9 },
-    //   ];
-    //   isLoading.value = false;
-    // }, 1000);
+    totalNotes.value = response.data.data.pagination.i_total_objects;
+    perPage.value = response.data.data.pagination.i_per_page;
+    currentPage.value = response.data.data.pagination.i_current_page;
   } catch (error) {
     console.error("Error fetching notes:", error);
     appStore.showSnackbar({
@@ -924,15 +832,28 @@ const displayAttachement = (item) => {
 
             <!-- Notes Tab -->
             <v-window-item value="notes">
-              <v-row>
+              <v-row v-if="isLoading">
+                <v-col v-for="i in 6" :key="i" cols="12" sm="6" lg="4">
+                  <v-skeleton-loader
+                    class="mx-auto"
+                    type="card"
+                  ></v-skeleton-loader>
+                </v-col>
+              </v-row>
+              <v-row v-else-if="notes.length">
                 <v-col
-                  v-for="note in staticNotes"
+                  v-for="note in notes"
                   :key="note.id"
                   cols="12"
                   sm="6"
                   lg="4"
                 >
                   <NoteItem :note="note" />
+                </v-col>
+              </v-row>
+              <v-row v-else>
+                <v-col cols="12" class="text-center">
+                  <p class="text-medium-emphasis">لا توجد ملاحظات</p>
                 </v-col>
               </v-row>
             </v-window-item>
