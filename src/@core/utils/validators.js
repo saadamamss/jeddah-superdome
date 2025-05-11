@@ -45,7 +45,7 @@ export const passwordValidator = (password) => {
 };
 
 // 👉 Confirm Password Validator
-export const confirmedValidator = (value, target) =>
+export const confirmPasswordValidator = (value, target) =>
   value === target || "تأكيد حقل تأكيد كلمة المرور غير متطابق";
 
 // 👉 Between Validator

@@ -2,7 +2,7 @@
   <v-card elevation="0" class="note-card rounded-lg pa-4">
     <div class="d-flex justify-space-between align-center mb-4">
       <div class="d-flex align-center gap-2">
-        <v-icon color="#B69265">mdi-map-marker</v-icon>
+        <v-icon color="#667178">mdi-map-marker</v-icon>
         <span class="text-body-2">{{ note.address }}</span>
       </div>
       <div class="status-chip" :class="'status-' + getStatusClass(note.status)">
@@ -13,7 +13,7 @@
     <div class="mb-4">
       <div class="d-flex align-center gap-2 mb-2">
         <v-chip
-          color="#B69265"
+          color="#667178"
           text-color="white"
           size="small"
           class="font-weight-medium"
@@ -100,7 +100,7 @@ const getAvatarUrl = (user) => {
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #b69265;
+    border-color: #667178;
     transform: translateY(-2px);
   }
 }
@@ -130,7 +130,7 @@ const getAvatarUrl = (user) => {
 }
 
 .eye-btn {
-  color: #b69265;
+  color: #667178;
   border: 1px solid #fbf7f3;
   border-radius: 8px;
   &:hover {
@@ -139,7 +139,7 @@ const getAvatarUrl = (user) => {
 }
 
 .escalate-btn {
-  color: #b69265;
+  color: #667178;
   background-color: #fbf7f3;
   border-radius: 8px;
   padding: 0 16px;

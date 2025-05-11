@@ -24,26 +24,27 @@ const router = createRouter({
 
 // Global Navigation Guard
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = authService.isAuthenticated();
+  // const isAuthenticated = authService.isAuthenticated();
 
-  if (
-    isAuthenticated &&
-    ((typeof to.meta.requiresPermission == "boolean" &&
-      to.meta.requiresPermission) ||
-      (typeof to.meta.requiresPermission == "string" &&
-        !hasPermission(to.meta.requiresPermission)))
-  ) {
-    next({ name: "NotFound" });
-    return;
-  }
+  // if (
+  //   isAuthenticated &&
+  //   ((typeof to.meta.requiresPermission == "boolean" &&
+  //     to.meta.requiresPermission) ||
+  //     (typeof to.meta.requiresPermission == "string" &&
+  //       !hasPermission(to.meta.requiresPermission)))
+  // ) {
+  //   next({ name: "NotFound" });
+  //   return;
+  // }
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    return next("/auth/login");
-  } else if (to.meta.guest && isAuthenticated) {
-    return next("/");
-  } else {
-    return next();
-  }
+  // if (to.meta.requiresAuth && !isAuthenticated) {
+  //   return next("/auth/login");
+  // } else if (to.meta.guest && isAuthenticated) {
+  //   return next("/");
+  // } else {
+  //   return next();
+  // }
+  return next();
 });
 
 // Workaround for https://github.com/vitejs/vite/issues/11804

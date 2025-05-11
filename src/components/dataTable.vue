@@ -73,33 +73,40 @@ table {
 
   .v-data-table__tr {
     margin-bottom: 16px;
-    filter: drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.05));
-    border-radius: 8px;
+    border-radius: 16px;
+    border: none !important;
   }
 
   .v-data-table__td {
-    background: white !important;
+    background: #F8F9F9 !important;
     height: 72px !important;
-
+    color: #222;
+    border: none !important;
+    
     &:first-child {
-      border-top-right-radius: 8px;
-      border-bottom-right-radius: 8px;
+      border-top-right-radius: 16px;
+      border-bottom-right-radius: 16px;
     }
-
+    
     &:last-child {
-      border-top-left-radius: 8px;
-      border-bottom-left-radius: 8px;
+      border-top-left-radius: 16px;
+      border-bottom-left-radius: 16px;
     }
+  }
+  .v-data-table__th {
+    color: #999 !important;
+    background-color: transparent !important;
   }
 }
 
 :deep(.v-table > .v-table__wrapper > table) {
-  border-spacing: 0 16px !important;
+  border-spacing: 0 10px !important;
   border-collapse: separate !important;
 }
 .v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > td,
 .v-table .v-table__wrapper > table > tbody > tr:not(:last-child) > th {
   // border-bottom: 0px solid #e0e0e0 !important;
-  border: 1px solid rgb(209, 10, 209) !important;
+  // border: 1px solid rgb(209, 10, 209) !important;
+
 }
 </style>

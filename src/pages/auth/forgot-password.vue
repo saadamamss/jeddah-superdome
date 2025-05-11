@@ -46,7 +46,7 @@ const submitEmail = async () => {
       class="d-flex flex-column align-center justify-center py-4 pa-0 mx-auto"
     >
       <div class="w-100 d-flex justify-center pb-6 pt-3 px-4">
-        <img width="280" src="/logo-colored.svg" alt="امتثال" />
+        <img width="280" src="/logo-colored.svg" alt="جدة سوبردوم" />
       </div>
       <VCard flat class="w-100 app-logo py-4 px-2 px-sm-6 px-xl-12 rounded-xl">
         <VCardTitle style="flex: 0">

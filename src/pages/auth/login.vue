@@ -81,7 +81,7 @@ const loginUser = async () => {
     >
       <div style="width: 580px; max-width: 100%">
         <div class="w-100 d-flex justify-center pb-6 pt-3 px-4">
-          <img width="280" src="/logo-colored.svg" alt="امتثال" />
+          <img width="280" src="/logo-colored.svg" alt="جدة سوبردوم" />
         </div>
         <VCard
           flat

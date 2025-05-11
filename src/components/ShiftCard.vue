@@ -16,12 +16,12 @@
                 cx="12"
                 cy="12"
                 r="10"
-                stroke="#B69265"
+                stroke="#667178"
                 stroke-width="2"
               />
               <polyline
                 points="12 6 12 12 16 14"
-                stroke="#B69265"
+                stroke="#667178"
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"

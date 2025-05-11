@@ -41,7 +41,7 @@ const logout = async (e) => {
 };
 
 onMounted(() => {
-  user.value = authStore.user.user;
+  user.value = {} //authStore.user.user;
   console.log(user.value);
 });
 </script>
@@ -85,7 +85,7 @@ onMounted(() => {
           >
             <path
               d="M7.25 0.75L4 4.25L0.75 0.75"
-              stroke="#B69265"
+              stroke="#667178"
               stroke-width="1.5"
               stroke-linecap="round"
               stroke-linejoin="round"

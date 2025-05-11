@@ -175,7 +175,18 @@ body .v-card {
 }
 
 body .v-date-picker-month__day--selected .v-btn {
-  background-color: #b69265 !important;
+  background-color: #667178 !important;
   color: rgb(var(--v-theme-on-surface-variant));
 }
+table tr td,
+table tr th {
+  white-space: nowrap;
+}
+.v-btn--size-small{
+  height:40px !important
+}
+.v-slide-group__container {
+  align-items: center;
+}
+
 </style>

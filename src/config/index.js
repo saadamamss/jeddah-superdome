@@ -14,7 +14,8 @@ export const API_BASE_URL = "https://api.imtithal1446.com/api/v1/dashboard"; // 
 // الدومين صار imtithal1446.com
 // export const API_BASE_URL = "https://imtithal1446.com/";
 // export const API_BASE_URL = "https://imtithal.zimam.sa/";
-export const LOCAL_STORAGE_USER_KEY = "imtethal_storage_key_user";
+// export const LOCAL_STORAGE_USER_KEY = "imtethal_storage_key_user";
+export const LOCAL_STORAGE_USER_KEY = "neolt_storage_key_user";
 
 // API endpoints
 export const API_ENDPOINTS = {

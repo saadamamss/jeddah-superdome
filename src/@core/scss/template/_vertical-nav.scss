@@ -7,7 +7,9 @@ body {
     .layout-vertical-nav {
       overflow: hidden;
       height: 100vh;
-
+      background-color: #f8f9f9;
+      border: none;
+      box-shadow: none !important;
       &::before {
         content: "";
         position: absolute;
@@ -16,7 +18,7 @@ body {
         width: 100%;
         height: 50%;
         z-index: 1;
-        background: url(/imgs/nav-top.svg) no-repeat top;
+        // background: url(/imgs/nav-top.svg) no-repeat top;
         background-size: cover;
       }
 
@@ -28,7 +30,7 @@ body {
         width: 100%;
         height: 100%;
         z-index: -1;
-        background: url(/imgs/nav-bottom.svg) no-repeat top;
+        // background: url(/imgs/nav-bottom.svg) no-repeat top;
         background-size: cover;
       }
 
@@ -86,9 +88,8 @@ body {
       margin-inline: 0.875rem;
       padding: 1.5rem 0.75rem !important;
       border-radius: 20px 0 0 20px;
-      // background-color: #f3f4f6;
-      color: #fff;
-
+      color: #667178;
+      height: 64px;
       &::after {
         content: "";
         position: absolute;
@@ -100,8 +101,10 @@ body {
       }
 
       &.router-link-active.router-link-exact-active {
-        background-color: #fff !important;
-        color: #b69265;
+        // background-color: #fff !important;
+        background: linear-gradient(180deg, #0d114e 0%, #1e27b4 100%);
+        border-radius: 16px 0px 0px 16px;
+        color: #fff;
 
         &::after {
           background-color: #fff;
