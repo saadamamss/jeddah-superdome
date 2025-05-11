@@ -8,6 +8,7 @@ import axios from "@/plugins/axios";
 // import CustomVAutocomplete from "@/@core/components/global/CustomVAutocomplete.vue";
 import { ref, computed, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import FiltersMenu from "./components/FiltersMenu.vue";
 
 const appStore = useAppStore();
 const isLoading = ref(true);
@@ -79,6 +80,21 @@ const displayFormattedDate = (date) => {
 const onClearDateFilter = () => {
   filters.created_at = undefined;
   fetchAttendance(); // Trigger data refresh when clearing the date filter
+};
+
+const handleFilterUpdate = (newFilters) => {
+  console.log({ newFilters });
+
+  newFilters = {
+    ...newFilters,
+    created_at: newFilters.created_at
+      ? format(newFilters.created_at, "YYYY-MM-DD")
+      : null,
+  };
+  Object.assign(filters, newFilters);
+  // Reset to first page when filters change
+  currentPage.value = 1;
+  fetchAttendance();
 };
 
 // const handleTableUpdate = (options) => {
@@ -486,6 +502,10 @@ const handleRemoveAssignment = async () => {
               <h2 class="text-h6 font-weight-bold">الإسنادات</h2>
 
               <div class="align-center ga-2 flex-wrap d-flex">
+                <FiltersMenu
+                  @update:filters="handleFilterUpdate"
+                  @applyFilters="applyFilters"
+                />
                 <v-text-field
                   v-model="searchQuery"
                   label="البحث..."
