@@ -53,9 +53,7 @@ const search = ref("");
         >
           <VIcon icon="tabler-menu-2" size="24" />
         </VBtn>
-
         <!-- search box -->
-
         <v-btn
           color="default"
           size="small"
@@ -79,14 +77,24 @@ const search = ref("");
           </svg>
         </v-btn>
 
+        <div class="d-none d-sm-block">
+          <h2 class="text-h6">
+            <b>مرحبًا، عبدالله 👋</b>
+          </h2>
+          <p class="text-sm text-secondary">
+            نتمنى لك يومًا موفقًا في إدارة نقطة التجمع.
+          </p>
+        </div>
         <!-- <span class="text-black font-weight-semibold">{{
           appStore.appPageTitle
         }}</span> -->
         <!-- <NavbarThemeSwitcher /> -->
         <VSpacer />
         <div class="d-flex gap-3">
+          <Notifications :notifications="[]" />
+        </div>
+        <div class="d-flex gap-3">
           <!-- <Notifications :notifications="notifications" /> -->
-
           <UserProfile />
         </div>
       </div>

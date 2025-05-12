@@ -1,312 +1,371 @@
 <template>
   <div>
-    <VCard class="rounded-lg">
-      <VCardText>
-        <!-- Header Section -->
-        <div class="d-flex align-center justify-space-between mb-6">
-          <h2 class="text-h5 font-weight-bold">إدارة الشركات</h2>
-          <div class="d-flex align-center ga-2">
-            <!-- Search -->
-            <v-text-field
-              v-model="searchQuery"
-              placeholder="بحث برقم الترخيص أو رقم الشركة"
-              rounded="lg"
-              clearable
-              height="48"
-              class="bg-primary_2 me-3 border-none"
-              style="width: 320px; max-width: 100%"
-              density="compact"
-              hide-details
-              @update:model-value="handleSearch"
+    <v-container fluid class="px-0 px-sm-4 px-xl-0 py-0">
+      <div class="mb-2">
+        <v-breadcrumbs
+          divider=">"
+          :items="[
+            {
+              title: 'الرئيسية',
+              disabled: false,
+              to: '/',
+            },
+            {
+              title: 'إدارة الشركات',
+              disabled: true,
+            },
+          ]"
+        >
+          <template v-slot:prepend>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <template v-slot:prepend-inner>
-                <svg
-                  width="1.3rem"
-                  height="1.3rem"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.4"
-                    d="M16.6666 9.16669C16.6666 5.02455 13.3088 1.66669 9.16663 1.66669C5.02449 1.66669 1.66663 5.02455 1.66663 9.16669C1.66663 13.3088 5.02449 16.6667 9.16663 16.6667C13.3088 16.6667 16.6666 13.3088 16.6666 9.16669Z"
-                    fill="#667178"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M9.16663 1.04169C4.67931 1.04169 1.04163 4.67937 1.04163 9.16669C1.04163 13.654 4.67931 17.2917 9.16663 17.2917C11.1853 17.2917 13.032 16.5555 14.453 15.337L17.8914 18.7753C18.1354 19.0194 18.5312 19.0194 18.7752 18.7753C19.0193 18.5312 19.0193 18.1355 18.7752 17.8914L15.3369 14.4531C16.5554 13.0321 17.2916 11.1854 17.2916 9.16669C17.2916 4.67937 13.6539 1.04169 9.16663 1.04169ZM2.29163 9.16669C2.29163 5.36973 5.36967 2.29169 9.16663 2.29169C12.9636 2.29169 16.0416 5.36973 16.0416 9.16669C16.0416 12.9636 12.9636 16.0417 9.16663 16.0417C5.36967 16.0417 2.29163 12.9636 2.29163 9.16669Z"
-                    fill="#667178"
-                  />
-                </svg>
-              </template>
-            </v-text-field>
-
-            <!-- Add Company Button -->
-            <VBtn
-              height="48"
-              elevation="0"
-              class="rounded-lg"
-              prepend-icon="tabler-file-plus"
-              color="primary_2"
-              @click="uploadDialog = true"
-            >
-              إضافة ملف شركة جديدة
-            </VBtn>
-            <VBtn
-              height="48"
-              elevation="0"
-              @click="isAddDialogVisible = true"
-              class="rounded-lg"
-            >
-              إضافة شركة جديدة
-            </VBtn>
-          </div>
-        </div>
-
-        <v-row>
-          <v-col cols="12">
-            <DataTable
-              :headers="headers"
-              :items="companies"
-              :loading="isLoading"
-              class="elevation-0"
-              :items-per-page="perPage"
-              v-model:page="currentPage"
-              :hide-default-footer="true"
-            >
-              <template #[`item.licenseNumber`]="{ item }">
-                <span class="text-nowrap">{{ item.licenseNumber }}</span>
-              </template>
-
-              <template #[`item.companyName`]="{ item }">
-                <span class="text-nowrap">{{ item.companyName }}</span>
-              </template>
-              <template #[`item.contactNumber`]="{ item }">
-                <span class="text-nowrap">{{ item.contactNumber }}</span>
-              </template>
-
-              <template #[`item.actions`]="{ item }">
-                <div class="d-flex gap-2">
-                  <v-btn size="small" variant="text" class="text-black">
-                    <v-icon>mdi-eye</v-icon>
-                  </v-btn>
-                  <v-btn
-                    size="small"
-                    class="text-black text-sm rounded-lg"
-                    color="#fff"
-                    :prepend-icon="Editicon"
-                  >
-                    تعديل
-                  </v-btn>
-                  <v-btn
-                    size="small"
-                    class="text-error text-sm rounded-lg"
-                    color="#fff"
-                    :prepend-icon="Trash"
-                    @click="deleteDialogOpen = true"
-                  >
-                    حذف
-                  </v-btn>
-                </div>
-              </template>
-            </DataTable>
-
-            <!-- Pagination -->
-            <Pagination
-              :total-items="totalItems"
-              v-model:per-page="perPage"
-              v-model:page="currentPage"
-            />
-          </v-col>
-        </v-row>
-      </VCardText>
-    </VCard>
-
-    <!-- Add Company Dialog -->
-    <VDialog v-model="isAddDialogVisible" max-width="600px">
-      <VCard rounded="lg">
-        <VCardTitle class="bg-primary_2 py-3 rounded-lg">
-          <div class="d-flex align-center justify-space-between">
-            <div>
-              <h5 class="mb-2">إضافة شركة جديدة</h5>
-              <p class="text-sm text-secondary mb-0">
-                يرجى تعبئة بيانات الشركة بدقة. الحقول الإلزامية محددة بعلامة
-                (*).
-              </p>
-            </div>
-          </div>
-        </VCardTitle>
+              <path
+                d="M5.62519 16.0419H14.3752C15.2957 16.0419 16.0419 15.2957 16.0419 14.3752V8.12519L10.0002 3.95853L3.95853 8.12519V14.3752C3.95853 15.2957 4.70472 16.0419 5.62519 16.0419Z"
+                stroke="#25343E"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M8.12468 13.1244C8.12468 12.2039 8.87088 11.4577 9.79135 11.4577H10.208C11.1285 11.4577 11.8747 12.2039 11.8747 13.1244V16.0411H8.12468V13.1244Z"
+                stroke="#25343E"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </template>
+        </v-breadcrumbs>
+      </div>
+      <VCard class="rounded-lg">
         <VCardText>
-          <VForm ref="form" @submit.prevent="handleSubmit">
-            <VRow>
-              <VCol cols="12">
-                <label for="" class="mb-2 d-block">اسم الشركة *</label>
-                <VTextField
-                  rounded="lg"
-                  v-model="formData.name"
-                  placeholder="الإسم الكامل الرسمى"
-                  required
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <label for="" class="mb-2 d-block">رقم الترخيص*</label>
-                <VTextField
-                  rounded="lg"
-                  v-model="formData.license_no"
-                  placeholder="رقم الترخيص"
-                  required
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <label for="" class="mb-2 d-block">المدينة*</label>
-                <VTextField
-                  rounded="lg"
-                  v-model="formData.center_no"
-                  placeholder="الرياض، مكة، جدة..."
-                  required
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <label for="" class="mb-2 d-block">رقم التواصل*</label>
-                <VTextField
-                  rounded="lg"
-                  v-model="formData.phone"
-                  placeholder="رقم التواصل"
-                  required
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <label for="" class="mb-2 d-block">البريد الإلكتروني*</label>
-                <VTextField
-                  rounded="lg"
-                  v-model="formData.email"
-                  placeholder="البريد الإلكتروني"
-                  type="email"
-                  required
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <label for="" class="mb-2 d-block">كلمة المرور*</label>
-                <VTextField
-                  rounded="lg"
-                  v-model="formData.contact_name"
-                  label="كلمة المرور"
-                  required
-                />
-              </VCol>
-
-              <VCol cols="12">
-                <label for="" class="mb-2 d-block">العنوان</label>
-                <VTextField
-                  rounded="lg"
-                  v-model="formData.address"
-                  label="الموقع التفصيلى إن وجد"
-                  required
-                />
-              </VCol>
-            </VRow>
-          </VForm>
-        </VCardText>
-
-        <VCardActions
-          class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
-        >
-          <VBtn
-            variant="outlined"
-            class="text-black rounded-xl bg-white"
-            @click="isAddDialogVisible = false"
+          <!-- Header Section -->
+          <div
+            class="d-flex flex-wrap align-center justify-space-between mb-6 ga-4"
           >
-            إلغاء
-          </VBtn>
-          <VBtn
-            color="primary"
-            variant="flat"
-            class="rounded-xl px-8"
-            @click="handleUploadFile"
-          >
-            إضافة
-          </VBtn>
-        </VCardActions>
-      </VCard>
-    </VDialog>
+            <!-- Title - Takes full width on small screens, auto on larger -->
+            <h2 class="text-h5 font-weight-bold flex-grow-1 flex-md-grow-0">
+              إدارة الشركات
+            </h2>
 
-    <!-- upload company file Dialog -->
-    <VDialog v-model="uploadDialog" max-width="700px">
-      <VCard rounded="lg" class="rounded-lg">
-        <VCardTitle class="bg-primary_2 py-3 rounded-lg">
-          <div class="d-flex align-center justify-space-between">
-            <div>
-              <h5 class="mb-2">رفع ملف الشركات</h5>
-              <p class="text-sm text-secondary">
-                يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات الشركات، تأكد
-                أن الملفات تحتوي على المعلومات الكاملة.
-              </p>
+            <!-- Search and Buttons Container - Full width on small screens -->
+            <div
+              class="d-flex flex-wrap align-center justify-md-end ga-2"
+              style="flex-grow: 1; min-width: 0"
+            >
+              <!-- Search - Full width on small screens, fixed width on medium+ -->
+              <v-text-field
+                v-model="searchQuery"
+                placeholder="بحث برقم الترخيص أو رقم الشركة"
+                rounded="lg"
+                clearable
+                height="48"
+                class="bg-primary_2 border-none flex-grow-1"
+                :style="{
+                  'min-width': '200px',
+                  'max-width': '300px',
+                  'margin-inline-end': '12px',
+                }"
+                density="compact"
+                hide-details
+                @update:model-value="handleSearch"
+              >
+                <template v-slot:prepend-inner>
+                  <Magnifier />
+                </template>
+              </v-text-field>
+
+              <!-- Buttons Container - Wraps on small screens -->
+              <div class="d-flex flex-wrap ga-2" style="min-width: fit-content">
+                <!-- Add File Button -->
+                <VBtn
+                  height="48"
+                  elevation="0"
+                  class="rounded-lg flex-grow-1 flex-md-grow-0"
+                  :prepend-icon="Fileadd"
+                  color="primary_2"
+                  @click="uploadDialog = true"
+                >
+                  <span class="d-none d-sm-inline">إضافة ملف شركة جديدة</span>
+                  <span class="d-inline d-sm-none">إضافة ملف</span>
+                </VBtn>
+
+                <!-- Add Company Button -->
+                <VBtn
+                  height="48"
+                  elevation="0"
+                  @click="isAddDialogVisible = true"
+                  class="rounded-lg flex-grow-1 flex-md-grow-0"
+                >
+                  <span class="d-none d-sm-inline">إضافة شركة جديدة</span>
+                  <span class="d-inline d-sm-none">إضافة</span>
+                </VBtn>
+              </div>
             </div>
-            <button @click="uploadDialog = false">
-              <v-icon size="sm">mdi-close</v-icon>
-            </button>
           </div>
-        </VCardTitle>
 
-        <UploadComponent
-          title="ملف الشركات"
-          btn-text="تحميل نموذج ملف الشركات"
-          @file-selected="handleFileSelection"
-          :upload-error="uploadError"
-          @reupload-file="handleFileSelection"
-        />
+          <v-row>
+            <v-col cols="12">
+              <DataTable
+                :headers="headers"
+                :items="companies"
+                :loading="isLoading"
+                class="elevation-0"
+                :items-per-page="perPage"
+                v-model:page="currentPage"
+                :hide-default-footer="true"
+              >
+                <template #[`item.licenseNumber`]="{ item }">
+                  <span class="text-nowrap">{{ item.licenseNumber }}</span>
+                </template>
 
-        <VCardActions
-          class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
-        >
-          <VBtn
-            variant="outlined"
-            class="text-black rounded-xl bg-white"
-            @click="uploadDialog = false"
-          >
-            إلغاء
-          </VBtn>
-          <VBtn
-            color="primary"
-            variant="flat"
-            class="rounded-xl"
-            :disabled="!fileToUpload"
-          >
-            إضافة
-          </VBtn>
-        </VCardActions>
+                <template #[`item.companyName`]="{ item }">
+                  <span class="text-nowrap">{{ item.companyName }}</span>
+                </template>
+                <template #[`item.contactNumber`]="{ item }">
+                  <span class="text-nowrap">{{ item.contactNumber }}</span>
+                </template>
+
+                <template #[`item.password`]="{ item, index }">
+                  <div class="text-nowrap d-flex gap-3 align-center">
+                    <span>
+                      {{
+                        item.password.show ? item.password.text : "*********"
+                      }}
+                    </span>
+                    <button
+                      @click="handleShowPass(item)"
+                      class="d-flex gap-3 align-center"
+                    >
+                      <Eyeoff v-if="item.password.show" />
+                      <Eyeicon v-else />
+                    </button>
+                  </div>
+                </template>
+
+                <template #[`item.actions`]="{ item }">
+                  <div class="d-flex gap-2">
+                    <v-btn
+                      size="small"
+                      class="text-black text-sm rounded-lg"
+                      color="#fff"
+                      :prepend-icon="Editicon"
+                    >
+                      تعديل
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      class="text-error text-sm rounded-lg"
+                      color="#fff"
+                      :prepend-icon="Trash"
+                      @click="deleteDialogOpen = true"
+                    >
+                      حذف
+                    </v-btn>
+                  </div>
+                </template>
+              </DataTable>
+
+              <!-- Pagination -->
+              <Pagination
+                :total-items="totalItems"
+                v-model:per-page="perPage"
+                v-model:page="currentPage"
+              />
+            </v-col>
+          </v-row>
+        </VCardText>
       </VCard>
-    </VDialog>
 
-    <!-- Success Dialog -->
-    <SuccessDialog
-      title="تمت إضافة الشركة بنجاح!"
-      subtitle="إعادة التوجه إلى إدارة الشركات أو إضافة شركة أخرى."
-      cancel-text="إضافة شركة أخرى"
-      action-text="التوجه إلى إدارة الشركات"
-      v-model="successDialogOpen"
-      @cancel="successDialogOpen = false"
-      @action="successDialogOpen = false"
-    />
+      <!-- Add Company Dialog -->
+      <VDialog v-model="isAddDialogVisible" max-width="600px">
+        <VCard rounded="lg">
+          <VCardTitle class="bg-primary_2 py-3 rounded-lg">
+            <div class="d-flex align-center justify-space-between">
+              <div>
+                <h5 class="mb-2">إضافة شركة جديدة</h5>
+                <p class="text-sm text-secondary mb-0">
+                  يرجى تعبئة بيانات الشركة بدقة. الحقول الإلزامية محددة بعلامة
+                  (*).
+                </p>
+              </div>
+            </div>
+          </VCardTitle>
+          <VCardText>
+            <VForm ref="form" @submit.prevent="handleSubmit">
+              <VRow>
+                <VCol cols="12">
+                  <label for="" class="mb-2 d-block">اسم الشركة *</label>
+                  <VTextField
+                    rounded="lg"
+                    v-model="formData.companyName"
+                    placeholder="الإسم الكامل الرسمى"
+                    required
+                  />
+                </VCol>
 
-    <DeleteDialog
-      title="️ هل أنت متأكد من حذف الشركة؟"
-      subtitle="سيؤدي حذف هذه الشركة إلى إزالة جميع بياناتها من النظام، وقد لا يمكن استرجاعها لاحقًا."
-      cancel-text="إلغاء"
-      action-text="نعم، حذف الشركة"
-      v-model="deleteDialogOpen"
-      @cancel="deleteDialogOpen = false"
-      @action="deleteDialogOpen = false"
-    />
+                <VCol cols="12">
+                  <label for="" class="mb-2 d-block">رقم الترخيص*</label>
+                  <VTextField
+                    rounded="lg"
+                    v-model="formData.license_no"
+                    placeholder="رقم الترخيص"
+                    required
+                  />
+                </VCol>
 
-    <!-- Delete Confirmation Modal -->
-    <!-- <VDialog v-model="isDeleteDialogVisible" max-width="400px">
+                <VCol cols="12">
+                  <label for="" class="mb-2 d-block">المدينة*</label>
+                  <VTextField
+                    rounded="lg"
+                    v-model="formData.city"
+                    placeholder="الرياض، مكة، جدة..."
+                    required
+                  />
+                </VCol>
+
+                <VCol cols="12">
+                  <label for="" class="mb-2 d-block">رقم التواصل*</label>
+                  <VTextField
+                    rounded="lg"
+                    v-model="formData.phone"
+                    placeholder="رقم التواصل"
+                    required
+                  />
+                </VCol>
+
+                <VCol cols="12">
+                  <label for="" class="mb-2 d-block">البريد الإلكتروني*</label>
+                  <VTextField
+                    rounded="lg"
+                    v-model="formData.email"
+                    placeholder="البريد الإلكتروني"
+                    type="email"
+                    required
+                  />
+                </VCol>
+
+                <VCol cols="12">
+                  <label for="" class="mb-2 d-block">كلمة المرور*</label>
+                  <VTextField
+                    rounded="lg"
+                    v-model="formData.password"
+                    label="كلمة المرور"
+                    required
+                  />
+                </VCol>
+
+                <VCol cols="12">
+                  <label for="" class="mb-2 d-block">العنوان</label>
+                  <VTextField
+                    rounded="lg"
+                    v-model="formData.address"
+                    label="العنوان التفصيلى إن وجد"
+                    required
+                  />
+                </VCol>
+              </VRow>
+            </VForm>
+          </VCardText>
+
+          <VCardActions
+            class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
+          >
+            <VBtn
+              variant="outlined"
+              class="text-black rounded-xl bg-white"
+              @click="isAddDialogVisible = false"
+            >
+              إلغاء
+            </VBtn>
+            <VBtn
+              color="primary"
+              variant="flat"
+              class="rounded-xl px-8"
+              @click="handleUploadFile"
+            >
+              إضافة
+            </VBtn>
+          </VCardActions>
+        </VCard>
+      </VDialog>
+
+      <!-- upload company file Dialog -->
+      <VDialog v-model="uploadDialog" max-width="700px">
+        <VCard rounded="lg" class="rounded-lg">
+          <VCardTitle class="bg-primary_2 py-3 rounded-lg">
+            <div class="d-flex align-center justify-space-between">
+              <div>
+                <h5 class="mb-2">رفع ملف الشركات</h5>
+                <p class="text-sm text-secondary">
+                  يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات الشركات، تأكد
+                  أن الملفات تحتوي على المعلومات الكاملة.
+                </p>
+              </div>
+              <button @click="uploadDialog = false">
+                <v-icon size="sm">mdi-close</v-icon>
+              </button>
+            </div>
+          </VCardTitle>
+
+          <UploadComponent
+            title="ملف الشركات"
+            btn-text="تحميل نموذج ملف الشركات"
+            @file-selected="handleFileSelection"
+            :upload-error="uploadError"
+            @reupload-file="handleFileSelection"
+          />
+
+          <VCardActions
+            class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
+          >
+            <VBtn
+              variant="outlined"
+              class="text-black rounded-xl bg-white"
+              @click="uploadDialog = false"
+            >
+              إلغاء
+            </VBtn>
+            <VBtn
+              color="primary"
+              variant="flat"
+              class="rounded-xl"
+              :disabled="!fileToUpload"
+            >
+              إضافة
+            </VBtn>
+          </VCardActions>
+        </VCard>
+      </VDialog>
+
+      <!-- Success Dialog -->
+      <SuccessDialog
+        title="تمت إضافة الشركة بنجاح!"
+        subtitle="إعادة التوجه إلى إدارة الشركات أو إضافة شركة أخرى."
+        cancel-text="إضافة شركة أخرى"
+        action-text="التوجه إلى إدارة الشركات"
+        v-model="successDialogOpen"
+        @cancel="successDialogOpen = false"
+        @action="successDialogOpen = false"
+      />
+
+      <DeleteDialog
+        title="️ هل أنت متأكد من حذف الشركة؟"
+        subtitle="سيؤدي حذف هذه الشركة إلى إزالة جميع بياناتها من النظام، وقد لا يمكن استرجاعها لاحقًا."
+        cancel-text="إلغاء"
+        action-text="نعم، حذف الشركة"
+        v-model="deleteDialogOpen"
+        @cancel="deleteDialogOpen = false"
+        @action="deleteDialogOpen = false"
+      />
+
+      <!-- Delete Confirmation Modal -->
+      <!-- <VDialog v-model="isDeleteDialogVisible" max-width="400px">
       <VCard>
         <VCardTitle class="text-h6 pa-4">تأكيد الحذف</VCardTitle>
         <VCardText class="pa-4">
@@ -327,6 +386,7 @@
         </VCardActions>
       </VCard>
     </VDialog> -->
+    </v-container>
   </div>
 </template>
 
@@ -343,6 +403,11 @@ import Pagination from "@/@core/components/Pagination.vue";
 import DataTable from "@/components/dataTable.vue";
 import Editicon from "@/components/icons/editicon.vue";
 import Trash from "@/components/icons/trash.vue";
+import Fileadd from "@/components/icons/fileadd.vue";
+import Magnifier from "@/components/icons/magnifier.vue";
+import Eyeicon from "@/components/icons/eyeicon.vue";
+import Eyeoff from "@/components/icons/eyeoff.vue";
+import TelInput from "@/components/TelInput.vue";
 const appStore = useAppStore();
 const headers = ref([
   { title: "رقم الترخيص", value: "licenseNumber" },
@@ -360,7 +425,10 @@ const companies = ref([
     licenseNumber: "1966 555 555 555",
     companyName: "34 حاج",
     contactNumber: "2378903242",
-    password: "msn2115",
+    password: {
+      text: "msn2115",
+      show: true,
+    },
     actions: { edit: true },
   },
   {
@@ -368,7 +436,10 @@ const companies = ref([
     licenseNumber: "1966 500 123 456",
     companyName: "20 حاج",
     contactNumber: "1234567890",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
   {
@@ -376,7 +447,10 @@ const companies = ref([
     licenseNumber: "1966 511 234 567",
     companyName: "15 حاج",
     contactNumber: "0987654321",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
   {
@@ -384,7 +458,10 @@ const companies = ref([
     licenseNumber: "1966 522 345 678",
     companyName: "50 حاج",
     contactNumber: "1357924680",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
   {
@@ -392,7 +469,10 @@ const companies = ref([
     licenseNumber: "1966 533 456 789",
     companyName: "25 حاج",
     contactNumber: "2468135790",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
   {
@@ -400,7 +480,10 @@ const companies = ref([
     licenseNumber: "1966 544 567 890",
     companyName: "40 حاج",
     contactNumber: "9876543210",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
   {
@@ -408,7 +491,10 @@ const companies = ref([
     licenseNumber: "1966 544 567 890",
     companyName: "40 حاج",
     contactNumber: "9876543210",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
   {
@@ -416,7 +502,10 @@ const companies = ref([
     licenseNumber: "1966 544 567 890",
     companyName: "40 حاج",
     contactNumber: "9876543210",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
   {
@@ -424,13 +513,49 @@ const companies = ref([
     licenseNumber: "1966 544 567 890",
     companyName: "40 حاج",
     contactNumber: "9876543210",
-    password: "******",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: {
+      text: "msn2115",
+      show: false,
+    },
     actions: { edit: true },
   },
 ]);
 const searchQuery = ref("");
 const currentPage = ref(1);
-const totalItems = ref(0);
+const totalItems = ref(companies.value.length);
 const itemsPerPage = ref(12);
 const totalPages = ref(1);
 const isAddDialogVisible = ref(false);
@@ -449,22 +574,16 @@ const companyToDelete = ref(null);
 const selectedLocation = ref({ lat: 21.4225, lng: 39.8262 });
 
 const formData = ref({
-  name: "",
+  companyName: "",
   license_no: "",
-  center_no: "",
+  city: "",
   phone: "",
   email: "",
-  contact_name: "",
-  pligrims_nationality: "",
-  latitude: "21.4225",
-  longitude: "39.8262",
+  password: "",
   address: "",
-  created_by_id: 1,
 });
 const fileToUpload = ref(null);
-const uploadError = ref({
-  message: "فشل التحميل",
-});
+const uploadError = ref(null);
 const handleFileSelection = (file) => {
   console.log(file);
   fileToUpload.value = file;
@@ -473,13 +592,10 @@ const handleUploadFile = () => {
   isAddDialogVisible.value = false;
   successDialogOpen.value = true;
 };
-// Handle location change from map
-const handleLocationChange = (newLocation) => {
-  if (newLocation) {
-    formData.value.latitude = newLocation.lat.toString();
-    formData.value.longitude = newLocation.lng.toString();
-  }
+const handleShowPass = (item) => {
+  item.password.show = !item.password.show;
 };
+
 // Methods
 const fetchCompanies = async (page = 1) => {
   try {

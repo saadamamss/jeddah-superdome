@@ -2,11 +2,13 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import LoginPage from "@/pages/auth/login";
 import CreatePasswordPage from "@/pages/auth/create-password";
 import ForgotPasswordPage from "@/pages/auth/forgot-password";
+import ResetPasswordPage from "@/pages/auth/reset-password.vue";
 import OTPPage from "@/pages/auth/otp";
 import DashboardHome from "@/pages/home";
 import UsersPage from "@/pages/users/users.vue";
 import NotFoundPage from "@/pages/NotFound";
 import NotificationsPage from "@/pages/notifications/index.vue";
+import Emailtemp from "@/pages/emailtemp.vue";
 
 export default [
   {
@@ -74,6 +76,11 @@ export default [
           requiresPermission: "admin_notifications.view",
         },
       },
+      {
+        path: "/email-template",
+        name: "email-template",
+        component: Emailtemp,
+      },
     ],
   },
   {
@@ -97,6 +104,15 @@ export default [
         path: "create-password",
         name: "create-password",
         component: CreatePasswordPage,
+        meta: {
+          requiresAuth: false,
+          requiresPermission: false,
+        },
+      },
+      {
+        path: "reset-password",
+        name: "reset-password",
+        component: ResetPasswordPage,
         meta: {
           requiresAuth: false,
           requiresPermission: false,

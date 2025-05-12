@@ -1,66 +1,108 @@
 <template>
   <div>
+    <div class="mb-2">
+      <v-breadcrumbs
+        divider=">"
+        :items="[
+          {
+            title: 'الرئيسية',
+            disabled: false,
+            to: '/',
+          },
+          {
+            title: 'إدارة الحجاج',
+            disabled: true,
+          },
+        ]"
+      >
+        <template v-slot:prepend>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5.62519 16.0419H14.3752C15.2957 16.0419 16.0419 15.2957 16.0419 14.3752V8.12519L10.0002 3.95853L3.95853 8.12519V14.3752C3.95853 15.2957 4.70472 16.0419 5.62519 16.0419Z"
+              stroke="#25343E"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M8.12468 13.1244C8.12468 12.2039 8.87088 11.4577 9.79135 11.4577H10.208C11.1285 11.4577 11.8747 12.2039 11.8747 13.1244V16.0411H8.12468V13.1244Z"
+              stroke="#25343E"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </template>
+      </v-breadcrumbs>
+    </div>
     <VCard class="rounded-lg">
       <VCardText>
         <!-- Header Section -->
-        <div class="d-flex align-center justify-space-between mb-6">
-          <h2 class="text-h5 font-weight-bold">إدارة الحجاج</h2>
-          <div class="d-flex align-center ga-2">
-            <!-- Search -->
+        <div
+          class="d-flex flex-wrap align-center justify-space-between mb-6 ga-4"
+        >
+          <!-- Title - Takes full width on small screens, auto on larger -->
+          <h2 class="text-h5 font-weight-bold flex-grow-1 flex-md-grow-0">
+            إدارة الحجاج
+          </h2>
+
+          <!-- Search and Buttons Container - Full width on small screens -->
+          <div
+            class="d-flex flex-wrap align-center justify-md-end ga-2"
+            style="flex-grow: 1; min-width: 0"
+          >
+            <!-- Search - Full width on small screens, fixed width on medium+ -->
             <v-text-field
               v-model="searchQuery"
               placeholder="بحث برقم الهوية أو الإسم أو الشركة"
               rounded="lg"
               clearable
               height="48"
-              class="bg-primary_2 me-3 border-none"
-              style="width: 320px; max-width: 100%"
+              class="bg-primary_2 border-none flex-grow-1"
+              :style="{
+                'min-width': '200px',
+                'max-width': '300px',
+                'margin-inline-end': '12px',
+              }"
               density="compact"
               hide-details
               @update:model-value="handleSearch"
             >
               <template v-slot:prepend-inner>
-                <svg
-                  width="1.3rem"
-                  height="1.3rem"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.4"
-                    d="M16.6666 9.16669C16.6666 5.02455 13.3088 1.66669 9.16663 1.66669C5.02449 1.66669 1.66663 5.02455 1.66663 9.16669C1.66663 13.3088 5.02449 16.6667 9.16663 16.6667C13.3088 16.6667 16.6666 13.3088 16.6666 9.16669Z"
-                    fill="#667178"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M9.16663 1.04169C4.67931 1.04169 1.04163 4.67937 1.04163 9.16669C1.04163 13.654 4.67931 17.2917 9.16663 17.2917C11.1853 17.2917 13.032 16.5555 14.453 15.337L17.8914 18.7753C18.1354 19.0194 18.5312 19.0194 18.7752 18.7753C19.0193 18.5312 19.0193 18.1355 18.7752 17.8914L15.3369 14.4531C16.5554 13.0321 17.2916 11.1854 17.2916 9.16669C17.2916 4.67937 13.6539 1.04169 9.16663 1.04169ZM2.29163 9.16669C2.29163 5.36973 5.36967 2.29169 9.16663 2.29169C12.9636 2.29169 16.0416 5.36973 16.0416 9.16669C16.0416 12.9636 12.9636 16.0417 9.16663 16.0417C5.36967 16.0417 2.29163 12.9636 2.29163 9.16669Z"
-                    fill="#667178"
-                  />
-                </svg>
+                <Magnifier />
               </template>
             </v-text-field>
 
-            <!-- Add Company Button -->
-            <VBtn
-              height="48"
-              elevation="0"
-              class="rounded-lg"
-              prepend-icon="tabler-file-plus"
-              color="primary_2"
-              @click="uploadDialog = true"
-            >
-              إضافة ملف حجاج
-            </VBtn>
-            <VBtn
-              height="48"
-              elevation="0"
-              @click="isAddDialogVisible = true"
-              class="rounded-lg"
-            >
-              إضافة حاج جديدة
-            </VBtn>
+            <!-- Buttons Container - Wraps on small screens -->
+            <div class="d-flex flex-wrap ga-2" style="min-width: fit-content">
+              <!-- Add File Button -->
+              <VBtn
+                height="48"
+                elevation="0"
+                class="rounded-lg flex-grow-1 flex-md-grow-0"
+                :prepend-icon="Fileadd"
+                color="primary_2"
+                @click="uploadDialog = true"
+              >
+                <span class="">إضافة ملف حجاج</span>
+              </VBtn>
+
+              <!-- Add Company Button -->
+              <VBtn
+                height="48"
+                elevation="0"
+                @click="isAddDialogVisible = true"
+                class="rounded-lg flex-grow-1 flex-md-grow-0"
+              >
+                <span class="">إضافة حاج</span>
+              </VBtn>
+            </div>
           </div>
         </div>
 
@@ -68,7 +110,7 @@
           <v-col cols="12">
             <DataTable
               :headers="headers"
-              :items="companies"
+              :items="pilgrims"
               :loading="isLoading"
               class="elevation-0"
               :items-per-page="perPage"
@@ -157,29 +199,39 @@
                 >
                 <VTextField
                   rounded="lg"
-                  v-model="formData.license_no"
-                  placeholder="رقم الترخيص"
+                  v-model="formData.identity"
+                  placeholder="رقم الهوية"
                   required
                 />
               </VCol>
 
               <VCol cols="12">
                 <label for="" class="mb-2 d-block">الشركة التابع لها*</label>
-                <VTextField
+                <v-select
                   rounded="lg"
-                  v-model="formData.center_no"
-                  placeholder="الرياض، مكة، جدة..."
+                  :items="[]"
+                  v-model="formData.company"
+                  placeholder="اختيار"
                   required
-                />
+                ></v-select>
               </VCol>
-
-              <VCol cols="12" md="6">
+              <VCol cols="12">
                 <label for="" class="mb-2 d-block">الجنسية*</label>
                 <v-select
                   rounded="lg"
+                  :items="['سعودى', 'مصرى']"
+                  v-model="formData.nationality"
+                  label="اختيار"
+                  required
+                ></v-select>
+              </VCol>
+              <VCol cols="12" md="6">
+                <label for="" class="mb-2 d-block">الجنس*</label>
+                <v-select
+                  rounded="lg"
                   :items="['ذكر', 'أنثى']"
-                  v-model="formData.center_no"
-                  placeholder="الرياض، مكة، جدة..."
+                  v-model="formData.nationality"
+                  label="اختيار"
                   required
                 ></v-select>
               </VCol>
@@ -188,8 +240,8 @@
                 <v-text-field
                   type="date"
                   rounded="lg"
-                  v-model="formData.center_no"
-                  placeholder="الرياض، مكة، جدة..."
+                  v-model="formData.birth_date"
+                  placeholder="تاريخ الميلاد"
                   required
                 ></v-text-field>
               </VCol>
@@ -248,8 +300,8 @@
             <div>
               <h5 class="mb-2">رفع ملف الحجاج</h5>
               <p class="text-sm text-secondary">
-                يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات الشركات، تأكد
-                أن الملفات تحتوي على المعلومات الكاملة.
+                يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات الحجاج تأكد أن
+                الملفات تحتوي على المعلومات الكاملة.
               </p>
             </div>
             <button @click="uploadDialog = false">
@@ -259,7 +311,7 @@
         </VCardTitle>
 
         <UploadComponent
-          title="ملف الشركات"
+          title="ملف الحجاج"
           btn-text="تحميل نموذج ملف الحجاج"
           @file-selected="handleFileSelection"
           :upload-error="uploadError"
@@ -291,7 +343,7 @@
     <!-- Success Dialog -->
     <SuccessDialog
       title="تمت إضافة الحاج بنجاح!"
-      subtitle="إعادة التوجه إلى إدارة الشركات أو إضافة حاج آخر."
+      subtitle="إعادة التوجه إلى إدارة الحجاج أو إضافة حاج آخر."
       cancel-text="إضافة حاج آخر"
       action-text="التوجه إلى إدارة الحجاج"
       v-model="successDialogOpen"
@@ -326,6 +378,8 @@ import PilgrimDetails from "./pilgrim-details.vue";
 import Editicon from "@/components/icons/editicon.vue";
 import Trash from "@/components/icons/trash.vue";
 import Eyeicon from "@/components/icons/eyeicon.vue";
+import Fileadd from "@/components/icons/fileadd.vue";
+import Magnifier from "@/components/icons/magnifier.vue";
 const appStore = useAppStore();
 const headers = ref([
   { title: "رقم الترخيص", value: "licenseNumber" },
@@ -337,7 +391,7 @@ const headers = ref([
 ]);
 
 // State
-const companies = ref([
+const pilgrims = ref([
   {
     connectedHujjaj: 34,
     licenseNumber: "1966 555 555 555",
@@ -410,10 +464,58 @@ const companies = ref([
     password: "******",
     actions: { edit: true },
   },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: "******",
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: "******",
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: "******",
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: "******",
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: "******",
+    actions: { edit: true },
+  },
+  {
+    connectedHujjaj: 40,
+    licenseNumber: "1966 544 567 890",
+    companyName: "40 حاج",
+    contactNumber: "9876543210",
+    password: "******",
+    actions: { edit: true },
+  },
 ]);
 const searchQuery = ref("");
 const currentPage = ref(1);
-const totalItems = ref(0);
+const totalItems = ref(pilgrims.value.length);
 const itemsPerPage = ref(12);
 const totalPages = ref(1);
 const detailsDialog = ref(false);
@@ -433,16 +535,13 @@ const selectedLocation = ref({ lat: 21.4225, lng: 39.8262 });
 
 const formData = ref({
   name: "",
-  license_no: "",
-  center_no: "",
+  identity: "",
+  company: "",
+  nationality: "",
+  gender: "",
+  birth_date: "",
   phone: "",
   email: "",
-  contact_name: "",
-  pligrims_nationality: "",
-  latitude: "21.4225",
-  longitude: "39.8262",
-  address: "",
-  created_by_id: 1,
 });
 
 const fileToUpload = ref(null);
@@ -456,13 +555,6 @@ const handleFileSelection = (file) => {
 const handleUploadFile = () => {
   isAddDialogVisible.value = false;
   successDialogOpen.value = true;
-};
-// Handle location change from map
-const handleLocationChange = (newLocation) => {
-  if (newLocation) {
-    formData.value.latitude = newLocation.lat.toString();
-    formData.value.longitude = newLocation.lng.toString();
-  }
 };
 
 // Methods
@@ -515,16 +607,13 @@ const handleSubmit = async () => {
     // Reset form
     formData.value = {
       name: "",
-      license_no: "",
-      center_no: "",
+      identity: "",
+      company: "",
+      nationality: "",
+      gender: "",
+      birth_date: "",
       phone: "",
       email: "",
-      contact_name: "",
-      pligrims_nationality: "",
-      latitude: "21.4225",
-      longitude: "39.8262",
-      address: "",
-      created_by_id: 1,
     };
     selectedLocation.value = { lat: 21.4225, lng: 39.8262 }; // Reset map location
   } catch (error) {

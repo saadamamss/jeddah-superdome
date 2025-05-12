@@ -25,9 +25,9 @@ const emit = defineEmits(["click:readAllNotifications"]);
 <template>
   <VBtn height="48" color="default" class="btn-icon" elevation="0">
     <VBadge
-      :model-value="!!props.notifications?.length"
+      :model-value="!!props.notifications?.length || 3"
       color="primary"
-      content="1"
+      content="3"
     >
       <svg
         width="24"
@@ -36,11 +36,6 @@ const emit = defineEmits(["click:readAllNotifications"]);
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path
-          opacity="0.4"
-          d="M5.15857 11.491C5.08509 12.887 5.16956 14.373 3.92233 15.3084C3.34183 15.7438 3.0002 16.427 3.0002 17.1527C3.0002 18.1508 3.782 19 4.8002 19H19.2002C20.2184 19 21.0002 18.1508 21.0002 17.1527C21.0002 16.427 20.6586 15.7438 20.0781 15.3084C18.8308 14.373 18.9153 12.887 18.8418 11.491C18.6503 7.85223 15.644 5 12.0002 5C8.35637 5 5.35008 7.85222 5.15857 11.491Z"
-          fill="#667178"
-        />
         <path
           fill-rule="evenodd"
           clip-rule="evenodd"

@@ -38,65 +38,73 @@ const submitEmail = async () => {
 
 <template>
   <VRow no-gutters class="auth-wrapper text-black">
+    <div class="overlay"></div>
     <VCol
       cols="12"
       sm="10"
       md="8"
       lg="5"
-      class="d-flex flex-column align-center justify-center py-4 pa-0 mx-auto"
+      class="d-flex content flex-column align-center justify-center py-4 pa-0 mx-auto"
     >
-      <div class="w-100 d-flex justify-center pb-6 pt-3 px-4">
-        <img width="280" src="/logo-colored.svg" alt="جدة سوبردوم" />
-      </div>
-      <VCard flat class="w-100 app-logo py-4 px-2 px-sm-6 px-xl-12 rounded-xl">
-        <VCardTitle style="flex: 0">
-          <h1 class="text-h5 text-sm-h4 font-weight-semibold mb-1">
+      <div
+        class="w-100 d-flex flex-column align-center justify-center pb-6 pt-3 px-4"
+      >
+        <img width="140" src="/jeddah-superdome.svg" alt="جدة سوبردوم" />
+        <div>
+          <h1 align="center" class="text-5xl pt-12 py-4">
             هل نسيت كلمة المرور؟
           </h1>
-          <p class="mb-4 text-lg" style="color: #75797c">
+          <p class="text-secondary text-center text-lg">
             أدخل بريدك الإلكتروني المسجل لإرسال رمز التحقق.
           </p>
-        </VCardTitle>
-        <v-divider class="my-3" />
-        <VCardText style="flex: 0" class="px-4">
-          <VForm @submit.prevent="submitEmail" class="mb-8">
-            <VRow>
-              <VCol cols="12" class="py-1">
-                <label class="d-block text-subtitle-1 mb-2 text-dark">
-                  البريد الإلكتروني*
-                </label>
-                <VTextField
-                  v-model="formState.email"
-                  type="email"
-                  bg-color="white"
-                  density="comfortable"
-                  placeholder="example@domain.com"
-                  rounded="lg"
-                  :rules="[requiredValidator, emailValidator]"
-                  dir="ltr"
-                />
-              </VCol>
+        </div>
+      </div>
 
-              <VCol cols="12" class="py-1">
-                <div class="d-flex align-center justify-space-between mt-6">
-                  <div></div>
+      <VCardText
+        style="max-width: 500px"
+        class="w-100 app-logo py-4 px-5 px-sm-6 px-xl-12"
+      >
+        <VForm @submit.prevent="submitEmail" class="mb-8">
+          <VRow>
+            <VCol cols="12" class="py-1">
+              <label class="d-block text-subtitle-1 mb-2 text-dark">
+                البريد الإلكتروني*
+              </label>
+              <VTextField
+                v-model="formState.email"
+                type="email"
+                bg-color="white"
+                density="comfortable"
+                placeholder="example@domain.com"
+                rounded="lg"
+                :rules="[requiredValidator, emailValidator]"
+                dir="ltr"
+              />
+            </VCol>
 
-                  <VBtn
-                    rounded="pill"
-                    :loading="isSubmitting"
-                    type="submit"
-                    size="large"
-                    height="50"
-                    class="px-10"
-                  >
-                    التالي
-                  </VBtn>
-                </div>
-              </VCol>
-            </VRow>
-          </VForm>
-        </VCardText>
-      </VCard>
+            <VCol cols="12" class="py-1 mt-8">
+              <VBtn
+                rounded="pill"
+                :loading="isSubmitting"
+                type="submit"
+                size="large"
+                height="50"
+                class="px-10 w-100"
+              >
+                إرسال
+              </VBtn>
+            </VCol>
+          </VRow>
+        </VForm>
+      </VCardText>
+    </VCol>
+    <VCol cols="12" class="content py-8 mt-10">
+      <div class="text-center mb-10">
+        <img src="/zimam-qwa.svg" alt="zimam" />
+      </div>
+      <p class="text-secondary text-center">
+        © جميع حقوق الطبع و النشر محفوظة 2025 - Jeddah Superdome
+      </p>
     </VCol>
   </VRow>
 </template>
@@ -109,7 +117,6 @@ const submitEmail = async () => {
 }
 
 .auth-wrapper {
-  background: url(/bg.webp) no-repeat center;
   background-size: cover;
 }
 </style>

@@ -2,33 +2,118 @@
 import { useAppStore } from "@/stores/app";
 import axios from "@/plugins/axios";
 import { hasPermission } from "@core/utils/permissions";
-import Pagination from "@/@core/components/Pagination";
 import UserCard from "@/@core/components/widgets/userCard";
 import DeleteObserverConfirmationDialog from "./components/DeleteObserverConfirmationDialog";
 import DeleteOperatorConfirmationDialog from "./components/DeleteOperatorConfirmationDialog";
 import DeleteConfirmationDialog from "./components/DeleteConfirmationDialog";
 import AddNewUserDialog from "./components/AddNewUserDialog.vue";
 import UpdateUserDialog from "./components/UpdateUserDialog.vue";
+import Magnifier from "@/components/icons/magnifier.vue";
+import DataTable from "@/components/dataTable.vue";
+import Pagination from "@/@core/components/Pagination.vue";
+import CustomeSwitch from "@/components/CustomeSwitch.vue";
+import Editicon from "@/components/icons/editicon.vue";
+import Trash from "@/components/icons/trash.vue";
+import Fileadd from "@/components/icons/fileadd.vue";
+import UploadComponent from "@/components/UploadComponent.vue";
+import SuccessDialog from "@/components/SuccessDialog.vue";
+import DeleteDialog from "@/components/DeleteDialog.vue";
 // import UserWidget from "@/@core/components/widgets/UserWidget.vue";
-
+const headers = [
+  { title: "رقم الهوية", value: "identityNumber", align: "start" },
+  { title: "الاسم", value: "name" },
+  { title: "الدور", value: "role" },
+  { title: "رقم الجوال", value: "phone" },
+  { title: "الحالة", value: "status" },
+  { title: "", value: "actions" },
+];
+const users = ref([
+  {
+    identityNumber: "0987654321",
+    name: "مجمد الفحطاني عبدالله",
+    role: "مشرف ميداني",
+    phone: "966 098 8889",
+    status: "active",
+  },
+  {
+    identityNumber: "1234567890",
+    name: "علي السعيد",
+    role: "مشرف ميداني",
+    phone: "966 123 4567",
+    status: "active",
+  },
+  {
+    identityNumber: "2345678901",
+    name: "فاطمة الرهواء",
+    role: "مشرف ميداني",
+    phone: "966 234 5678",
+    status: "inactive",
+  },
+  {
+    identityNumber: "3456789012",
+    name: "يوسف الشمري",
+    role: "مشرف ميداني",
+    phone: "966 345 6789",
+    status: "active",
+  },
+  {
+    identityNumber: "4567890123",
+    name: "سارة الفحطاني",
+    role: "مشرف ميداني",
+    phone: "966 456 7890",
+    status: "inactive",
+  },
+  {
+    identityNumber: "5678901234",
+    name: "أحمد العلي",
+    role: "مشرف ميداني",
+    phone: "966 567 8901",
+    status: "active",
+  },
+  {
+    identityNumber: "6789012345",
+    name: "مع الفرجان",
+    role: "مشرف ميداني",
+    phone: "966 678 9012",
+    status: "active",
+  },
+  {
+    identityNumber: "7890123456",
+    name: "طارق اجلهي",
+    role: "مشرف ميداني",
+    phone: "966 789 0123",
+    status: "inactive",
+  },
+]);
 const appStore = useAppStore();
-const isLoading = ref(true);
+const isLoading = ref(false);
 const perPage = ref(6);
 const currentPage = ref(1);
 const search = ref("");
 
 // Data for users
-const users = ref([]);
+
 const totalUsers = ref(0);
 const userDialog = ref(false);
 const isUpdatingDialog = ref(false);
 const userIdToDelete = ref(null);
 const filterDialog = ref(false);
+const isAddDialogVisible = ref(false);
+const uploadDialog = ref(false);
+const successDialogOpen = ref(false);
+const deleteDialogOpen = ref(false);
 const deleteDialog = ref(false);
 const isDeletingObserver = ref(false);
 const isDeletingOperator = ref(false);
 const isDeleting = ref(false);
 
+const formData = ref({
+  name: "",
+  email: "",
+  phone: "",
+  status: "",
+  role: "",
+});
 // Filter form data
 const filterForm = ref({
   role_id: null,
@@ -55,6 +140,18 @@ const districts = [
   "الزاهر",
 ];
 
+const fileToUpload = ref(null);
+const uploadError = ref({
+  message: "فشل التحميل",
+});
+const handleFileSelection = (file) => {
+  console.log(file);
+  fileToUpload.value = file;
+};
+const handleUploadFile = () => {
+  isAddDialogVisible.value = false;
+  successDialogOpen.value = true;
+};
 const currentUserId = ref(null);
 const handleUpdateUserDialog = (userId) => {
   currentUserId.value = userId;
@@ -210,7 +307,7 @@ const handleUserUpdated = () => {
 };
 
 onMounted(() => {
-  fetchUsers();
+  // fetchUsers();
 });
 </script>
 
@@ -258,235 +355,275 @@ onMounted(() => {
           </template>
         </v-breadcrumbs>
       </div>
-      <VCard elevation="0" class="rounded-lg px-4 bg-light-white">
-        <v-card-title class="pt-4 pb-6">
-          <div class="d-flex align-center justify-space-between gap-4">
+
+      <VCard class="rounded-lg">
+        <VCardText>
+          <!-- Header Section -->
+          <div
+            class="d-flex flex-wrap align-center justify-space-between mb-6 ga-4"
+          >
             <h2 class="text-h5 font-weight-bold">إدارة المستخدمين</h2>
-            <div class="d-flex align-center gap-2">
+
+            <!-- Search -->
+            <div
+              class="d-flex flex-wrap align-center justify-md-end ga-2"
+              style="flex-grow: 1; min-width: 0"
+            >
               <v-text-field
-                v-model="search"
-                label="البحث عن مستخدم... "
+                v-model="searchQuery"
+                placeholder="بحث برقم الهوية او الإسم"
                 rounded="lg"
                 clearable
                 height="48"
-                class="bg-white"
-                style="width: 320px; max-width: 100%"
+                class="bg-primary_2 border-none flex-grow-1"
+                :style="{
+                  'min-width': '200px',
+                  'max-width': '300px',
+                  'margin-inline-end': '12px',
+                }"
+                density="compact"
+                hide-details
+                @update:model-value="handleSearch"
               >
                 <template v-slot:prepend-inner>
-                  <v-icon>mdi-magnify</v-icon>
+                  <Magnifier />
                 </template>
               </v-text-field>
-              <!--
-                  <VBtn
-                    height="48"
-                    elevation="0"
-                    class="rounded-lg"
-                    variant="outlined"
-                    @click="filterDialog = true"
-                  >
-                    فلترة
-                  </VBtn> -->
-              <VBtn
-                color="default"
-                class="btn-icon border"
-                elevation="0"
-                v-bind="props"
-                :variant="hasActiveFilters ? 'flat' : 'outlined'"
-                @click="filterDialog = true"
-              >
-                <svg
-                  width="1.3rem"
-                  height="1.3rem"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.4"
-                    d="M8.85746 12.5061C6.36901 10.6456 4.59564 8.59915 3.62734 7.44867C3.3276 7.09253 3.22938 6.8319 3.17033 6.3728C2.96811 4.8008 2.86701 4.0148 3.32795 3.5074C3.7889 3 4.60404 3 6.23433 3H17.7657C19.396 3 20.2111 3 20.672 3.5074C21.133 4.0148 21.0319 4.8008 20.8297 6.37281C20.7706 6.83191 20.6724 7.09254 20.3726 7.44867C19.403 8.60062 17.6261 10.6507 15.1326 12.5135C14.907 12.6821 14.7583 12.9567 14.7307 13.2614C14.4837 15.992 14.2559 17.4876 14.1141 18.2442C13.8853 19.4657 12.1532 20.2006 11.226 20.8563C10.6741 21.2466 10.0043 20.782 9.93278 20.1778C9.79643 19.0261 9.53961 16.6864 9.25927 13.2614C9.23409 12.9539 9.08486 12.6761 8.85746 12.5061Z"
-                    fill="#B69265"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M6.18176 2.24732C6.1991 2.24732 6.21649 2.24732 6.23394 2.24732L17.8175 2.24732C18.588 2.24728 19.2422 2.24725 19.7583 2.31762C20.3046 2.3921 20.8269 2.56023 21.2268 3.00041C21.6302 3.44445 21.7406 3.97957 21.7491 4.52659C21.757 5.03745 21.6753 5.67204 21.5801 6.41193L21.5732 6.46581C21.5395 6.72764 21.489 6.98088 21.3836 7.23442C21.2767 7.49184 21.1294 7.71109 20.946 7.92897C19.9664 9.09285 18.1451 11.1962 15.5811 13.1117C15.5396 13.1427 15.4872 13.2161 15.4773 13.3263C15.2282 16.0792 15.009 17.5358 14.8509 18.3796C14.6799 19.2921 13.9839 19.9237 13.3838 20.3585C13.0697 20.5861 12.7364 20.791 12.4394 20.9717C12.4156 20.9862 12.3921 21.0005 12.3689 21.0146C12.0915 21.1833 11.8557 21.3267 11.6586 21.466C11.1181 21.8482 10.4945 21.8214 10.0179 21.5437C9.56811 21.2817 9.25159 20.8038 9.1876 20.2633C9.04713 19.0769 8.79249 16.7542 8.51139 13.3199C8.50238 13.2097 8.48517 13.1778 8.48373 13.1751C8.48275 13.1733 8.48022 13.1686 8.47182 13.1594C8.46243 13.149 8.44366 13.1308 8.40798 13.1041C5.84915 11.191 4.03146 9.09132 3.05314 7.92893C2.87044 7.71185 2.71884 7.49783 2.61076 7.23754C2.50494 6.98273 2.45983 6.7282 2.42607 6.46581C2.42375 6.44778 2.42144 6.42982 2.41914 6.41192C2.32392 5.67203 2.24226 5.03744 2.25016 4.52659C2.25863 3.97957 2.36905 3.44445 2.77244 3.00041C3.17232 2.56023 3.69466 2.3921 4.24094 2.31762C4.75704 2.24725 5.4112 2.24728 6.18176 2.24732ZM4.44357 3.80387C4.05947 3.85624 3.94377 3.94181 3.88271 4.00903C3.82515 4.07239 3.75565 4.18397 3.74998 4.5498C3.74395 4.93944 3.80975 5.46543 3.91382 6.27444C3.94273 6.49924 3.96807 6.59485 3.99606 6.66228C4.02179 6.72422 4.06736 6.80453 4.20077 6.96304C5.15905 8.10163 6.8881 10.0949 9.30617 11.9027C9.50044 12.048 9.67868 12.2278 9.80763 12.4699C9.93468 12.7085 9.98668 12.9567 10.0064 13.1975C10.286 16.6131 10.5388 18.9178 10.6772 20.0869C10.6814 20.1226 10.6944 20.1578 10.7144 20.1884C10.7348 20.2197 10.7575 20.2386 10.773 20.2476C10.7749 20.2488 10.7767 20.2497 10.7781 20.2504C10.7817 20.2485 10.7865 20.2456 10.7926 20.2413C11.0347 20.0701 11.3157 19.8993 11.581 19.7382C11.6074 19.7221 11.6336 19.7062 11.6597 19.6903C11.9585 19.5085 12.2442 19.3318 12.5036 19.1439C13.0505 18.7477 13.3187 18.4124 13.3766 18.1034C13.523 17.3216 13.7369 15.9154 13.9834 13.1911C14.0286 12.692 14.2736 12.2161 14.6833 11.91C17.1063 10.0998 18.8389 8.10302 19.7985 6.96301C19.9148 6.82476 19.9666 6.73562 19.9984 6.65892C20.0319 6.57834 20.06 6.47171 20.0854 6.27444C20.1895 5.46543 20.2553 4.93944 20.2493 4.5498C20.2436 4.18397 20.1741 4.07239 20.1165 4.00903C20.0555 3.94181 19.9398 3.85624 19.5557 3.80387C19.153 3.74897 18.6023 3.74732 17.7653 3.74732H6.23394C5.3969 3.74732 4.84624 3.74897 4.44357 3.80387ZM10.7703 20.2539C10.7703 20.2539 10.7708 20.2537 10.7717 20.2535L10.7703 20.2539Z"
-                    fill="#B69265"
-                  />
-                </svg>
-              </VBtn>
 
-              <VBtn
-                v-if="hasPermission('users.create')"
-                height="48"
-                elevation="0"
-                class="rounded-lg"
-                @click="userDialog = true"
-              >
-                إضافة مستخدم جديد
-              </VBtn>
+              <!-- Add Company Button -->
+              <div class="d-flex flex-wrap ga-2" style="min-width: fit-content">
+                <VBtn
+                  height="48"
+                  elevation="0"
+                  class="rounded-lg flex-grow-1 flex-md-grow-0"
+                  :prepend-icon="Fileadd"
+                  color="primary_2"
+                  @click="uploadDialog = true"
+                >
+                  إضافة ملف المستخدمين
+                </VBtn>
+                <VBtn
+                  height="48"
+                  elevation="0"
+                  @click="isAddDialogVisible = true"
+                  class="rounded-lg flex-grow-1 flex-md-grow-0"
+                >
+                  إضافة مستخدم جديد
+                </VBtn>
+              </div>
             </div>
           </div>
 
-          <div v-if="isLoading">
-            <v-row>
-              <v-col v-for="item in 4" :key="item" cols="6" sm="6" md="3">
-                <VCard elevation="0">
-                  <v-card-text class="px-1 py-2">
-                    <v-skeleton-loader
-                      class="mx-auto"
-                      elevation="0"
-                      max-width="400"
-                      type="list-item-two-line, table-heading"
-                    ></v-skeleton-loader>
-                  </v-card-text>
-                </VCard>
-              </v-col>
-            </v-row>
-          </div>
+          <v-row>
+            <v-col cols="12">
+              <DataTable
+                :headers="headers"
+                :items="users"
+                :loading="isLoading"
+                class="elevation-0"
+                :items-per-page="perPage"
+                v-model:page="currentPage"
+                :hide-default-footer="true"
+              >
+                <template #[`item.status`]="{ item }">
+                  <CustomeSwitch
+                    :_key="item.identityNumber"
+                    v-model="item.status"
+                  />
+                </template>
 
-          <v-row v-else class="mt-6">
-            <v-col
-              v-for="user in users"
-              :key="user.id"
-              cols="12"
-              sm="6"
-              md="4"
-              lg="4"
-              class="pa-3"
-            >
-              <UserCard
-                :user="user"
-                @edit="handleUpdateUserDialog(user.id)"
-                @delete="confirmDelete(user)"
-                :can-delete="hasPermission('users.delete')"
-                :can-edit="hasPermission('users.edit')"
+                <template #[`item.actions`]="{ item }">
+                  <div class="d-flex gap-2">
+                    <v-btn
+                      size="small"
+                      class="text-black text-sm rounded-lg"
+                      color="#fff"
+                      :prepend-icon="Editicon"
+                    >
+                      تعديل
+                    </v-btn>
+                    <v-btn
+                      size="small"
+                      class="text-error text-sm rounded-lg"
+                      color="#fff"
+                      :prepend-icon="Trash"
+                      @click="deleteDialogOpen = true"
+                    >
+                      حذف
+                    </v-btn>
+                  </div>
+                </template>
+              </DataTable>
+
+              <!-- Pagination -->
+              <Pagination
+                :total-items="totalItems"
+                v-model:per-page="perPage"
+                v-model:page="currentPage"
               />
             </v-col>
-            <v-col
-              v-if="!isLoading && users.length === 0"
-              cols="12"
-              class="text-center"
-            >
-              <p class="text-medium-emphasis">لا يوجد مستخدمين</p>
-            </v-col>
           </v-row>
-
-          <!-- pagination -->
-          <Pagination
-            :total-items="totalUsers"
-            v-model:per-page="perPage"
-            v-model:page="currentPage"
-          />
-        </v-card-title>
+        </VCardText>
       </VCard>
     </v-container>
+    <!-- Add Company Dialog -->
+    <VDialog v-model="isAddDialogVisible" max-width="600px">
+      <VCard rounded="lg">
+        <VCardTitle class="bg-primary_2 py-3 rounded-lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <h5 class="mb-2">إضافة مستخدم</h5>
+              <p class="text-sm text-secondary mb-0">
+                يرجى تعبئة بيانات المستخدم بدقة. الحقول الإلزامية محددة بعلامة
+                (*).
+              </p>
+            </div>
+          </div>
+        </VCardTitle>
+        <VCardText>
+          <VForm ref="form">
+            <VRow>
+              <VCol cols="12">
+                <label for="" class="mb-2 d-block">اسم الكامل *</label>
+                <VTextField
+                  rounded="lg"
+                  v-model="formData.name"
+                  placeholder="الإسم الكامل الرسمى"
+                  required
+                />
+              </VCol>
+              <VCol cols="12">
+                <label for="" class="mb-2 d-block">البريد الإلكتروني*</label>
+                <VTextField
+                  rounded="lg"
+                  v-model="formData.email"
+                  placeholder="البريد الإلكتروني"
+                  type="email"
+                  required
+                />
+              </VCol>
+              <VCol cols="12">
+                <label for="" class="mb-2 d-block">رقم الجوال*</label>
+                <VTextField
+                  rounded="lg"
+                  v-model="formData.phone"
+                  placeholder="رقم الجوال"
+                  required
+                />
+              </VCol>
+              <VCol cols="12">
+                <label for="" class="mb-2 d-block">الحالة *</label>
+                <v-select
+                  rounded="lg"
+                  v-model="formData.status"
+                  label="اختيار"
+                  required
+                ></v-select>
+              </VCol>
 
-    <!-- Add User Dialog -->
-    <template v-if="hasPermission('users.create')">
-      <AddNewUserDialog
-        v-if="userDialog"
-        v-model="userDialog"
-        @close="userDialog = false"
-        @added="handleUserAdded"
-      />
-    </template>
+              <VCol cols="12">
+                <label for="" class="mb-2 d-block">الدور</label>
+                <v-select
+                  rounded="lg"
+                  v-model="formData.role"
+                  label="اختيار"
+                  required
+                ></v-select>
+              </VCol>
+            </VRow>
+          </VForm>
+        </VCardText>
 
-    <!-- Update User Dialog  -->
-    <template v-if="hasPermission('users.edit')">
-      <UpdateUserDialog
-        v-if="isUpdatingDialog"
-        v-model="isUpdatingDialog"
-        :user-id="currentUserId"
-        @close="isUpdatingDialog = false"
-        @updated="handleUserUpdated"
-      />
-    </template>
-
-    <!-- Delete Confirmation Dialog -->
-    <template v-if="hasPermission('users.delete')">
-      <DeleteConfirmationDialog
-        v-model="deleteDialog"
-        @close="closeDeletingDialog"
-        @delete="deleteUser"
-        :isDeleting="isDeleting"
-      />
-
-      <DeleteObserverConfirmationDialog
-        v-model="isDeletingObserver"
-        @close="closeDeletingDialog"
-        @delete="deleteUser"
-        :isDeleting="isDeleting"
-      />
-
-      <DeleteOperatorConfirmationDialog
-        v-model="isDeletingOperator"
-        @close="closeDeletingDialog"
-        @delete="deleteUser"
-        :isDeleting="isDeleting"
-      />
-    </template>
-
-    <!-- Filter Dialog -->
-    <v-dialog v-model="filterDialog" max-width="500px">
-      <v-card class="pa-4">
-        <v-card-title
-          class="text-h5 border-b border-color-light-white pb-4 px-0"
+        <VCardActions
+          class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
         >
-          فلترة
-        </v-card-title>
-        <v-card-text class="px-4">
-          <v-form>
-            <v-row class="">
-              <v-col cols="12" class="bg-gray-1 mt-4">
-                <label class="mb-2 d-block">فلترة حسب الدور</label>
-                <v-radio-group v-model="filterForm.role_id" class="mt-2">
-                  <div class="d-flex flex-row flex-wrap">
-                    <v-radio
-                      v-for="role in roles"
-                      :key="role.id"
-                      :label="role.name"
-                      :value="role.id"
-                      style="width: 50%"
-                      class="mx-0 flex-shrink-0"
-                    ></v-radio>
-                  </div>
-                </v-radio-group>
-              </v-col>
-
-              <v-col cols="12" class="bg-gray-1 mt-4">
-                <label class="mb-2 d-block">فلترة حسب الأحياء</label>
-                <v-radio-group v-model="filterForm.district" class="mt-2">
-                  <div class="d-flex flex-row flex-wrap">
-                    <v-radio
-                      v-for="district in districts"
-                      :key="district"
-                      :label="district"
-                      :value="district"
-                      style="width: 50%"
-                      class="mx-0"
-                    ></v-radio>
-                  </div>
-                </v-radio-group>
-              </v-col>
-            </v-row>
-          </v-form>
-        </v-card-text>
-        <v-card-actions class="mt-4 pt-4 border-t px-0">
-          <v-spacer></v-spacer>
-          <v-btn
-            variant="text"
-            color="error"
-            class="bg-gray-1 w-50"
-            @click="resetFilter"
+          <VBtn
+            variant="outlined"
+            class="text-black rounded-xl bg-white"
+            @click="isAddDialogVisible = false"
           >
-            إعادة تعيين
-          </v-btn>
-          <v-btn class="bg-primary w-50 text-white" @click="applyFilter">
-            تطبيق الفلترة
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+            إلغاء
+          </VBtn>
+          <VBtn
+            color="primary"
+            variant="flat"
+            class="rounded-xl px-8"
+            @click="handleUploadFile"
+          >
+            إضافة
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
+
+    <!-- upload company file Dialog -->
+    <VDialog v-model="uploadDialog" max-width="700px">
+      <VCard rounded="lg" class="rounded-lg">
+        <VCardTitle class="bg-primary_2 py-3 rounded-lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <h5 class="mb-2">رفع ملف المستخدمين</h5>
+              <p class="text-sm text-secondary">
+                يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات المستخدمين،
+                تأكد أن الملفات تحتوي على المعلومات الكاملة.
+              </p>
+            </div>
+            <button @click="uploadDialog = false">
+              <v-icon size="sm">mdi-close</v-icon>
+            </button>
+          </div>
+        </VCardTitle>
+
+        <UploadComponent
+          title="ملف المستخدمين"
+          btn-text="تحميل نموذج ملف المستخدمين"
+          @file-selected="handleFileSelection"
+          :upload-error="uploadError"
+          @reupload-file="handleFileSelection"
+        />
+
+        <VCardActions
+          class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
+        >
+          <VBtn
+            variant="outlined"
+            class="text-black rounded-xl bg-white"
+            @click="uploadDialog = false"
+          >
+            إلغاء
+          </VBtn>
+          <VBtn
+            color="primary"
+            variant="flat"
+            class="rounded-xl"
+            :disabled="!fileToUpload"
+          >
+            إضافة
+          </VBtn>
+        </VCardActions>
+      </VCard>
+    </VDialog>
+
+    <!-- Success Dialog -->
+    <SuccessDialog
+      title="تمت إضافة المستخدم بنجاح!"
+      subtitle="إعادة التوجه إلى إدارة المستخدمين أو إضافة مستخدم أخرى."
+      cancel-text="إضافة مستخدم أخرى"
+      action-text="التوجه إلى إدارة المستخدمين"
+      v-model="successDialogOpen"
+      @cancel="successDialogOpen = false"
+      @action="successDialogOpen = false"
+    />
+
+    <DeleteDialog
+      title="️ هل أنت متأكد من حذف المستخدم؟"
+      subtitle="سيؤدي حذف هذه المستخدم إلى إزالة جميع بياناتها من النظام، وقد لا يمكن استرجاعها لاحقًا."
+      cancel-text="إلغاء"
+      action-text="نعم، حذف المستخدم"
+      v-model="deleteDialogOpen"
+      @cancel="deleteDialogOpen = false"
+      @action="deleteDialogOpen = false"
+    />
   </div>
 </template>
 

@@ -2,7 +2,7 @@
   <VDialog max-width="650px" v-model="isOpen">
     <VCard>
       <VCardTitle class="text-h6 pa-4 text-center">
-        <img src="/imgs/icons/trash-icon-dialog.svg" alt="" />
+        <Trashfordialog />
       </VCardTitle>
       <VCardText class="pa-4">
         <h3 class="text-primary text-center mb-2">{{ props.title }}</h3>
@@ -31,6 +31,8 @@
   </VDialog>
 </template>
 <script setup>
+import Trashfordialog from "./icons/trashfordialog.vue";
+
 const props = defineProps(["title", "subtitle", "cancelText", "actionText"]);
 const isOpen = defineModel();
 const emit = defineEmits(["cancel", "action"]);

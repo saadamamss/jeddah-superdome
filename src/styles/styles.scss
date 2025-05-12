@@ -276,11 +276,31 @@ body {
   }
 
   .auth-wrapper {
-    background: url(/imgs/bg.webp) no-repeat center;
     background-size: cover;
+    background-color: #fff !important;
+    overflow: hidden;
+    .content {
+      position: relative;
+      z-index: 10;
+    }
+    .overlay {
+      position: absolute;
+      width: 100%;
+      height: 200vh;
+      background-color: #f8f9f9;
+      border-radius: 50%;
+      top: -105vh;
+      z-index: 1;
+    }
   }
 }
-
+@media (max-width: 800px) {
+  .overlay {
+    height: 100vh !important;
+    top: 0vh !important;
+    border-radius: 0px !important;
+  }
+}
 .min-h-500 {
   min-height: 500px;
 }

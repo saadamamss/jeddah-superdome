@@ -182,11 +182,10 @@ table tr td,
 table tr th {
   white-space: nowrap;
 }
-.v-btn--size-small{
-  height:40px !important
+.v-btn--size-small {
+  height: 40px !important;
 }
 .v-slide-group__container {
   align-items: center;
 }
-
 </style>

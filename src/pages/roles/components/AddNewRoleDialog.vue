@@ -177,7 +177,7 @@ onMounted(() => {
                 variant="text"
                 class="mb-1 rounded-lg"
                 density="comfortable"
-                style="background-color: #f9f9f9"
+                style="background-color: #ffffff"
                 placeholder="وصف الدور..."
               ></v-textarea>
             </v-col>

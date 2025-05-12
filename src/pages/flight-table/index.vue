@@ -1,65 +1,101 @@
 <template>
   <div>
+    <div class="mb-2">
+      <v-breadcrumbs
+        divider=">"
+        :items="[
+          {
+            title: 'الرئيسية',
+            disabled: false,
+            to: '/',
+          },
+          {
+            title: 'إدارة الرحلات',
+            disabled: true,
+          },
+        ]"
+      >
+        <template v-slot:prepend>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M5.62519 16.0419H14.3752C15.2957 16.0419 16.0419 15.2957 16.0419 14.3752V8.12519L10.0002 3.95853L3.95853 8.12519V14.3752C3.95853 15.2957 4.70472 16.0419 5.62519 16.0419Z"
+              stroke="#25343E"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M8.12468 13.1244C8.12468 12.2039 8.87088 11.4577 9.79135 11.4577H10.208C11.1285 11.4577 11.8747 12.2039 11.8747 13.1244V16.0411H8.12468V13.1244Z"
+              stroke="#25343E"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </template>
+      </v-breadcrumbs>
+    </div>
     <VCard class="rounded-lg">
       <VCardText>
         <!-- Header Section -->
-        <div class="d-flex align-center justify-space-between mb-6">
+        <div
+          class="d-flex flex-wrap align-center justify-space-between mb-6 ga-4"
+        >
           <h2 class="text-h5 font-weight-bold">جدول الرحلات</h2>
-          <div class="d-flex align-center ga-2">
-            <!-- Search -->
+
+          <!-- Search -->
+          <div
+            class="d-flex flex-wrap align-center justify-md-end ga-2"
+            style="flex-grow: 1; min-width: 0"
+          >
             <v-text-field
               v-model="searchQuery"
-              placeholder="بحث برقم الرحلة   "
+              placeholder="بحث برقم الرحلة"
               rounded="lg"
               clearable
               height="48"
-              class="bg-primary_2 me-3 border-none"
-              style="width: 320px; max-width: 100%"
+              class="bg-primary_2 border-none flex-grow-1"
+              :style="{
+                'min-width': '200px',
+                'max-width': '300px',
+                'margin-inline-end': '12px',
+              }"
               density="compact"
               hide-details
               @update:model-value="handleSearch"
             >
               <template v-slot:prepend-inner>
-                <svg
-                  width="1.3rem"
-                  height="1.3rem"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    opacity="0.4"
-                    d="M16.6666 9.16669C16.6666 5.02455 13.3088 1.66669 9.16663 1.66669C5.02449 1.66669 1.66663 5.02455 1.66663 9.16669C1.66663 13.3088 5.02449 16.6667 9.16663 16.6667C13.3088 16.6667 16.6666 13.3088 16.6666 9.16669Z"
-                    fill="#667178"
-                  />
-                  <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M9.16663 1.04169C4.67931 1.04169 1.04163 4.67937 1.04163 9.16669C1.04163 13.654 4.67931 17.2917 9.16663 17.2917C11.1853 17.2917 13.032 16.5555 14.453 15.337L17.8914 18.7753C18.1354 19.0194 18.5312 19.0194 18.7752 18.7753C19.0193 18.5312 19.0193 18.1355 18.7752 17.8914L15.3369 14.4531C16.5554 13.0321 17.2916 11.1854 17.2916 9.16669C17.2916 4.67937 13.6539 1.04169 9.16663 1.04169ZM2.29163 9.16669C2.29163 5.36973 5.36967 2.29169 9.16663 2.29169C12.9636 2.29169 16.0416 5.36973 16.0416 9.16669C16.0416 12.9636 12.9636 16.0417 9.16663 16.0417C5.36967 16.0417 2.29163 12.9636 2.29163 9.16669Z"
-                    fill="#667178"
-                  />
-                </svg>
+                <Magnifier />
               </template>
             </v-text-field>
 
             <!-- Add Company Button -->
-            <VBtn
-              height="48"
-              elevation="0"
-              class="rounded-lg"
-              prepend-icon="tabler-file-plus"
-              color="primary_2"
-            >
-              إضافة ملف الرحلات
-            </VBtn>
-            <VBtn
-              height="48"
-              elevation="0"
-              @click="isAddDialogVisible = true"
-              class="rounded-lg"
-            >
-              إضافة رحلة جديدة
-            </VBtn>
+            <div class="d-flex flex-wrap ga-2" style="min-width: fit-content">
+              <VBtn
+                height="48"
+                elevation="0"
+                class="rounded-lg flex-grow-1 flex-md-grow-0"
+                :prepend-icon="Fileadd"
+                color="primary_2"
+                @click="uploadDialog = true"
+              >
+                إضافة ملف الرحلات
+              </VBtn>
+              <VBtn
+                height="48"
+                elevation="0"
+                @click="isAddDialogVisible = true"
+                class="rounded-lg flex-grow-1 flex-md-grow-0"
+              >
+                إضافة رحلة جديدة
+              </VBtn>
+            </div>
           </div>
         </div>
 
@@ -67,7 +103,7 @@
           <v-col cols="12">
             <dataTable
               :headers="headers"
-              :items="companies"
+              :items="flights"
               :loading="isLoading"
               class="elevation-0"
               :items-per-page="perPage"
@@ -89,6 +125,7 @@
                     class="text-sm text-error rounded-lg"
                     color="#fff"
                     :prepend-icon="Trash"
+                    @click="deleteDialogOpen = true"
                   >
                     حذف
                   </v-btn>
@@ -109,149 +146,184 @@
 
     <!-- Add Company Dialog -->
     <VDialog v-model="isAddDialogVisible" max-width="600px">
-      <VCard>
-        <VCardTitle>إضافة شركة جديدة</VCardTitle>
-        <VCardText>
+      <VCard rounded="lg">
+        <VCardTitle class="bg-primary_2 py-3 rounded-lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <h5 class="mb-2">إضافة رحلة جديدة</h5>
+              <p class="text-sm text-secondary mb-0">
+                يرجى تعبئة بيانات الرحلة بدقة. الحقول الإلزامية محددة بعلامة
+                (*).
+              </p>
+            </div>
+            <button @click="isAddDialogVisible = false">
+              <v-icon size="sm">mdi-close</v-icon>
+            </button>
+          </div>
+        </VCardTitle>
+
+        <VCardText class="">
           <VForm ref="form" @submit.prevent="handleSubmit">
             <VRow>
               <VCol cols="12">
+                <label for="" class="mb-2 d-block">رقم الرحلة*</label>
                 <VTextField
-                  v-model="formData.name"
-                  label="اسم الشركة"
+                  rounded="lg"
+                  v-model="formData.tripNumber"
+                  placeholder="رقم الرحلة"
                   required
                 />
               </VCol>
-
               <VCol cols="12" md="6">
-                <VTextField
-                  v-model="formData.license_no"
-                  label="رقم الترخيص"
+                <label for="" class="mb-2 d-block">الوقت</label>
+                <v-select
+                  variant="solo"
+                  rounded="lg"
+                  v-model="formData.time"
+                  placeholder="اختيار"
                   required
-                />
+                ></v-select>
               </VCol>
-
               <VCol cols="12" md="6">
-                <VTextField
-                  v-model="formData.center_no"
-                  label="رقم المركز"
+                <label for="" class="mb-2 d-block">التاريخ</label>
+                <v-select
+                  variant="solo"
+                  rounded="lg"
+                  v-model="formData.date"
+                  placeholder="اختيار"
                   required
-                />
+                ></v-select>
               </VCol>
-
-              <VCol cols="12" md="6">
-                <VTextField
-                  v-model="formData.phone"
-                  label="رقم الهاتف"
-                  required
-                />
-              </VCol>
-
-              <VCol cols="12" md="6">
-                <VTextField
-                  v-model="formData.email"
-                  label="البريد الإلكتروني"
-                  type="email"
-                  required
-                />
-              </VCol>
-
               <VCol cols="12">
-                <VTextField
-                  v-model="formData.contact_name"
-                  label="اسم جهة الاتصال"
+                <label for="" class="mb-2 d-block">الشركة التابع لها*</label>
+                <v-select
+                  rounded="lg"
+                  v-model="formData.comapy"
+                  placeholder="اختيار"
                   required
-                />
+                ></v-select>
               </VCol>
-
               <VCol cols="12">
-                <VTextField
-                  v-model="formData.pligrims_nationality"
-                  label="جنسية الحجاج"
+                <label for="" class="mb-2 d-block">الوجهة*</label>
+                <v-select
+                  rounded="lg"
+                  v-model="formData.distnation"
+                  placeholder="اختيار"
                   required
-                />
+                ></v-select>
               </VCol>
-
               <VCol cols="12">
-                <label class="text-subtitle-2 mb-2 d-block"
-                  >الموقع على الخريطة</label
-                >
-                <LocationPicker
-                  v-model="selectedLocation"
-                  class="rounded-lg overflow-hidden"
-                  @update:model-value="handleLocationChange"
-                />
-                <!-- Coordinates display -->
-                <div class="d-flex gap-4 mt-2">
-                  <VTextField
-                    v-model="formData.latitude"
-                    label="خط العرض"
-                    readonly
-                    variant="outlined"
-                    density="comfortable"
-                    class="rounded-lg"
-                    hide-details
-                  />
-                  <VTextField
-                    v-model="formData.longitude"
-                    label="خط الطول"
-                    readonly
-                    variant="outlined"
-                    density="comfortable"
-                    class="rounded-lg"
-                    hide-details
-                  />
-                </div>
-              </VCol>
-
-              <VCol cols="12">
-                <VTextField
-                  v-model="formData.address"
-                  label="العنوان"
+                <label for="" class="mb-2 d-block">وسيلة النقل*</label>
+                <v-select
+                  rounded="lg"
+                  v-model="formData.transport"
+                  placeholder="اختيار"
                   required
-                />
+                ></v-select>
+              </VCol>
+              <VCol cols="12">
+                <label for="" class="mb-2 d-block">عدد الحجاج المتوقع*</label>
+                <VTextField
+                  rounded="lg"
+                  v-model="formData.pilgrim_no"
+                  placeholder="عدد الحجاج المتوقع"
+                  required
+                ></VTextField>
               </VCol>
             </VRow>
           </VForm>
         </VCardText>
 
-        <VCardActions>
-          <VSpacer />
+        <VCardActions
+          class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
+        >
           <VBtn
-            color="error"
-            variant="text"
+            variant="outlined"
+            class="text-black rounded-xl bg-white"
             @click="isAddDialogVisible = false"
           >
             إلغاء
           </VBtn>
-          <VBtn color="primary" @click="handleSubmit" :loading="isSubmitting">
-            حفظ
+          <VBtn
+            color="primary"
+            variant="flat"
+            class="rounded-xl px-8"
+            @click="handleUploadFile"
+          >
+            إضافة
           </VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
 
-    <!-- Delete Confirmation Modal -->
-    <VDialog v-model="isDeleteDialogVisible" max-width="400px">
-      <VCard>
-        <VCardTitle class="text-h6 pa-4">تأكيد الحذف</VCardTitle>
-        <VCardText class="pa-4">
-          هل أنت متأكد من حذف هذه الشركة؟ لا يمكن التراجع عن هذا الإجراء.
-        </VCardText>
-        <VCardActions class="pa-4">
-          <VSpacer />
+    <!-- upload company file Dialog -->
+    <VDialog v-model="uploadDialog" max-width="700px">
+      <VCard rounded="lg" class="rounded-lg">
+        <VCardTitle class="bg-primary_2 py-3 rounded-lg">
+          <div class="d-flex align-center justify-space-between">
+            <div>
+              <h5 class="mb-2">رفع ملف الرحلات</h5>
+              <p class="text-sm text-secondary">
+                رفع ملف بيانات الرحلات لإضافتها أو تحديثها دفعة واحدة، تأكد أن
+                الملفات تحتوي على المعلومات الكاملة.
+              </p>
+            </div>
+            <button @click="uploadDialog = false">
+              <v-icon size="sm">mdi-close</v-icon>
+            </button>
+          </div>
+        </VCardTitle>
+
+        <UploadComponent
+          title="ملف الرحلات"
+          btn-text="تحميل نموذج ملف الرحلات"
+          @file-selected="handleFileSelection"
+          :upload-error="uploadError"
+          @reupload-file="handleFileSelection"
+        />
+
+        <VCardActions
+          class="bg-primary_2 mt-6 rounded-lg py-3 justify-space-between"
+        >
           <VBtn
-            color="grey-darken-1"
-            variant="text"
-            @click="isDeleteDialogVisible = false"
+            variant="outlined"
+            class="text-black rounded-xl bg-white"
+            @click="uploadDialog = false"
           >
             إلغاء
           </VBtn>
-          <VBtn color="error" @click="confirmDelete" :loading="isDeleting">
-            حذف
+          <VBtn
+            color="primary"
+            variant="flat"
+            class="rounded-xl"
+            :disabled="!fileToUpload"
+          >
+            إضافة
           </VBtn>
         </VCardActions>
       </VCard>
     </VDialog>
+
+    <!-- Success Dialog -->
+    <SuccessDialog
+      title="تمت إضافة الحاج بنجاح!"
+      subtitle="إعادة التوجه إلى إدارة الشركات أو إضافة حاج آخر."
+      cancel-text="إضافة حاج آخر"
+      action-text="التوجه إلى إدارة الحجاج"
+      v-model="successDialogOpen"
+      @cancel="successDialogOpen = false"
+      @action="successDialogOpen = false"
+    />
+
+    <DeleteDialog
+      title="️ هل أنت متأكد من حذف الحاج"
+      subtitle="سيؤدي حذف هذا الحاج إلى إزالة جميع بياناته من النظام، وقد لا يمكن استرجاعها لاحقًا."
+      cancel-text="إلغاء"
+      action-text="نعم، حذف الحاج"
+      v-model="deleteDialogOpen"
+      @cancel="deleteDialogOpen = false"
+      @action="deleteDialogOpen = false"
+    />
   </div>
 </template>
 
@@ -266,6 +338,11 @@ import dataTable from "@/components/dataTable.vue";
 import Editicon from "@/components/icons/editicon.vue";
 import Trash from "@/components/icons/trash.vue";
 import Eyeicon from "@/components/icons/eyeicon.vue";
+import Fileadd from "@/components/icons/fileadd.vue";
+import UploadComponent from "@/components/UploadComponent.vue";
+import SuccessDialog from "@/components/SuccessDialog.vue";
+import DeleteDialog from "@/components/DeleteDialog.vue";
+import Magnifier from "@/components/icons/magnifier.vue";
 const appStore = useAppStore();
 const headers = ref([
   { title: "رقم الرحلة", value: "flight_number" },
@@ -279,7 +356,7 @@ const headers = ref([
 ]);
 
 // State
-const companies = ref([
+const flights = ref([
   {
     flight_number: 112,
     company: "شركة النور",
@@ -418,10 +495,14 @@ const companies = ref([
 ]);
 const searchQuery = ref("");
 const currentPage = ref(1);
-const totalItems = ref(0);
+const totalItems = ref(flights.value.length);
 const itemsPerPage = ref(12);
 const totalPages = ref(1);
+const detailsDialog = ref(false);
 const isAddDialogVisible = ref(false);
+const uploadDialog = ref(false);
+const successDialogOpen = ref(false);
+const deleteDialogOpen = ref(false);
 const isSubmitting = ref(false);
 const form = ref(null);
 
@@ -434,28 +515,29 @@ const companyToDelete = ref(null);
 const selectedLocation = ref({ lat: 21.4225, lng: 39.8262 });
 
 const formData = ref({
-  name: "",
-  license_no: "",
-  center_no: "",
-  phone: "",
-  email: "",
-  contact_name: "",
-  pligrims_nationality: "",
-  latitude: "21.4225",
-  longitude: "39.8262",
-  address: "",
-  created_by_id: 1,
+  tripNumber: "",
+  time: "",
+  date: "",
+  comapy: "",
+  distnation: "",
+  transport: "",
+  pilgrim_no: "",
 });
 
-// Handle location change from map
-const handleLocationChange = (newLocation) => {
-  if (newLocation) {
-    formData.value.latitude = newLocation.lat.toString();
-    formData.value.longitude = newLocation.lng.toString();
-  }
+// Methods
+const fileToUpload = ref(null);
+const uploadError = ref({
+  message: "فشل التحميل",
+});
+const handleFileSelection = (file) => {
+  console.log(file);
+  fileToUpload.value = file;
+};
+const handleUploadFile = () => {
+  isAddDialogVisible.value = false;
+  successDialogOpen.value = true;
 };
 
-// Methods
 const fetchCompanies = async (page = 1) => {
   try {
     let url = "/companies?page=" + page + "&per_page=" + itemsPerPage.value;

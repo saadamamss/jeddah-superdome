@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/Auth";
 import { useRouter } from "vue-router";
 import axios from "@/plugins/axios";
 
-const user = ref();
+const user = ref({});
 const settingsListStore = useSettingsStore();
 const authStore = useAuthStore();
 const router = useRouter();
@@ -41,7 +41,7 @@ const logout = async (e) => {
 };
 
 onMounted(() => {
-  user.value = {} //authStore.user.user;
+  user.value = {firstname:"عبدالله" , lastname:"القحطانى" ,avatar_image:"/imgs/User-Image.png"} //authStore.user.user;
   console.log(user.value);
 });
 </script>
