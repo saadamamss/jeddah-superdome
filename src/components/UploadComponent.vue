@@ -98,9 +98,12 @@
 
     <v-card-text class="rounded-xl py-2" style="background-color: #f8f5ef">
       <div class="d-flex align-center justify-space-between">
-        <p class="text-sm mb-0">
-          يرجى التأكد من تنسيق الأعمدة حسب النموذج المطلوب
-        </p>
+        <div class="d-flex gap-2">
+          <Inforound />
+          <p class="text-sm mb-0">
+            يرجى التأكد من تنسيق الأعمدة حسب النموذج المطلوب
+          </p>
+        </div>
         <v-btn
           color="#fff"
           size="small"
@@ -120,6 +123,7 @@ import Trash from "@/components/icons/trash.vue";
 import Success from "@/components/icons/success.vue";
 import Uploadfile from "@/components/icons/uploadfile.vue";
 import Csvfileicon from "./icons/csvfileicon.vue";
+import Inforound from "./icons/inforound.vue";
 
 const emit = defineEmits(["file-selected"]);
 const props = defineProps(["title", "uploadError", "btnText"]);

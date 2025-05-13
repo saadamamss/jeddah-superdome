@@ -22,6 +22,12 @@ export default [
         permission: true,
       },
       {
+        title: "بيانات الشركة",
+        to: { name: "company-profile" },
+        icon: Realstate,
+        permission: true,
+      },
+      {
         title: "إدارة الحجاج",
         to: { name: "manage-pilgrims" },
         icon: Usergroup,

@@ -99,7 +99,7 @@
                 <VBtn
                   height="48"
                   elevation="0"
-                  @click="isAddDialogVisible = true"
+                  @click="openAddForm"
                   class="rounded-lg flex-grow-1 flex-md-grow-0"
                 >
                   <span class="d-none d-sm-inline">إضافة شركة جديدة</span>
@@ -155,6 +155,7 @@
                       class="text-black text-sm rounded-lg"
                       color="#fff"
                       :prepend-icon="Editicon"
+                      @click="handleEdit(item)"
                     >
                       تعديل
                     </v-btn>
@@ -289,7 +290,7 @@
               class="rounded-xl px-8"
               @click="handleUploadFile"
             >
-              إضافة
+              {{ isEdit ? "حفظ" : "إضافة" }}
             </VBtn>
           </VCardActions>
         </VCard>
@@ -631,6 +632,26 @@ const handlePageChange = (page) => {
   fetchCompanies(page);
 };
 
+const isEdit = ref(false);
+const openAddForm = () => {
+  isEdit.value = false;
+  isAddDialogVisible.value = true;
+  formData.value = {};
+};
+const handleEdit = (item) => {
+  isEdit.value = true;
+  const data = {
+    companyName: item.companyName,
+    license_no: item.licenseNumber,
+    city: item.city,
+    phone: item.contactNumber,
+    email: item.email,
+    password: item.password.text,
+    address: item.address,
+  };
+  formData.value = { ...data };
+  isAddDialogVisible.value = true;
+};
 const handleSubmit = async () => {
   try {
     isSubmitting.value = true;

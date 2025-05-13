@@ -39,6 +39,16 @@ export default [
         },
       },
       {
+        path: "/company-profile",
+        name: "company-profile",
+        component: () => import("@/pages/company/companyProfile.vue"),
+        meta: {
+          // layout: "default",
+          requiresAuth: true,
+          requiresPermission: "companies.view",
+        },
+      },
+      {
         path: "/manage-pilgrims",
         name: "manage-pilgrims",
         component: () => import("@/pages/pilgrims/index.vue"),

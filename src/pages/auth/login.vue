@@ -78,15 +78,15 @@ const loginUser = async () => {
       sm="10"
       md="8"
       lg="5"
-      class="content d-flex flex-column align-center justify-center py-4 pa-0 mx-auto"
+      class="content d-flex flex-column align-center justify-center py-3 pa-0 mx-auto"
     >
       <div style="width: 580px; max-width: 100%">
         <div
-          class="w-100 d-flex flex-column align-center justify-center pb-6 pt-3 px-4"
+          class="w-100 d-flex flex-column align-center justify-center pb-3 pt-6 px-4"
         >
           <img width="140" src="/jeddah-superdome.svg" alt="جدة سوبردوم" />
           <div>
-            <h1 align="center" class="text-5xl pt-8 py-4">تسجيل الدخول</h1>
+            <h1 align="center" class="text-5xl pt-8 py-4">تسجيل دخول</h1>
             <p class="text-secondary text-lg">
               مرحبًا بك في نظام تفويج الحجاج - سوبر دوم جدة
             </p>
@@ -97,7 +97,7 @@ const loginUser = async () => {
             <VRow>
               <VCol cols="12" class="py-1 mb-5">
                 <label class="d-block text-subtitle-1 mb-2 text-black">
-                  رقم الهوية / البريد الإلكتروني
+                  رقم الهوية / الترخيص أو البريد الإلكتروني
                 </label>
                 <VTextField
                   v-model="formState.email"
@@ -139,7 +139,7 @@ const loginUser = async () => {
                   height="50"
                   color="primary"
                 >
-                  تسجيل الدخول
+                  تسجيل دخول
                 </VBtn>
                 <VBtn
                   class="w-100"
@@ -158,7 +158,7 @@ const loginUser = async () => {
         </VCardText>
       </div>
     </VCol>
-   
+
     <VCol cols="12" class="content py-8 mt-10">
       <div class="text-center mb-10">
         <img src="/zimam-qwa.svg" alt="zimam" />
