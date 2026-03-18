@@ -100,14 +100,14 @@ $alert-prepend-icon-font-size: 1.125rem !important;
 }
 
 .v-slider-thumb__label {
-  background: vuetify.$tooltip-background-color !important;
+  background: #212121 !important;
   color: rgb(var(--v-theme-on-primary)) !important;
 }
 
 .v-slider.v-input--horizontal .v-slider-thumb__label::before {
-  border-block-start-color: vuetify.$tooltip-background-color !important;
+  border-block-start-color: #212121 !important;
 }
 
 .v-slider.v-input--vertical .v-slider-thumb__label::before {
-  border-inline-end-color: vuetify.$tooltip-background-color !important;
+  border-inline-end-color: #212121 !important;
 }
