@@ -80,7 +80,7 @@ const loginUser = async () => {
       lg="5"
       class="content d-flex flex-column align-center justify-center py-3 pa-0 mx-auto"
     >
-      <div style="width: 580px; max-width: 100%">
+      <div style="width: 480px; max-width: 100%">
         <div
           class="w-100 d-flex flex-column align-center justify-center pb-3 pt-6 px-4"
         >
@@ -95,7 +95,7 @@ const loginUser = async () => {
         <VCardText style="flex: 0" class="px-4">
           <VForm ref="form" @submit.prevent="loginUser" class="mb-8">
             <VRow>
-              <VCol cols="12" class="py-1 mb-5">
+              <VCol cols="12" class="py-1 mb-3">
                 <label class="d-block text-subtitle-1 mb-2 text-black">
                   رقم الهوية / الترخيص أو البريد الإلكتروني
                 </label>
@@ -134,10 +134,10 @@ const loginUser = async () => {
                   class="w-100 mb-4"
                   rounded="lg"
                   :loading="isSubmitting"
-                  type="submit"
                   size="large"
                   height="50"
                   color="primary"
+                  href="/dashboard"
                 >
                   تسجيل دخول
                 </VBtn>
@@ -145,7 +145,7 @@ const loginUser = async () => {
                   class="w-100"
                   rounded="lg"
                   :loading="isSubmitting"
-                  type="submit"
+                  href="/dashboard"
                   size="large"
                   height="50"
                   color="white"

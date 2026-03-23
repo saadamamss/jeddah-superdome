@@ -285,11 +285,14 @@ body {
     }
     .overlay {
       position: absolute;
-      width: 100%;
+      min-width: 100%;
+      width: 200vh;
       height: 200vh;
       background-color: #f8f9f9;
       border-radius: 50%;
       top: -105vh;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 1;
     }
   }

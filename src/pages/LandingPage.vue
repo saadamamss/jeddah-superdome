@@ -20,10 +20,19 @@
               class="text-center"
               style="max-width: 590px"
             >
-              <h1 class="font-weight-bold text-white mb-4 title">
+              <h1
+                class="font-weight-bold text-white mb-4 title"
+                data-aos="fade-up"
+                data-aos-duration="800"
+              >
                 منصة جدة سوبردوم لحجٍ منظم وطمأنينة رقمية
               </h1>
-              <p class="text-body text-white mt-10 px-8 mx-auto subtitle">
+              <p
+                class="text-body text-white mt-10 px-8 mx-auto subtitle"
+                data-aos="fade-up"
+                data-aos-duration="800"
+                data-aos-delay="200"
+              >
                 منصة رقمية تسهّل على الحاج كل خطوة، من لحظة الوصول وحتى صعود
                 القافلة.
               </p>
@@ -31,6 +40,9 @@
                 <router-link to="#">
                   <span
                     class="d-block font-weight-medium bg-white px-3 py-2 text-white rounded-lg mt-10"
+                    data-aos="fade-up"
+                    data-aos-duration="800"
+                    data-aos-delay="400"
                   >
                     <qr-app />
                   </span>
@@ -47,13 +59,26 @@
       <v-container>
         <v-row>
           <v-col cols="12" md="8">
-            <h3 class="text-secondary mb-3">الخدمات المقدمة</h3>
-            <p class="font-weight-bold text-h5">مزايا ترافقك في كل خطوة</p>
+            <h3 class="text-secondary mb-3" data-aos="fade-up">
+              الخدمات المقدمة
+            </h3>
+            <p
+              class="font-weight-bold text-h5"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
+              مزايا ترافقك في كل خطوة
+            </p>
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12" sm="6" lg="4" class="mb-0">
-            <v-card class="benefits-card h-100 pa-6" flat>
+            <v-card
+              class="benefits-card h-100 pa-6"
+              flat
+              data-aos="fade-up"
+              data-aos-delay="200"
+            >
               <div class="d-flex mb-6">
                 <Database />
               </div>
@@ -68,7 +93,12 @@
           </v-col>
 
           <v-col cols="12" sm="6" lg="4" class="mb-0">
-            <v-card class="benefits-card h-100 pa-6" flat>
+            <v-card
+              class="benefits-card h-100 pa-6"
+              flat
+              data-aos="fade-up"
+              data-aos-delay="300"
+            >
               <div class="d-flex mb-6">
                 <Location />
               </div>
@@ -80,7 +110,12 @@
           </v-col>
 
           <v-col cols="12" sm="6" lg="4" class="mb-0">
-            <v-card class="benefits-card h-100 pa-6" flat>
+            <v-card
+              class="benefits-card h-100 pa-6"
+              flat
+              data-aos="fade-up"
+              data-aos-delay="400"
+            >
               <div class="d-flex mb-6">
                 <Notification />
               </div>
@@ -104,11 +139,21 @@
         <v-row class="align-center">
           <v-col cols="12" sm="6" class="mb-0 pl-md-24">
             <div>
-              <h3 class="text-secondary mb-4">خدمات لتجربة مثالية</h3>
-              <h4 class="font-weight-bold text-h4 mb-4">
+              <h3 class="text-secondary mb-4" data-aos="fade-right">
+                خدمات لتجربة مثالية
+              </h3>
+              <h4
+                class="font-weight-bold text-h4 mb-4"
+                data-aos="fade-right"
+                data-aos-delay="50"
+              >
                 حالتك تُحدّث في لحظات
               </h4>
-              <p class="font-weight-medium text-sm text-grey">
+              <p
+                class="font-weight-medium text-sm text-grey"
+                data-aos="fade-right"
+                data-aos-delay="100"
+              >
                 بمجرد مسح رمز الـ QR، يتم تحديث حالتك تلقائيًا في كل مرحلة داخل
                 السوبر دوم — بسهولة وسرعة.
               </p>
@@ -120,6 +165,8 @@
               alt="features"
               class="rounded-xl"
               style="width: 100%; max-width: 628px"
+              data-aos="fade-left"
+              data-aos-delay="200"
             />
           </v-col>
         </v-row>
@@ -129,11 +176,21 @@
         <v-row class="align-center flex-row-reverse">
           <v-col cols="12" sm="6" class="d-flex pr-md-20">
             <div>
-              <h3 class="text-secondary mb-4">خدمات لتجربة مثالية</h3>
-              <h4 class="font-weight-bold text-h4 mb-4">
+              <h3 class="text-secondary mb-4" data-aos="fade-left">
+                خدمات لتجربة مثالية
+              </h3>
+              <h4
+                class="font-weight-bold text-h4 mb-4"
+                data-aos="fade-left"
+                data-aos-delay="50"
+              >
                 خريطة ترافقك في كل خطوة
               </h4>
-              <p class="font-weight-medium text-sm text-grey">
+              <p
+                class="font-weight-medium text-sm text-grey"
+                data-aos="fade-left"
+                data-aos-delay="100"
+              >
                 اعرف طريقك داخل السوبر دوم من أول لحظة. الخريطة التفاعلية توضّح
                 لك مكانك وتدلّك على المسار الصحيح.
               </p>
@@ -145,6 +202,8 @@
               alt="features"
               class="rounded-xl"
               style="width: 100%; max-width: 628px"
+              data-aos="fade-right"
+              data-aos-delay="200"
             />
           </v-col>
         </v-row>
@@ -156,7 +215,9 @@
       <v-container class="bg-grey-lighten-5 py-6 rounded-xl px-md-8">
         <v-row>
           <v-col cols="12" md="8">
-            <h2 class="text-h5 font-weight-bold mb-2">الأسئلة الشائعة</h2>
+            <h2 class="text-h5 font-weight-bold mb-2" data-aos="fade-up">
+              الأسئلة الشائعة
+            </h2>
           </v-col>
         </v-row>
         <v-row justify="center">
@@ -166,6 +227,8 @@
                 v-for="(faq, index) in faqs"
                 :key="index"
                 class="mb-2"
+                data-aos="fade-up"
+                :data-aos-delay="index * 50"
               >
                 <v-expansion-panel-title class="text-h6 font-weight-bold">
                   <span
@@ -203,12 +266,20 @@
       <v-container>
         <v-row class="justify-center">
           <v-col cols="12" sm="8" md="7">
-            <div class="d-flex justify-center mb-10">
-              <Logo :width="236" :height="140" />
+            <div
+              class="d-flex justify-center mb-10"
+              data-aos="fade-up"
+              data-aos-delay="50"
+            >
+              <Logo :width="236" :height="140" data-aos="zoom-in" />
             </div>
           </v-col>
           <v-col cols="12" class="text-center" style="max-width: 700px">
-            <p class="text-white text-sm text-h6 px-8 mx-auto">
+            <p
+              class="text-white text-sm text-h6 px-8 mx-auto"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
               نحن لا نقد لك تقنية فحسب ، بل نرافقك فى درب الطمأنينة...
               <br />
               نسأل الله لك حجاً مبروراً وذنباً مغفوراً...
@@ -223,7 +294,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 import QrApp from "@/components/icons/qr-app.vue";
 import Database from "@/components/icons/database.vue";
@@ -232,6 +305,17 @@ import Notification from "@/components/icons/notification.vue";
 import Logo from "@/components/icons/logo.vue";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
+
+onMounted(() => {
+  setTimeout(() => {
+    AOS.init({
+      duration: 500,
+      easing: "ease-in-out",
+      once: true,
+      offset: 100,
+    });
+  }, 100);
+});
 
 const faqs = [
   {

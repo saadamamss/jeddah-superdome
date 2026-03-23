@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar elevation="1" height="80" :class="appBarClasses">
+  <v-app-bar height="80" :class="appBarClasses">
     <v-container
       class="d-flex align-center justify-space-between h-100 ga-4"
     >
