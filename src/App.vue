@@ -32,7 +32,7 @@ onMounted(() => {
   <VLocaleProvider rtl>
     <VApp
       :style="`--v-global-theme-primary: ${hexToRgb(
-        global.current.value.colors.primary
+        global.current.value.colors.primary,
       )}`"
     >
       <RouterView />

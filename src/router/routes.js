@@ -9,10 +9,11 @@ import UsersPage from "@/pages/users/users.vue";
 import NotFoundPage from "@/pages/NotFound";
 import NotificationsPage from "@/pages/notifications/index.vue";
 import Emailtemp from "@/pages/emailtemp.vue";
+import LandingPage from "@/pages/LandingPage.vue";
 
 export default [
   {
-    path: "/",
+    path: "/dashboard",
     component: DashboardLayout,
     meta: {
       requiresAuth: true,
@@ -92,6 +93,14 @@ export default [
         component: Emailtemp,
       },
     ],
+  },
+  {
+    path: "/",
+    component: LandingPage,
+    meta: {
+      requiresAuth: false,
+      requiresPermission: false,
+    }
   },
   {
     path: "/auth",
