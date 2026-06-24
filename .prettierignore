@@ -1,0 +1,8 @@
+node_modules
+dist
+dist/
+*.min.js
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+.eslintrc-auto-import.json

@@ -1,0 +1,674 @@
+{
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "close": "إغلاق",
+    "loading": "جارٍ التحميل...",
+    "success": "نجاح",
+    "error": "خطأ",
+    "yes": "نعم",
+    "no": "لا",
+    "search": "بحث",
+    "view": "عرض",
+    "back": "رجوع",
+    "submit": "إرسال",
+    "reset": "إعادة تعيين",
+    "home": "الرئيسية",
+    "select": "اختيار",
+    "optional": "(اختياري)",
+    "required": "مطلوب",
+    "requiredField": "هذا الحقل مطلوب",
+    "noData": "لا توجد بيانات",
+    "errorOccurred": "حدث خطأ",
+    "copyright": "© جميع الحقوق الطبع و النشر محفوظة 2025 - Jeddah Superdome"
+  },
+  "auth": {
+    "login": {
+      "title": "تسجيل دخول",
+      "subtitle": "مرحبًا بك في نظام تفويج الحجاج - سوبر دوم جدة",
+      "emailLabel": "رقم الهوية / الترخيص أو البريد الإلكتروني",
+      "emailPlaceholder": "ادخل البريد الإلكتروني",
+      "emailRequired": "البريد الإلكتروني مطلوب",
+      "passwordLabel": "كلمة المرور",
+      "passwordPlaceholder": "أدخل كلمة المرور",
+      "passwordRequired": "كلمة المرور مطلوبة",
+      "loginButton": "تسجيل دخول",
+      "loginAsCompany": "تسجيل دخول كشركة",
+      "invalidCredentials": "بيانات تسجيل الدخول غير صحيحة",
+      "loginError": "حدث خطأ أثناء تسجيل الدخول"
+    },
+    "forgotPassword": {
+      "title": "هل نسيت كلمة المرور؟",
+      "subtitle": "أدخل بريدك الإلكتروني المسجل لإرسال رمز التحقق.",
+      "emailLabel": "البريد الإلكتروني*",
+      "emailPlaceholder": "example@domain.com",
+      "sendButton": "إرسال",
+      "error": "خطأ غير متوقع!"
+    },
+    "otp": {
+      "title": "التحقق من البريد الإلكتروني",
+      "subtitle": "أدخل رمز التحقق المكون من 4 أرقام الذي تم إرساله إلى بريدك الإلكتروني",
+      "verifyButton": "تحقق",
+      "resendButton": "إعادة إرسال الرمز",
+      "resentSuccess": "تم إرسال رمز التحقق مرة أخرى",
+      "resentError": "حدث خطأ أثناء إعادة إرسال رمز التحقق",
+      "error": "خطأ غير متوقع!"
+    },
+    "createPassword": {
+      "title": "كلمة المرور الجديدة",
+      "subtitle": "تغيير كلمة المرور!",
+      "description": "يُرجى تغيير كلمة المرور عند تسجيل الدخول لأول مرة.",
+      "newPasswordLabel": "كلمة المرور الجديدة",
+      "newPasswordPlaceholder": "أدخل كلمة المرور",
+      "confirmPasswordLabel": "تأكيد كلمة المرور الجديدة",
+      "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
+      "confirmButton": "تأكيد",
+      "changeButton": "تغيير كلمة المرور",
+      "success": "تم تحديث كلمة المرور بنجاح",
+      "error": "خطأ غير متوقع!"
+    },
+    "resetPassword": {
+      "title": "كلمة المرور الجديدة",
+      "subtitle": "تغيير كلمة المرور!",
+      "description": "يُرجى تغيير كلمة المرور عند تسجيل الدخول لأول مرة.",
+      "newPasswordLabel": "كلمة المرور الجديدة*",
+      "confirmPasswordLabel": "تأكيد كلمة المرور*",
+      "saveButton": "حفظ كلمة المرور",
+      "success": "تم تغيير كلمة المرور بنجاح",
+      "error": "خطأ غير متوقع!"
+    }
+  },
+  "companies": {
+    "title": "إدارة الشركات",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbTitle": "إدارة الشركات",
+    "searchPlaceholder": "بحث برقم الترخيص أو اسم الشركة",
+    "addFile": "إضافة ملف شركة nueva",
+    "addFileShort": "إضافة ملف",
+    "addCompany": "إضافة شركة nueva",
+    "addShort": "إضافة",
+    "editButton": "تعديل",
+    "deleteButton": "حذف",
+    "headers": {
+      "licenseNumber": "رقم الترخيص",
+      "companyName": "اسم الشركة",
+      "connectedHujjaj": "عدد الحجاج المرتبطين",
+      "contactNumber": "وسيلة الاتصال",
+      "password": "كلمة المرور"
+    },
+    "dialog": {
+      "editTitle": "تعديل الشركة",
+      "addTitle": "إضافة شركة nueva",
+      "subtitle": "يرجى تعبئة بيانات الشركة بدقة. الحقول الإلزامية محددة بعلامة (*).",
+      "companyNameLabel": "اسم الشركة *",
+      "companyNamePlaceholder": "الإسم الكامل الرسمى",
+      "licenseLabel": "رقم الترخيص*",
+      "licensePlaceholder": "رقم الترخيص",
+      "cityLabel": "المدينة*",
+      "cityPlaceholder": "الرياض، مكة، جدة...",
+      "phoneLabel": "رقم التواصل*",
+      "phonePlaceholder": "رقم التواصل",
+      "emailLabel": "البريد الإلكتروني*",
+      "emailPlaceholder": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور*",
+      "addressLabel": "العنوان",
+      "addressPlaceholder": "العنوان التفصيلى إن وجد"
+    },
+    "upload": {
+      "title": "رفع ملف الشركات",
+      "subtitle": "يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات الشركات.",
+      "fileName": "ملف الشركات",
+      "btnText": "تحميل نموذج ملف الشركات",
+      "error": "حدث خطأ أثناء رفع الملف"
+    },
+    "success": {
+      "addTitle": "تمت إضافة الشركة بنجاح!",
+      "addSubtitle": "إعادة التوجه إلى إدارة الشركات أو إضافة شركة أخرى.",
+      "addCancel": "إضافة شركة أخرى",
+      "addAction": "التوجه إلى إدارة الشركات",
+      "editTitle": "تم تعديل الشركة بنجاح!",
+      "editSubtitle": "يمكنك الآن العودة إلى بيانات الشركة أو متابعة التعديل إن لزم الأمر.",
+      "editCancel": "تعديل بيانات أخرى",
+      "editAction": "العودة إلى بيانات الشركة"
+    },
+    "delete": {
+      "title": "هل أنت متأكد من حذف الشركة؟",
+      "subtitle": "سيؤدي حذف هذه الشركة إلى إزالة جميع بياناتها من النظام، وقد لا يمكن استرجاعها لاحقًا.",
+      "cancel": "إلغاء",
+      "action": "نعم، حذف الشركة",
+      "success": "تم حذف الشركة بنجاح",
+      "error": "حدث خطأ أثناء حذف الشركة"
+    },
+    "messages": {
+      "addSuccess": "تم إضافة الشركة بنجاح",
+      "editSuccess": "تم تعديل الشركة بنجاح",
+      "error": "حدث خطأ"
+    },
+    "profile": {
+      "title": "بيانات الشركة",
+      "editButton": "تعديل",
+      "companyName": "اسم الشركة",
+      "licenseNumber": "رقم الترخيص",
+      "contactNumber": "رقم التواصل",
+      "email": "البريد الإلكترونى",
+      "city": "المدينة",
+      "address": "العنوان",
+      "editDialog": {
+        "title": "تعديل بيانات الشركة",
+        "subtitle": "يرجى تعديل بيانات الشركة بدقة. الحقول الإلزامية محددة بعلامة (*).",
+        "successTitle": "تم تعديل بيانات الشركة بنجاح!",
+        "successSubtitle": "يمكنك الآن العودة إلى بيانات الشركة أو متابعة التعديل إن لزم الأمر.",
+        "successCancel": "تعديل بيانات أخرى",
+        "successAction": "العودة إلى بيانات الشركة"
+      }
+    }
+  },
+  "pilgrims": {
+    "title": "إدارة الحجاج",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbTitle": "إدارة الحجاج",
+    "searchPlaceholder": "بحث برقم الهوية أو الإسم",
+    "addFile": "إضافة ملف حجاج",
+    "addPilgrim": "إضافة حاج",
+    "viewButton": "عرض",
+    "editButton": "تعديل",
+    "deleteButton": "حذف",
+    "headers": {
+      "name": "الاسم",
+      "identity": "رقم الهوية",
+      "nationality": "الجنسية",
+      "gender": "الجنس",
+      "phone": "رقم التواصل"
+    },
+    "dialog": {
+      "editTitle": "تعديل بيانات الحاج",
+      "addTitle": "إضافة حاج nueva",
+      "subtitle": "يرجى تعبئة بيانات الحاج بدقة. الحقول الإلزامية محددة بعلامة (*).",
+      "nameLabel": "الإسم الكامل*",
+      "namePlaceholder": "الإسم الكامل الرسمى",
+      "identityLabel": "رقم الهوية / جواز السفر*",
+      "identityPlaceholder": "رقم الهوية",
+      "companyLabel": "الشركة التابع لها*",
+      "nationalityLabel": "الجنسية*",
+      "genderLabel": "الجنس*",
+      "birthDateLabel": "تاريخ الميلاد*",
+      "birthDatePlaceholder": "تاريخ الميلاد",
+      "phoneLabel": "رقم التواصل*",
+      "phonePlaceholder": "رقم التواصل",
+      "emailLabel": "البريد الإلكتروني*",
+      "emailPlaceholder": "البريد الإلكتروني"
+    },
+    "upload": {
+      "title": "رفع ملف الحجاج",
+      "subtitle": "يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات الحجاج.",
+      "fileName": "ملف الحجاج",
+      "btnText": "تحميل نموذج ملف الحجاج",
+      "error": "حدث خطأ أثناء رفع الملف"
+    },
+    "success": {
+      "addTitle": "تمت إضافة الحاج بنجاح!",
+      "addSubtitle": "إعادة التوجه إلى إدارة الحجاج أو إضافة حاج آخر.",
+      "addCancel": "إضافة حاج آخر",
+      "addAction": "التوجه إلى إدارة الحجاج"
+    },
+    "delete": {
+      "title": "هل أنت متأكد من حذف الحاج؟",
+      "subtitle": "سيؤدي حذف هذا الحاج إلى إزالة جميع بياناته من النظام، وقد لا يمكن استرجاعها لاحقًا.",
+      "cancel": "إلغاء",
+      "action": "نعم، حذف الحاج",
+      "success": "تم حذف الحاج بنجاح",
+      "error": "حدث خطأ أثناء الحذف"
+    },
+    "messages": {
+      "addSuccess": "تم إضافة الحاج بنجاح",
+      "editSuccess": "تم تعديل بيانات الحاج بنجاح",
+      "error": "حدث خطأ"
+    },
+    "details": {
+      "basicData": "البيانات الأساسية",
+      "tripData": "بيانات الرحلة والتفويج",
+      "fullName": "الأسم الكامل",
+      "identityNumber": "رقم الهوية",
+      "companyName": "اسم الشركة",
+      "companyRef": "الرقم المرجعى للشركة",
+      "nationality": "الجنسية",
+      "gender": "الجنس",
+      "stage": "المرحلة",
+      "nextDestination": "الوجهة التالية",
+      "flowTime": "موعد التفويج",
+      "gateNumber": "رقم البوابة",
+      "pathNumber": "رقم المسار",
+      "busNumber": "رقم الحافلة"
+    }
+  },
+  "flights": {
+    "title": "جدول الرحلات",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbTitle": "إدارة الرحلات",
+    "searchPlaceholder": "بحث برقم الرحلة",
+    "addFile": "إضافة ملف الرحلات",
+    "addFlight": "إضافة رحلة nueva",
+    "editButton": "تعديل",
+    "deleteButton": "حذف",
+    "headers": {
+      "flightNumber": "رقم الرحلة",
+      "company": "الشركة المشغلة",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "destination": "الوجهة",
+      "pilgrimsCount": "عدد الحجاج",
+      "transport": "وسيلة النقل"
+    },
+    "dialog": {
+      "editTitle": "تعديل الرحلة",
+      "addTitle": "إضافة رحلة nueva",
+      "subtitle": "يرجى تعبئة بيانات الرحلة بدقة. الحقول الإلزامية محددة بعلامة (*).",
+      "flightNumberLabel": "رقم الرحلة*",
+      "flightNumberPlaceholder": "رقم الرحلة",
+      "timeLabel": "الوقت*",
+      "timePlaceholder": "08:00 ص",
+      "dateLabel": "التاريخ*",
+      "companyLabel": "الشركة*",
+      "destinationLabel": "الوجهة*",
+      "destinationPlaceholder": "مكة المكرمة",
+      "transportLabel": "وسيلة النقل*",
+      "pilgrimsCountLabel": "عدد الحجاج المتوقع*",
+      "pilgrimsCountPlaceholder": "عدد الحجاج"
+    },
+    "upload": {
+      "title": "رفع ملف الرحلات",
+      "subtitle": "رفع ملف بيانات الرحلات لإضافتها أو تحديثها دفعة واحدة.",
+      "fileName": "ملف الرحلات",
+      "btnText": "تحميل نموذج ملف الرحلات",
+      "error": "حدث خطأ أثناء رفع الملف"
+    },
+    "success": {
+      "addTitle": "تمت إضافة الرحلة بنجاح!",
+      "addSubtitle": "إعادة التوجه إلى إدارة الرحلات أو إضافة رحلة أخرى.",
+      "addCancel": "إضافة رحلة أخرى",
+      "addAction": "التوجه إلى إدارة الرحلات"
+    },
+    "delete": {
+      "title": "هل أنت متأكد من حذف الرحلة؟",
+      "subtitle": "سيؤدي حذف هذه الرحلة إلى إزالة جميع بياناتها من النظام.",
+      "cancel": "إلغاء",
+      "action": "نعم، حذف الرحلة",
+      "success": "تم حذف الرحلة بنجاح",
+      "error": "حدث خطأ أثناء الحذف"
+    },
+    "messages": {
+      "addSuccess": "تم إضافة الرحلة بنجاح",
+      "editSuccess": "تم تعديل الرحلة بنجاح",
+      "error": "حدث خطأ"
+    }
+  },
+  "users": {
+    "title": "إدارة المستخدمين",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbTitle": "إدارة المستخدمين",
+    "searchPlaceholder": "بحث برقم الهوية او الإسم",
+    "addFile": "إضافة ملف المستخدمين",
+    "addUser": "إضافة مستخدم جديد",
+    "editButton": "تعديل",
+    "deleteButton": "حذف",
+    "headers": {
+      "identity": "رقم الهوية",
+      "name": "الاسم",
+      "role": "الدور",
+      "phone": "رقم الجوال",
+      "status": "الحالة"
+    },
+    "roles": {
+      "admin": "مدير النظام",
+      "supervisor": "المشرف العام",
+      "moderator": "المشرف",
+      "observer": "المراقب"
+    },
+    "dialog": {
+      "addTitle": "إضافة مستخدم",
+      "editTitle": "تعديل المستخدم",
+      "subtitle": "يرجى تعبئة بيانات المستخدم بدقة. الحقول الإلزامية محددة بعلامة (*).",
+      "firstNameLabel": "الاسم",
+      "namePlaceholder": "أدخل الاسم",
+      "lastNameLabel": "اسم العائلة",
+      "phoneLabel": "رقم الجوال*",
+      "phonePlaceholder": "رقم الجوال",
+      "emailLabel": "البريد الإلكتروني*",
+      "emailPlaceholder": "البريد الإلكتروني",
+      "identityLabel": "رقم الهوية",
+      "passwordLabel": "كلمة المرور",
+      "passwordPlaceholder": "أدخل كلمة المرور",
+      "passwordHint": "اتركه فارغاً لاستخدام كلمة المرور الافتراضية: 12345678",
+      "confirmPasswordLabel": "تأكيد كلمة المرور",
+      "companyLabel": "الشركة الرئيسية",
+      "packageLabel": "الباقة",
+      "statusLabel": "الحالة *",
+      "roleLabel": "الدور",
+      "dashboardRoleLabel": "دور لوحة التحكم"
+    },
+    "upload": {
+      "title": "رفع ملف المستخدمين",
+      "subtitle": "يرجى رفع الملفات المطلوبة لإضافة أو تحديث بيانات المستخدمين.",
+      "fileName": "ملف المستخدمين",
+      "btnText": "تحميل نموذج ملف المستخدمين",
+      "error": "حدث خطأ أثناء رفع الملف"
+    },
+    "success": {
+      "addTitle": "تمت إضافة المستخدم بنجاح!",
+      "addSubtitle": "إعادة التوجه إلى إدارة المستخدمين أو إضافة مستخدم آخر.",
+      "addCancel": "إضافة مستخدم آخر",
+      "addAction": "التوجه إلى إدارة المستخدمين"
+    },
+    "delete": {
+      "title": "هل أنت متأكد من حذف المستخدم؟",
+      "subtitle": "سيؤدي حذف هذا المستخدم إلى إزالة جميع بياناته من النظام، وقد لا يمكن استرجاعها لاحقًا.",
+      "cancel": "إلغاء",
+      "action": "نعم، حذف المستخدم",
+      "success": "تم حذف المستخدم بنجاح",
+      "error": "حدث خطأ أثناء حذف المستخدم"
+    },
+    "messages": {
+      "addSuccess": "تم إضافة المستخدم بنجاح",
+      "editSuccess": "تم تحديث بيانات المستخدم بنجاح",
+      "loadError": "حدث خطأ أثناء جلب بيانات المستخدم",
+      "updateError": "حدث خطأ أثناء تحديث بيانات المستخدم",
+      "validationError": "يرجى التحقق من صحة البيانات المدخلة"
+    },
+    "details": {
+      "title": "تفاصيل المستخدم",
+      "firstName": "الاسم الأول",
+      "secondName": "الاسم الثاني",
+      "thirdName": "الاسم الثالث",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "role": "الدور",
+      "city": "المدينة",
+      "bloodType": "فصيلة الدم",
+      "gender": "الجنس",
+      "nationality": "الجنسية",
+      "identity": "رقم الهوية",
+      "saveButton": "حفظ التغييرات",
+      "stats": {
+        "attendanceDays": "عدد أيام الحضور",
+        "reports": "عدد التقارير",
+        "newRatings": "التقييمات الجديدة",
+        "completedRatings": "التقييمات المكتملة"
+      }
+    }
+  },
+  "notifications": {
+    "title": "إدارة الإشعارات",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbTitle": "إدارة الإشعارات",
+    "sendNew": "إرسال إشعار جديد",
+    "resend": " إعادة الإرسال",
+    "deleteButton": "حذف",
+    "emptyTitle": "لا توجد تنبيهات",
+    "emptySubtitle": " يمكنك إرسال تنبيه جديد عن طريق الضغط على زر \"إرسال تنبيه\"",
+    "emptyAction": "إرسال تنبيه",
+    "headers": {
+      "title": "عنوان الإشعار",
+      "body": "نص الإشعار",
+      "target": "الفئة المستهدفة",
+      "type": "نوع الإشعار",
+      "method": "وسيلة الإرسال"
+    },
+    "dialog": {
+      "title": "إرسال إشعار جديد",
+      "subtitle": "إرسال إشعار فوري لمستخدم واحد أو مجموعة مستخدمين لإبلاغهم بمعلومة مهمة أو إجراء عاجل.",
+      "titleLabel": "عنوان الإشعار*",
+      "titlePlaceholder": "عنوان الإشعار",
+      "titleRequired": "عنوان الإشعار مطلوب",
+      "bodyLabel": "نص الإشعار*",
+      "bodyPlaceholder": "نص الإشعار",
+      "bodyRequired": "نص الإشعار مطلوب",
+      "targetLabel": "الفئة المستهدفة*",
+      "targetPlaceholder": "الفئة المستهدفة",
+      "targetRequired": "الفئة المستهدفة مطلوب",
+      "typeLabel": "نوع الإشعار*",
+      "typePlaceholder": "نوع الإشعار",
+      "typeRequired": "نوع الإشعار مطلوب",
+      "methodLabel": "وسيلة الإرسال*",
+      "methodPlaceholder": "وسيلة الإرسال",
+      "methodRequired": "وسيلة الإرسال مطلوب",
+      "sendButton": "إرسال"
+    },
+    "targets": ["شركات", "حجاج", "مستخدمين"],
+    "types": ["تذكير", "إعلان", "تنبيه"],
+    "methods": ["إشعار داخل النظام", "بريد إلكتروني", "كلاهما"],
+    "success": {
+      "sendTitle": "تمت إرسال الإشعار بنجاح!",
+      "sendSubtitle": "إعادة التوجه إلى إدارة الإشعارات أو أرسال إشعار آخر.",
+      "sendCancel": "إرسال إشعار آخر",
+      "sendAction": "التوجه إلى إدارة الإشعارات"
+    },
+    "delete": {
+      "title": "هل أنت متأكد من حذف هذا التنبيه؟",
+      "subtitle": "سيؤدي حذف هذا التنبيه إلى إزالة جميع بياناته من النظام.",
+      "cancel": "إلغاء",
+      "action": "نعم، حذف التنبيه",
+      "success": "تم حذف التنبيه بنجاح",
+      "error": "حدث خطأ أثناء الحذف"
+    },
+    "messages": {
+      "sendSuccess": "تم إرسال التنبيه بنجاح",
+      "sendError": "حدث خطأ أثناء إرسال التنبيه",
+      "loadUsersError": "حدث خطأ أثناء جلب المستخدمين"
+    }
+  },
+  "roles": {
+    "title": "إدارة الأدوار والصلاحيات",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbTitle": "إدارة الأدوار والصلاحيات",
+    "addRole": "إضافة دور جديد",
+    "emptyTitle": "لا توجد أدوار متاحة",
+    "emptySubtitle": " يمكنك إضافة دور جديد بالضغط على زر \"إضافة دور جديد\".",
+    "permissionCount": "صلاحية",
+    "messages": {
+      "loadError": "حدث خطأ أثناء جلب الأدوار",
+      "deleteSuccess": "تم حذف الدور بنجاح",
+      "deleteError": "حدث خطأ أثناء حذف الدور"
+    },
+    "dialog": {
+      "addTitle": "إضافة دور جديد",
+      "editTitle": "تعديل الدور",
+      "nameLabel": "اسم الدور",
+      "namePlaceholder": "اسم الدور",
+      "nameRequired": "هذا الحقل مطلوب",
+      "descriptionLabel": "وصف الدور",
+      "descriptionPlaceholder": "وصف الدور...",
+      "permissionsLabel": "صلاحيات الدور",
+      "noPermissions": "لا توجد صلاحيات متاحة",
+      "permissionRequired": "يرجى اختيار صلاحية واحدة على الأقل",
+      "cancel": "الغاء",
+      "addButton": "إضافة",
+      "saveButton": "حفظ التغييرات",
+      "addSuccess": "تم إضافة الدور بنجاح",
+      "addError": "حدث خطأ أثناء إضافة الدور",
+      "editSuccess": "تم تحديث الدور بنجاح",
+      "editError": "حدث خطأ أثناء تحديث الدور",
+      "loadPermissionsError": "حدث خطأ أثناء جلب الصلاحيات"
+    },
+    "delete": {
+      "noRoleSelected": "لم يتم تحديد دور للحذف",
+      "error": "حدث خطأ أثناء محاولة حذف الدور",
+      "confirmTitle": "رسالة تاكيد",
+      "title": "هل أنت متأكد من حذف هذا الدور؟",
+      "subtitle": "لا يمكن التراجع عن هذه العملية. سيتم حذف جميع البيانات المرتبطة بهذا الدور.",
+      "action": "حذف",
+      "cancel": "إلغاء "
+    }
+  },
+  "dashboard": {
+    "stats": {
+      "companiesCount": "عدد الشركات",
+      "pilgrimsInside": "عدد الحجاج داخل السوبردوم",
+      "flightsCount": "عدد الرحلات",
+      "avgWaitTime": "متوسط وقت الإنتظار"
+    },
+    "tabs": {
+      "companies": "الشركات",
+      "flights": "الرحلات",
+      "pilgrims": "الحجاج"
+    },
+    "headers": {
+      "companies": {
+        "licenseNumber": "رقم الترخيص",
+        "companyName": "اسم الشركة",
+        "connectedHujjaj": "عدد الحجاج المرتبطين",
+        "contactNumber": "وسيلة الاتصال"
+      },
+      "flights": {
+        "flightNumber": "رقم الرحلة",
+        "company": "الشركة المشغلة",
+        "date": "التاريخ",
+        "time": "الوقت",
+        "destination": "الوجهة",
+        "pilgrimsCount": "عدد الحجاج"
+      },
+      "pilgrims": {
+        "name": "الاسم",
+        "identity": "رقم الهوية",
+        "nationality": "الجنسية",
+        "phone": "رقم التواصل"
+      }
+    },
+    "editButton": "تعديل",
+    "noData": "لا توجد بيانات",
+    "error": "حدث خطأ أثناء جلب البيانات"
+  },
+  "nav": {
+    "sections": {
+      "coreOperations": "الطلبات الأساسية",
+      "systemServices": "خدمات النظام"
+    },
+    "items": {
+      "home": "الصفحة الرئيسية",
+      "companies": "إدارة الشركات",
+      "companyProfile": "بيانات الشركة",
+      "pilgrims": "إدارة الحجاج",
+      "flights": "جداول الرحلات",
+      "users": "إدارة المستخدمين",
+      "notifications": "إدارة الإشعارات",
+      "notificationsView": "الإشعارات"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "منصة جدة سوبردوم لحجٍ منظم وطمأنينة رقمية",
+      "subtitle": "منصة رقمية تسهّل على الحاج كل خطوة، من لحظة الوصول وحتى صعود القافلة."
+    },
+    "services": {
+      "title": "الخدمات المقدمة",
+      "subtitle": "مزايا ترافقك في كل خطوة"
+    },
+    "features": {
+      "dataTitle": "بياناتك في مكان واحد",
+      "dataSubtitle": "اعرف كل تفاصيل رحلتك مثل: وقت التفويج، رقم البوابة، والمسار المخصص لك.",
+      "liveTitle": "تحديث لحظي لحالتك",
+      "liveSubtitle": "تابع حالتك خطوة بخطوة من لحظة الوصول حتى صعود الحافلة.",
+      "notifTitle": "إشعارات تنبهك في الوقت المناسب",
+      "notifSubtitle": "إشعارات تنبهك في الوقت المناسب تنبيهات فورية بكل ما يخص حركتك داخل السوبر دوم."
+    },
+    "qrSection": {
+      "title": "خدمات لتجربة مثالية",
+      "subtitle": "حالتك تُحدّث في لحظات",
+      "description": "بمجرد مسح رمز الـ QR، يتم تحديث حالتك تلقائيًا في كل مرحلة داخل السوبر دوم — بسهولة وسرعة."
+    },
+    "mapSection": {
+      "title": "خدمات لتجربة مثالية",
+      "subtitle": "خريطة ترافقك في كل خطوة",
+      "description": "اعرف طريقك داخل السوبر دوم من أول لحظة. الخريطة التفاعلية توضّح لك مكانك وتدلّك على المسار الصحيح."
+    },
+    "faq": {
+      "title": "الأسئلة الشائعة"
+    },
+    "closing": "نحن لا نقد لك تقنية فحسب ، بل نرافقك فى درب الطمأنينة... نسأل الله لك حجاً مبروراً وذنباً مغفوراً..."
+  },
+  "landingPage": {
+    "faq": {
+      "q1": "كيف أدخل إلى التطبيق",
+      "a1": "أدخل رقم الهوية الرمز السرى PIN لعرض بياناتك ومتابعة حالتك",
+      "q2": "ما هي الخدمات المتوفرة داخل التطبيق؟",
+      "a2": "المتابعة الميدانية لقياس حالة الامتثال شركات تقديم الخدمة في مواقع تواجد ضيوف الرحمن في مكة المكرمة و المشاعر المقدسة",
+      "q3": "متى موعد تحركي؟",
+      "a3": "تختلف فترات العمل حسب الوردية والمسمى الوظيفي الخاص بكل موظف",
+      "q4": "متى يتم تحديث حالتي داخل السوبر دوم؟",
+      "a4": "تختلف فترات العمل حسب الوردية والمسمى الوظيفي الخاص بكل موظف",
+      "q5": "هل التطبيق يدعم لغات غير العربية؟",
+      "a5": "تختلف فترات العمل حسب الوردية والمسمى الوظيفي الخاص بكل موظف"
+    }
+  },
+  "validators": {
+    "required": "هذا الحقل مطلوب",
+    "phoneStart": "رقم الجوال يجب أن يبدأ ب 05",
+    "emailInvalid": "ادخل قيمة صالحة للبريد الإلكتروني",
+    "passwordStrength": "يجب أن يحتوي الحقل على حرف كبير وصغير وحرف خاص ورقم بحد أدنى 8 أحرف",
+    "passwordMismatch": "تأكيد حقل تأكيد كلمة المرور غير متطابق",
+    "minMax": "أدخل الرقم بين {min} و {max}",
+    "integer": "يجب أن يكون هذا الحقل عددًا صحيحًا",
+    "regex": "تنسيق حقل Regex غير صالح",
+    "alpha": "قد يحتوي حقل Alpha على أحرف أبجدية فقط",
+    "url": "عنوان URL غير صالح",
+    "minLength": "يجب أن يحتوي الحقل على الأقل علي{length}حروف",
+    "alphaNum": "جميع الحروف غير صالحة",
+    "email": "البريد الإلكتروني غير صالح",
+    "phoneLength": "رقم الهاتف يجب أن يكون 10 أرقام",
+    "passwordLength": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+    "passwordConfirm": "كلمة المرور غير متطابقة",
+    "identityLength": "رقم الهوية يجب أن يكون 10 أرقام"
+  },
+  "upload": {
+    "dragDrop": "اسحب وأفلِت أو اختر الملف الذي تريد تحميله",
+    "supportedFormats": "يدعم الامتدادات .xlsx, .csv والحد الأقصى للحجم 5 ميجا بايت.",
+    "browseFiles": "استعراض الملفات",
+    "uploading": "جارى التحميل ...",
+    "from": "من",
+    "formatWarning": "يرجى التأكد من تنسيق الأعمدة حسب النموذج المطلوب",
+    "fileSizeUnits": {
+      "byte": "بايت",
+      "kilobyte": "كيلوبايت",
+      "megabyte": "ميجابايت",
+      "gigabyte": "جيجابايت",
+      "terabyte": "تيرابايت"
+    }
+  },
+  "emailTemplate": {
+    "title": "حساب جديد - جدة سوبردوم",
+    "greeting": "السلام عليكم ورحمة الله وبركاته",
+    "body": "تم إنشاء حساب جديد لك في نظام جدة سوبردوم. يمكنك الآن تسجيل الدخول إلى النظام باستخدام البيانات التالية:",
+    "loginButton": "تسجيل الدخول",
+    "accountData": "البيانات الحساب",
+    "username": "اسم المستخدم:",
+    "tempPassword": "كلمة المرور المؤقتة:",
+    "notes": "📌ملاحظات importante :",
+    "changePasswordNote": "يُرجى تغيير كلمة المرور عند تسجيل الدخول لأول مرة.",
+    "supportNote": "في حال مواجهة أي مشكلة، يمكنك التواصل مع فريق الدعم.",
+    "thanks": "شكرًا لك،",
+    "regards": "مع تحيات",
+    "organization": "[اسم الجهة المسؤولة]",
+    "team": "فريق إدارة العمليات للبداية"
+  },
+  "notFound": {
+    "title": "الصفحة المطلوبة غير موجودة :(",
+    "subtitle": "We couldn't find the page you are looking for.",
+    "backHome": "العودة إلى الرئيسية"
+  },
+  "components": {
+    "companyProfile": {
+      "sampleName": "شركة راية لخدمات الحج والعمرة",
+      "sampleCity": "الرياض",
+      "sampleAddress": "الرياض ، بجوار برج الرياض"
+    }
+  },
+  "permissionDenied": {
+    "title": "ليس لديك صلاحية",
+    "subtitle": "ليس لديك صلاحية للوصول إلى هذه الصفحة",
+    "backHome": "العودة إلى الرئيسية"
+  }
+}

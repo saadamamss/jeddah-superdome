@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@core/*": ["./src/@core/*"],
+      "@layouts/*": ["./src/@layouts/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@validators": ["./src/@core/utils/validators.ts"]
+    },
+    "baseUrl": ".",
+    "types": ["vite/client", "vitest/globals"],
+    "ignoreDeprecations": "6.0"
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "env.d.ts", "auto-imports.d.ts"],
+  "exclude": ["node_modules", "dist", "src/@iconify/build-icons.ts"]
+}

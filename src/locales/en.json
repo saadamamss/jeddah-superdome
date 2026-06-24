@@ -1,0 +1,674 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "yes": "Yes",
+    "no": "No",
+    "search": "Search",
+    "view": "View",
+    "back": "Back",
+    "submit": "Submit",
+    "reset": "Reset",
+    "home": "Home",
+    "select": "Select",
+    "optional": "(Optional)",
+    "required": "Required",
+    "requiredField": "This field is required",
+    "noData": "No data available",
+    "errorOccurred": "An error occurred",
+    "copyright": "© All rights reserved 2025 - Jeddah Superdome"
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "subtitle": "Welcome to the Hajj Flow Management System - Jeddah Superdome",
+      "emailLabel": "ID / License Number or Email",
+      "emailPlaceholder": "Enter email",
+      "emailRequired": "Email is required",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "passwordRequired": "Password is required",
+      "loginButton": "Login",
+      "loginAsCompany": "Login as Company",
+      "invalidCredentials": "Invalid login credentials",
+      "loginError": "An error occurred during login"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password?",
+      "subtitle": "Enter your registered email to send a verification code.",
+      "emailLabel": "Email*",
+      "emailPlaceholder": "example@domain.com",
+      "sendButton": "Send",
+      "error": "Unexpected error!"
+    },
+    "otp": {
+      "title": "Email Verification",
+      "subtitle": "Enter the 4-digit verification code sent to your email",
+      "verifyButton": "Verify",
+      "resendButton": "Resend Code",
+      "resentSuccess": "Verification code sent again",
+      "resentError": "Error sending verification code",
+      "error": "Unexpected error!"
+    },
+    "createPassword": {
+      "title": "New Password",
+      "subtitle": "Change Password!",
+      "description": "Please change your password when logging in for the first time.",
+      "newPasswordLabel": "New Password",
+      "newPasswordPlaceholder": "Enter password",
+      "confirmPasswordLabel": "Confirm New Password",
+      "confirmPasswordPlaceholder": "Confirm password",
+      "confirmButton": "Confirm",
+      "changeButton": "Change Password",
+      "success": "Password updated successfully",
+      "error": "Unexpected error!"
+    },
+    "resetPassword": {
+      "title": "New Password",
+      "subtitle": "Change Password!",
+      "description": "Please change your password when logging in for the first time.",
+      "newPasswordLabel": "New Password*",
+      "confirmPasswordLabel": "Confirm Password*",
+      "saveButton": "Save Password",
+      "success": "Password changed successfully",
+      "error": "Unexpected error!"
+    }
+  },
+  "companies": {
+    "title": "Company Management",
+    "breadcrumbHome": "Home",
+    "breadcrumbTitle": "Company Management",
+    "searchPlaceholder": "Search by license number or company name",
+    "addFile": "Add Company File",
+    "addFileShort": "Add File",
+    "addCompany": "Add New Company",
+    "addShort": "Add",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "headers": {
+      "licenseNumber": "License Number",
+      "companyName": "Company Name",
+      "connectedHujjaj": "Connected Pilgrims",
+      "contactNumber": "Contact Number",
+      "password": "Password"
+    },
+    "dialog": {
+      "editTitle": "Edit Company",
+      "addTitle": "Add New Company",
+      "subtitle": "Please fill in the company details accurately. Required fields are marked with (*).",
+      "companyNameLabel": "Company Name *",
+      "companyNamePlaceholder": "Official Full Name",
+      "licenseLabel": "License Number*",
+      "licensePlaceholder": "License Number",
+      "cityLabel": "City*",
+      "cityPlaceholder": "Riyadh, Makkah, Jeddah...",
+      "phoneLabel": "Contact Number*",
+      "phonePlaceholder": "Contact Number",
+      "emailLabel": "Email*",
+      "emailPlaceholder": "Email",
+      "passwordLabel": "Password*",
+      "addressLabel": "Address",
+      "addressPlaceholder": "Detailed Address if available"
+    },
+    "upload": {
+      "title": "Upload Company File",
+      "subtitle": "Please upload the required files to add or update company data.",
+      "fileName": "Company File",
+      "btnText": "Download Company File Template",
+      "error": "Error uploading file"
+    },
+    "success": {
+      "addTitle": "Company Added Successfully!",
+      "addSubtitle": "Return to company management or add another company.",
+      "addCancel": "Add Another Company",
+      "addAction": "Go to Company Management",
+      "editTitle": "Company Updated Successfully!",
+      "editSubtitle": "You can now return to company details or continue editing.",
+      "editCancel": "Edit Other Details",
+      "editAction": "Return to Company Details"
+    },
+    "delete": {
+      "title": "Are you sure you want to delete this company?",
+      "subtitle": "Deleting this company will remove all its data from the system, and it may not be recoverable.",
+      "cancel": "Cancel",
+      "action": "Yes, Delete Company",
+      "success": "Company deleted successfully",
+      "error": "Error deleting company"
+    },
+    "messages": {
+      "addSuccess": "Company added successfully",
+      "editSuccess": "Company updated successfully",
+      "error": "An error occurred"
+    },
+    "profile": {
+      "title": "Company Details",
+      "editButton": "Edit",
+      "companyName": "Company Name",
+      "licenseNumber": "License Number",
+      "contactNumber": "Contact Number",
+      "email": "Email",
+      "city": "City",
+      "address": "Address",
+      "editDialog": {
+        "title": "Edit Company Details",
+        "subtitle": "Please edit company details accurately. Required fields are marked with (*).",
+        "successTitle": "Company Details Updated Successfully!",
+        "successSubtitle": "You can now return to company details or continue editing.",
+        "successCancel": "Edit Other Details",
+        "successAction": "Return to Company Details"
+      }
+    }
+  },
+  "pilgrims": {
+    "title": "Pilgrim Management",
+    "breadcrumbHome": "Home",
+    "breadcrumbTitle": "Pilgrim Management",
+    "searchPlaceholder": "Search by ID number or name",
+    "addFile": "Add Pilgrim File",
+    "addPilgrim": "Add Pilgrim",
+    "viewButton": "View",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "headers": {
+      "name": "Name",
+      "identity": "ID Number",
+      "nationality": "Nationality",
+      "gender": "Gender",
+      "phone": "Contact Number"
+    },
+    "dialog": {
+      "editTitle": "Edit Pilgrim Details",
+      "addTitle": "Add New Pilgrim",
+      "subtitle": "Please fill in the pilgrim details accurately. Required fields are marked with (*).",
+      "nameLabel": "Full Name*",
+      "namePlaceholder": "Official Full Name",
+      "identityLabel": "ID / Passport Number*",
+      "identityPlaceholder": "ID Number",
+      "companyLabel": "Assigned Company*",
+      "nationalityLabel": "Nationality*",
+      "genderLabel": "Gender*",
+      "birthDateLabel": "Date of Birth*",
+      "birthDatePlaceholder": "Date of Birth",
+      "phoneLabel": "Contact Number*",
+      "phonePlaceholder": "Contact Number",
+      "emailLabel": "Email*",
+      "emailPlaceholder": "Email"
+    },
+    "upload": {
+      "title": "Upload Pilgrim File",
+      "subtitle": "Please upload the required files to add or update pilgrim data.",
+      "fileName": "Pilgrim File",
+      "btnText": "Download Pilgrim File Template",
+      "error": "Error uploading file"
+    },
+    "success": {
+      "addTitle": "Pilgrim Added Successfully!",
+      "addSubtitle": "Return to pilgrim management or add another pilgrim.",
+      "addCancel": "Add Another Pilgrim",
+      "addAction": "Go to Pilgrim Management"
+    },
+    "delete": {
+      "title": "Are you sure you want to delete this pilgrim?",
+      "subtitle": "Deleting this pilgrim will remove all its data from the system, and it may not be recoverable.",
+      "cancel": "Cancel",
+      "action": "Yes, Delete Pilgrim",
+      "success": "Pilgrim deleted successfully",
+      "error": "Error deleting pilgrim"
+    },
+    "messages": {
+      "addSuccess": "Pilgrim added successfully",
+      "editSuccess": "Pilgrim details updated successfully",
+      "error": "An error occurred"
+    },
+    "details": {
+      "basicData": "Basic Data",
+      "tripData": "Trip & Flow Data",
+      "fullName": "Full Name",
+      "identityNumber": "ID Number",
+      "companyName": "Company Name",
+      "companyRef": "Company Reference Number",
+      "nationality": "Nationality",
+      "gender": "Gender",
+      "stage": "Stage",
+      "nextDestination": "Next Destination",
+      "flowTime": "Flow Time",
+      "gateNumber": "Gate Number",
+      "pathNumber": "Path Number",
+      "busNumber": "Bus Number"
+    }
+  },
+  "flights": {
+    "title": "Flight Schedule",
+    "breadcrumbHome": "Home",
+    "breadcrumbTitle": "Flight Management",
+    "searchPlaceholder": "Search by flight number",
+    "addFile": "Add Flight File",
+    "addFlight": "Add New Flight",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "headers": {
+      "flightNumber": "Flight Number",
+      "company": "Operating Company",
+      "date": "Date",
+      "time": "Time",
+      "destination": "Destination",
+      "pilgrimsCount": "Pilgrims Count",
+      "transport": "Transport"
+    },
+    "dialog": {
+      "editTitle": "Edit Flight",
+      "addTitle": "Add New Flight",
+      "subtitle": "Please fill in the flight details accurately. Required fields are marked with (*).",
+      "flightNumberLabel": "Flight Number*",
+      "flightNumberPlaceholder": "Flight Number",
+      "timeLabel": "Time*",
+      "timePlaceholder": "08:00 AM",
+      "dateLabel": "Date*",
+      "companyLabel": "Company*",
+      "destinationLabel": "Destination*",
+      "destinationPlaceholder": "Makkah",
+      "transportLabel": "Transport*",
+      "pilgrimsCountLabel": "Expected Pilgrims Count*",
+      "pilgrimsCountPlaceholder": "Pilgrims Count"
+    },
+    "upload": {
+      "title": "Upload Flight File",
+      "subtitle": "Upload flight data file to add or update in bulk.",
+      "fileName": "Flight File",
+      "btnText": "Download Flight File Template",
+      "error": "Error uploading file"
+    },
+    "success": {
+      "addTitle": "Flight Added Successfully!",
+      "addSubtitle": "Return to flight management or add another flight.",
+      "addCancel": "Add Another Flight",
+      "addAction": "Go to Flight Management"
+    },
+    "delete": {
+      "title": "Are you sure you want to delete this flight?",
+      "subtitle": "Deleting this flight will remove all its data from the system.",
+      "cancel": "Cancel",
+      "action": "Yes, Delete Flight",
+      "success": "Flight deleted successfully",
+      "error": "Error deleting flight"
+    },
+    "messages": {
+      "addSuccess": "Flight added successfully",
+      "editSuccess": "Flight updated successfully",
+      "error": "An error occurred"
+    }
+  },
+  "users": {
+    "title": "User Management",
+    "breadcrumbHome": "Home",
+    "breadcrumbTitle": "User Management",
+    "searchPlaceholder": "Search by ID or name",
+    "addFile": "Add User File",
+    "addUser": "Add New User",
+    "editButton": "Edit",
+    "deleteButton": "Delete",
+    "headers": {
+      "identity": "ID Number",
+      "name": "Name",
+      "role": "Role",
+      "phone": "Phone Number",
+      "status": "Status"
+    },
+    "roles": {
+      "admin": "System Admin",
+      "supervisor": "General Supervisor",
+      "moderator": "Moderator",
+      "observer": "Observer"
+    },
+    "dialog": {
+      "addTitle": "Add User",
+      "editTitle": "Edit User",
+      "subtitle": "Please fill in the user details accurately. Required fields are marked with (*).",
+      "firstNameLabel": "Name",
+      "namePlaceholder": "Enter name",
+      "lastNameLabel": "Last Name",
+      "phoneLabel": "Phone Number*",
+      "phonePlaceholder": "Phone Number",
+      "emailLabel": "Email*",
+      "emailPlaceholder": "Email",
+      "identityLabel": "ID Number",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "passwordHint": "Leave empty to use default password: 12345678",
+      "confirmPasswordLabel": "Confirm Password",
+      "companyLabel": "Main Company",
+      "packageLabel": "Package",
+      "statusLabel": "Status *",
+      "roleLabel": "Role",
+      "dashboardRoleLabel": "Dashboard Role"
+    },
+    "upload": {
+      "title": "Upload User File",
+      "subtitle": "Please upload the required files to add or update user data.",
+      "fileName": "User File",
+      "btnText": "Download User File Template",
+      "error": "Error uploading file"
+    },
+    "success": {
+      "addTitle": "User Added Successfully!",
+      "addSubtitle": "Return to user management or add another user.",
+      "addCancel": "Add Another User",
+      "addAction": "Go to User Management"
+    },
+    "delete": {
+      "title": "Are you sure you want to delete this user?",
+      "subtitle": "Deleting this user will remove all its data from the system, and it may not be recoverable.",
+      "cancel": "Cancel",
+      "action": "Yes, Delete User",
+      "success": "User deleted successfully",
+      "error": "Error deleting user"
+    },
+    "messages": {
+      "addSuccess": "User added successfully",
+      "editSuccess": "User details updated successfully",
+      "loadError": "Error loading user details",
+      "updateError": "Error updating user details",
+      "validationError": "Please verify the entered data"
+    },
+    "details": {
+      "title": "User Details",
+      "firstName": "First Name",
+      "secondName": "Second Name",
+      "thirdName": "Third Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "role": "Role",
+      "city": "City",
+      "bloodType": "Blood Type",
+      "gender": "Gender",
+      "nationality": "Nationality",
+      "identity": "ID Number",
+      "saveButton": "Save Changes",
+      "stats": {
+        "attendanceDays": "Attendance Days",
+        "reports": "Reports Count",
+        "newRatings": "New Ratings",
+        "completedRatings": "Completed Ratings"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Notification Management",
+    "breadcrumbHome": "Home",
+    "breadcrumbTitle": "Notification Management",
+    "sendNew": "Send New Notification",
+    "resend": " Resend",
+    "deleteButton": "Delete",
+    "emptyTitle": "No alerts available",
+    "emptySubtitle": "You can send a new alert by clicking the \"Send Alert\" button",
+    "emptyAction": "Send Alert",
+    "headers": {
+      "title": "Notification Title",
+      "body": "Notification Text",
+      "target": "Target Audience",
+      "type": "Notification Type",
+      "method": "Delivery Method"
+    },
+    "dialog": {
+      "title": "Send New Notification",
+      "subtitle": "Send an instant notification to one or more users to inform them of important information or urgent action.",
+      "titleLabel": "Notification Title*",
+      "titlePlaceholder": "Notification Title",
+      "titleRequired": "Notification title is required",
+      "bodyLabel": "Notification Text*",
+      "bodyPlaceholder": "Notification Text",
+      "bodyRequired": "Notification text is required",
+      "targetLabel": "Target Audience*",
+      "targetPlaceholder": "Target Audience",
+      "targetRequired": "Target audience is required",
+      "typeLabel": "Notification Type*",
+      "typePlaceholder": "Notification Type",
+      "typeRequired": "Notification type is required",
+      "methodLabel": "Delivery Method*",
+      "methodPlaceholder": "Delivery Method",
+      "methodRequired": "Delivery method is required",
+      "sendButton": "Send"
+    },
+    "targets": ["Companies", "Pilgrims", "Users"],
+    "types": ["Reminder", "Announcement", "Alert"],
+    "methods": ["In-App Notification", "Email", "Both"],
+    "success": {
+      "sendTitle": "Notification Sent Successfully!",
+      "sendSubtitle": "Return to notification management or send another notification.",
+      "sendCancel": "Send Another Notification",
+      "sendAction": "Go to Notification Management"
+    },
+    "delete": {
+      "title": "Are you sure you want to delete this alert?",
+      "subtitle": "Deleting this alert will remove all its data from the system.",
+      "cancel": "Cancel",
+      "action": "Yes, Delete Alert",
+      "success": "Alert deleted successfully",
+      "error": "Error deleting alert"
+    },
+    "messages": {
+      "sendSuccess": "Alert sent successfully",
+      "sendError": "Error sending alert",
+      "loadUsersError": "Error loading users"
+    }
+  },
+  "roles": {
+    "title": "Roles & Permissions Management",
+    "breadcrumbHome": "Home",
+    "breadcrumbTitle": "Roles & Permissions Management",
+    "addRole": "Add New Role",
+    "emptyTitle": "No roles available",
+    "emptySubtitle": "You can add a new role by clicking the \"Add New Role\" button.",
+    "permissionCount": "permission",
+    "messages": {
+      "loadError": "Error loading roles",
+      "deleteSuccess": "Role deleted successfully",
+      "deleteError": "Error deleting role"
+    },
+    "dialog": {
+      "addTitle": "Add New Role",
+      "editTitle": "Edit Role",
+      "nameLabel": "Role Name",
+      "namePlaceholder": "Role Name",
+      "nameRequired": "This field is required",
+      "descriptionLabel": "Role Description",
+      "descriptionPlaceholder": "Role description...",
+      "permissionsLabel": "Role Permissions",
+      "noPermissions": "No permissions available",
+      "permissionRequired": "Please select at least one permission",
+      "cancel": "Cancel",
+      "addButton": "Add",
+      "saveButton": "Save Changes",
+      "addSuccess": "Role added successfully",
+      "addError": "Error adding role",
+      "editSuccess": "Role updated successfully",
+      "editError": "Error updating role",
+      "loadPermissionsError": "Error loading permissions"
+    },
+    "delete": {
+      "noRoleSelected": "No role selected for deletion",
+      "error": "Error trying to delete role",
+      "confirmTitle": "Confirmation",
+      "title": "Are you sure you want to delete this role?",
+      "subtitle": "This action cannot be undone. All data associated with this role will be deleted.",
+      "action": "Delete",
+      "cancel": "Cancel"
+    }
+  },
+  "dashboard": {
+    "stats": {
+      "companiesCount": "Number of Companies",
+      "pilgrimsInside": "Pilgrims Inside Superdome",
+      "flightsCount": "Number of Flights",
+      "avgWaitTime": "Average Wait Time"
+    },
+    "tabs": {
+      "companies": "Companies",
+      "flights": "Flights",
+      "pilgrims": "Pilgrims"
+    },
+    "headers": {
+      "companies": {
+        "licenseNumber": "License Number",
+        "companyName": "Company Name",
+        "connectedHujjaj": "Connected Pilgrims",
+        "contactNumber": "Contact Number"
+      },
+      "flights": {
+        "flightNumber": "Flight Number",
+        "company": "Operating Company",
+        "date": "Date",
+        "time": "Time",
+        "destination": "Destination",
+        "pilgrimsCount": "Pilgrims Count"
+      },
+      "pilgrims": {
+        "name": "Name",
+        "identity": "ID Number",
+        "nationality": "Nationality",
+        "phone": "Contact Number"
+      }
+    },
+    "editButton": "Edit",
+    "noData": "No data available",
+    "error": "Error loading data"
+  },
+  "nav": {
+    "sections": {
+      "coreOperations": "Core Operations",
+      "systemServices": "System Services"
+    },
+    "items": {
+      "home": "Home",
+      "companies": "Company Management",
+      "companyProfile": "Company Details",
+      "pilgrims": "Pilgrim Management",
+      "flights": "Flight Schedules",
+      "users": "User Management",
+      "notifications": "Notification Management",
+      "notificationsView": "Notifications"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Jeddah Superdome Platform for Organized Hajj and Digital Reassurance",
+      "subtitle": "A digital platform that simplifies every step for the pilgrim, from arrival to boarding the convoy."
+    },
+    "services": {
+      "title": "Services",
+      "subtitle": "Features accompanying you at every step"
+    },
+    "features": {
+      "dataTitle": "Your Data in One Place",
+      "dataSubtitle": "Know all your trip details like: flow time, gate number, and your designated path.",
+      "liveTitle": "Real-time Status Updates",
+      "liveSubtitle": "Follow your status step by step from arrival until boarding the bus.",
+      "notifTitle": "Timely Notifications",
+      "notifSubtitle": "Instant alerts about everything related to your movement inside the Superdome."
+    },
+    "qrSection": {
+      "title": "Services for an Ideal Experience",
+      "subtitle": "Your Status Updated in Moments",
+      "description": "Simply scan the QR code, and your status is automatically updated at each stage inside the Superdome — easily and quickly."
+    },
+    "mapSection": {
+      "title": "Services for an Ideal Experience",
+      "subtitle": "Map Accompanying You at Every Step",
+      "description": "Know your way inside the Superdome from the first moment. The interactive map shows your location and guides you to the correct path."
+    },
+    "faq": {
+      "title": "Frequently Asked Questions"
+    },
+    "closing": "We don't just bring you technology, we accompany you on a journey of reassurance... We ask Allah for you a accepted pilgrimage and forgiven sins..."
+  },
+  "landingPage": {
+    "faq": {
+      "q1": "How do I enter the application?",
+      "a1": "Enter your ID number and PIN to view your data and follow your status",
+      "q2": "What services are available in the application?",
+      "a2": "Field follow-up to measure compliance status of service companies at the locations of Allah's guests in Makkah and the holy sites",
+      "q3": "When is my movement schedule?",
+      "a3": "Work hours vary according to the shift and job title of each employee",
+      "q4": "When is my status updated inside the Superdome?",
+      "a4": "Work hours vary according to the shift and job title of each employee",
+      "q5": "Does the application support languages other than Arabic?",
+      "a5": "Work hours vary according to the shift and job title of each employee"
+    }
+  },
+  "validators": {
+    "required": "This field is required",
+    "phoneStart": "Phone number must start with 05",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordStrength": "Password must contain uppercase, lowercase, special character and number with minimum 8 characters",
+    "passwordMismatch": "Password confirmation does not match",
+    "minMax": "Enter a number between {min} and {max}",
+    "integer": "This field must be an integer",
+    "regex": "Regex field format is invalid",
+    "alpha": "Alpha field may only contain alphabetic characters",
+    "url": "URL is not valid",
+    "minLength": "Field must contain at least {length} characters",
+    "alphaNum": "All characters are invalid",
+    "email": "Email is not valid",
+    "phoneLength": "Phone number must be 10 digits",
+    "passwordLength": "Password must be at least 8 characters",
+    "passwordConfirm": "Passwords do not match",
+    "identityLength": "ID number must be 10 digits"
+  },
+  "upload": {
+    "dragDrop": "Drag and drop or choose the file you want to upload",
+    "supportedFormats": "Supports .xlsx, .csv extensions with maximum size 5 MB.",
+    "browseFiles": "Browse Files",
+    "uploading": "Uploading...",
+    "from": "from",
+    "formatWarning": "Please ensure column formatting matches the required template",
+    "fileSizeUnits": {
+      "byte": "Byte",
+      "kilobyte": "Kilobyte",
+      "megabyte": "Megabyte",
+      "gigabyte": "Gigabyte",
+      "terabyte": "Terabyte"
+    }
+  },
+  "emailTemplate": {
+    "title": "New Account - Jeddah Superdome",
+    "greeting": "Peace be upon you and God's mercy and blessings",
+    "body": "A new account has been created for you in the Jeddah Superdome system. You can now log in using the following credentials:",
+    "loginButton": "Login",
+    "accountData": "Account Data",
+    "username": "Username:",
+    "tempPassword": "Temporary Password:",
+    "notes": "📌Important Notes:",
+    "changePasswordNote": "Please change your password when logging in for the first time.",
+    "supportNote": "If you encounter any issues, please contact the support team.",
+    "thanks": "Thank you,",
+    "regards": "Best regards",
+    "organization": "[Responsible Organization]",
+    "team": "Operations Management Team"
+  },
+  "notFound": {
+    "title": "Page Not Found :(",
+    "subtitle": "We couldn't find the page you are looking for.",
+    "backHome": "Return to Home"
+  },
+  "components": {
+    "companyProfile": {
+      "sampleName": "Raya Hajj and Umrah Services Company",
+      "sampleCity": "Riyadh",
+      "sampleAddress": "Riyadh, next to Riyadh Tower"
+    }
+  },
+  "permissionDenied": {
+    "title": "Access Denied",
+    "subtitle": "You don't have permission to access this page",
+    "backHome": "Return to Home"
+  }
+}
