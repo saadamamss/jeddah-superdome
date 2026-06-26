@@ -60,6 +60,9 @@ namespace DotnetStarterKit.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<double?>("Latitude")
                         .HasColumnType("double");
 
@@ -90,7 +93,12 @@ namespace DotnetStarterKit.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CompanyId")
+                    b.Property<int>("Capacity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -114,6 +122,13 @@ namespace DotnetStarterKit.Migrations
                     b.Property<int>("NoOfHuj")
                         .HasColumnType("int");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("Scheduled");
+
                     b.Property<string>("Time")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -128,7 +143,30 @@ namespace DotnetStarterKit.Migrations
 
                     b.HasIndex("CompanyId");
 
+                    b.HasIndex("FlightNumber")
+                        .IsUnique();
+
                     b.ToTable("flights", (string)null);
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.FlightPilgrim", b =>
+                {
+                    b.Property<int>("FlightId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PilgrimId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.HasKey("FlightId", "PilgrimId");
+
+                    b.HasIndex("PilgrimId");
+
+                    b.ToTable("flight_pilgrims", (string)null);
                 });
 
             modelBuilder.Entity("DotnetStarterKit.Data.Notification", b =>
@@ -152,10 +190,17 @@ namespace DotnetStarterKit.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<string>("SentByUserId")
+                        .HasMaxLength(450)
+                        .HasColumnType("varchar(450)");
+
                     b.Property<string>("Target")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<int?>("TargetCompanyId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -168,6 +213,10 @@ namespace DotnetStarterKit.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SentByUserId");
+
+                    b.HasIndex("TargetCompanyId");
 
                     b.ToTable("notifications", (string)null);
                 });
@@ -206,7 +255,7 @@ namespace DotnetStarterKit.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int?>("CompanyId")
+                    b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -305,6 +354,40 @@ namespace DotnetStarterKit.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("user_companies", (string)null);
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.UserNotification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DeliveredAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("NotificationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NotificationId");
+
+                    b.HasIndex("UserId", "NotificationId")
+                        .IsUnique();
+
+                    b.ToTable("user_notifications", (string)null);
                 });
 
             modelBuilder.Entity("DotnetStarterKit.Users.User", b =>
@@ -575,17 +658,55 @@ namespace DotnetStarterKit.Migrations
                     b.HasOne("DotnetStarterKit.Data.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.FlightPilgrim", b =>
+                {
+                    b.HasOne("DotnetStarterKit.Data.Flight", "Flight")
+                        .WithMany("FlightPilgrims")
+                        .HasForeignKey("FlightId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DotnetStarterKit.Data.Pilgrim", "Pilgrim")
+                        .WithMany("FlightPilgrims")
+                        .HasForeignKey("PilgrimId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Flight");
+
+                    b.Navigation("Pilgrim");
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.Notification", b =>
+                {
+                    b.HasOne("DotnetStarterKit.Users.User", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("SentByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("DotnetStarterKit.Data.Company", "TargetCompany")
+                        .WithMany()
+                        .HasForeignKey("TargetCompanyId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("SentByUser");
+
+                    b.Navigation("TargetCompany");
                 });
 
             modelBuilder.Entity("DotnetStarterKit.Data.Pilgrim", b =>
                 {
                     b.HasOne("DotnetStarterKit.Data.Company", "Company")
-                        .WithMany()
+                        .WithMany("Pilgrims")
                         .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Company");
                 });
@@ -624,6 +745,25 @@ namespace DotnetStarterKit.Migrations
                         .IsRequired();
 
                     b.Navigation("Company");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.UserNotification", b =>
+                {
+                    b.HasOne("DotnetStarterKit.Data.Notification", "Notification")
+                        .WithMany("UserNotifications")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DotnetStarterKit.Users.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Notification");
 
                     b.Navigation("User");
                 });
@@ -691,12 +831,29 @@ namespace DotnetStarterKit.Migrations
 
             modelBuilder.Entity("DotnetStarterKit.Data.Company", b =>
                 {
+                    b.Navigation("Pilgrims");
+
                     b.Navigation("UserCompanies");
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.Flight", b =>
+                {
+                    b.Navigation("FlightPilgrims");
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.Notification", b =>
+                {
+                    b.Navigation("UserNotifications");
                 });
 
             modelBuilder.Entity("DotnetStarterKit.Data.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
+                });
+
+            modelBuilder.Entity("DotnetStarterKit.Data.Pilgrim", b =>
+                {
+                    b.Navigation("FlightPilgrims");
                 });
 
             modelBuilder.Entity("DotnetStarterKit.Data.Role", b =>

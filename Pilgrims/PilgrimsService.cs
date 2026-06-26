@@ -18,7 +18,7 @@ public class PilgrimsService
         _db = db;
     }
 
-    public async Task<object> GetAllAsync(int page, int perPage, string? search, int? companyId)
+    public async Task<object> GetAllAsync(int page, int perPage, string? search, int? companyId, int? excludeFlightId = null)
     {
         var query = _db.Pilgrims
             .Include(p => p.Company)
@@ -34,6 +34,14 @@ public class PilgrimsService
 
         if (companyId.HasValue)
             query = query.Where(p => p.CompanyId == companyId.Value);
+
+        if (excludeFlightId.HasValue)
+        {
+            var assignedIds = _db.FlightPilgrims
+                .Where(fp => fp.FlightId == excludeFlightId.Value)
+                .Select(fp => fp.PilgrimId);
+            query = query.Where(p => !assignedIds.Contains(p.Id));
+        }
 
         var total = await query.CountAsync();
         var items = await query
@@ -101,11 +109,14 @@ public class PilgrimsService
         if (await _db.Pilgrims.AnyAsync(p => p.Identity == dto.Identity))
             return (false, "Identity number already exists.", AppCodes.Conflict, null);
 
+        if (!dto.CompanyId.HasValue)
+            return (false, "Company is required.", AppCodes.ValidationError, null);
+
         var pilgrim = new Data.Pilgrim
         {
             Name = dto.Name,
             Identity = dto.Identity,
-            CompanyId = dto.CompanyId,
+            CompanyId = dto.CompanyId.Value,
             Nationality = dto.Nationality,
             Gender = dto.Gender,
             BirthDate = DateTime.TryParse(dto.BirthDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var birthDate) ? birthDate : null,
@@ -117,9 +128,7 @@ public class PilgrimsService
         _db.Pilgrims.Add(pilgrim);
         await _db.SaveChangesAsync();
 
-        var company = pilgrim.CompanyId.HasValue
-            ? await _db.Companies.FindAsync(pilgrim.CompanyId.Value)
-            : null;
+        var company = await _db.Companies.FindAsync(pilgrim.CompanyId);
 
         return (true, "Pilgrim created successfully.", AppCodes.Created, new PilgrimResponseDto
         {
@@ -153,7 +162,7 @@ public class PilgrimsService
         }
 
         if (dto.Name is not null) pilgrim.Name = dto.Name;
-        if (dto.CompanyId.HasValue) pilgrim.CompanyId = dto.CompanyId;
+        if (dto.CompanyId.HasValue && !companyId.HasValue) pilgrim.CompanyId = dto.CompanyId.Value;
         if (dto.Nationality is not null) pilgrim.Nationality = dto.Nationality;
         if (dto.Gender is not null) pilgrim.Gender = dto.Gender;
         if (dto.BirthDate is not null) pilgrim.BirthDate = DateTime.TryParse(dto.BirthDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var bd) ? bd : null;
@@ -162,9 +171,7 @@ public class PilgrimsService
 
         await _db.SaveChangesAsync();
 
-        var company = pilgrim.CompanyId.HasValue
-            ? await _db.Companies.FindAsync(pilgrim.CompanyId.Value)
-            : null;
+        var company = await _db.Companies.FindAsync(pilgrim.CompanyId);
 
         return (true, "Pilgrim updated successfully.", AppCodes.Success, new PilgrimResponseDto
         {
@@ -196,13 +203,16 @@ public class PilgrimsService
         return (true, "Pilgrim deleted successfully.", AppCodes.Success);
     }
 
-    public async Task<(bool Success, string Message, string Code, object? Data)> UploadAsync(IFormFile file)
+    public async Task<(bool Success, string Message, string Code, object? Data)> UploadAsync(IFormFile file, int? companyId = null)
     {
         if (file is null || file.Length == 0)
             return (false, "No file uploaded.", AppCodes.ValidationError, null);
 
         if (!file.FileName.EndsWith(".csv", StringComparison.OrdinalIgnoreCase))
             return (false, "Only CSV files are supported.", AppCodes.ValidationError, null);
+
+        if (!companyId.HasValue)
+            return (false, "Company is required for import.", AppCodes.ValidationError, null);
 
         using var reader = new StreamReader(file.OpenReadStream(), Encoding.UTF8);
         using var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -243,14 +253,40 @@ public class PilgrimsService
                 continue;
             }
 
+            if (string.IsNullOrWhiteSpace(record.Nationality))
+            {
+                errors.Add($"Row {rowNum}: Nationality is required.");
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(record.Gender))
+            {
+                errors.Add($"Row {rowNum}: Gender is required.");
+                continue;
+            }
+
+            var normalizedGender = record.Gender.Trim().ToLowerInvariant();
+            if (normalizedGender != "male" && normalizedGender != "female"
+                && normalizedGender != "ذكر" && normalizedGender != "أنثى")
+            {
+                errors.Add($"Row {rowNum}: Gender must be Male/Female (ذكر/أنثى).");
+                continue;
+            }
+
+            if (!DateTime.TryParse(record.BirthDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var birthDate))
+            {
+                errors.Add($"Row {rowNum}: Invalid date format for BirthDate.");
+                continue;
+            }
+
             var pilgrim = new Data.Pilgrim
             {
                 Name = record.Name,
                 Identity = record.Identity,
-                CompanyId = null,
-                Nationality = record.Nationality ?? string.Empty,
-                Gender = record.Gender ?? string.Empty,
-                BirthDate = DateTime.TryParse(record.BirthDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var bd) ? bd : null,
+                CompanyId = companyId.Value,
+                Nationality = record.Nationality,
+                Gender = record.Gender,
+                BirthDate = birthDate,
                 Phone = record.Phone ?? string.Empty,
                 Email = record.Email ?? string.Empty,
                 CreatedAt = DateTime.UtcNow,

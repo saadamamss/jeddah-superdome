@@ -80,6 +80,17 @@ public class UsersController : ControllerBase
         return Ok(new { status = new { success = true, message } });
     }
 
+    [HttpPut("{id:int}/toggle-status")]
+    [RequirePermission("users.edit")]
+    public async Task<IActionResult> ToggleStatus(int id)
+    {
+        var (success, message, code, data) = await _usersService.ToggleStatusAsync(id);
+        if (!success)
+            return BadRequest(ApiResponse<object>.Fail(message, code));
+
+        return Ok(new { data, status = new { success = true, message } });
+    }
+
     [HttpPost("upload")]
     [RequirePermission("users.create")]
     public async Task<IActionResult> Upload(IFormFile file)
@@ -95,7 +106,7 @@ public class UsersController : ControllerBase
     [AllowAnonymous]
     public IActionResult DownloadTemplate()
     {
-        var csv = "name,email,phone,password,status\n";
+        var csv = "name,email,phone,password,status,companyId\n";
         var bytes = System.Text.Encoding.UTF8.GetBytes(csv);
         return File(bytes, "text/csv", "template-users.csv");
     }

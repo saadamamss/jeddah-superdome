@@ -26,6 +26,20 @@ public class CompaniesController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("profile")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var companyId = User.FindFirst("companyId");
+        if (companyId is null || !int.TryParse(companyId.Value, out var id))
+            return BadRequest(ApiResponse<object>.Fail("Company not associated.", AppCodes.ValidationError));
+
+        var result = await _companiesService.GetByIdAsync(id);
+        if (result is null)
+            return NotFound(ApiResponse<object>.Fail("Company not found.", AppCodes.NotFound));
+
+        return Ok(new { data = result });
+    }
+
     [HttpGet("{id:int}")]
     [RequirePermission("companies.view")]
     public async Task<IActionResult> GetById(int id)
@@ -45,6 +59,23 @@ public class CompaniesController : ControllerBase
             return BadRequest(ApiResponse<object>.Fail("Validation error.", AppCodes.ValidationError));
 
         var (success, message, code, data) = await _companiesService.CreateAsync(dto);
+        if (!success)
+            return BadRequest(ApiResponse<object>.Fail(message, code));
+
+        return Ok(new { data, status = new { success = true, message } });
+    }
+
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateCompanyDto dto)
+    {
+        var companyClaim = User.FindFirst("companyId");
+        if (companyClaim is null || !int.TryParse(companyClaim.Value, out var id))
+            return BadRequest(ApiResponse<object>.Fail("Company not associated.", AppCodes.ValidationError));
+
+        if (!ModelState.IsValid)
+            return BadRequest(ApiResponse<object>.Fail("Validation error.", AppCodes.ValidationError));
+
+        var (success, message, code, data) = await _companiesService.UpdateAsync(id, dto);
         if (!success)
             return BadRequest(ApiResponse<object>.Fail(message, code));
 

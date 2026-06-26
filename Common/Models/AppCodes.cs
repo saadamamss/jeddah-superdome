@@ -11,6 +11,7 @@ public static class AppCodes
     public const string ValidationError   = "VALIDATION_ERROR";
     public const string InvalidToken      = "INVALID_TOKEN";
     public const string AccountLocked     = "ACCOUNT_LOCKED";
+    public const string AccountDeactivated = "ACCOUNT_DEACTIVATED";
     public const string EmailNotVerified  = "EMAIL_NOT_VERIFIED";
     public const string InvalidCredentials = "INVALID_CREDENTIALS";
     public const string InternalError     = "INTERNAL_ERROR";

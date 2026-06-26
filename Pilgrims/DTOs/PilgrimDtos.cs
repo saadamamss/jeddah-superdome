@@ -49,7 +49,7 @@ public class PilgrimResponseDto
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Identity { get; set; } = string.Empty;
-    public int? CompanyId { get; set; }
+    public int CompanyId { get; set; }
     public string? Company { get; set; }
     public string Nationality { get; set; } = string.Empty;
     public string Gender { get; set; } = string.Empty;

@@ -33,10 +33,11 @@ public class PilgrimsController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int perPage = 10,
         [FromQuery] string? search = null,
-        [FromQuery] int? companyId = null)
+        [FromQuery] int? companyId = null,
+        [FromQuery] int? excludeFlightId = null)
     {
         var resolvedCompanyId = GetCompanyId() ?? companyId;
-        var result = await _pilgrimsService.GetAllAsync(page, perPage, search, resolvedCompanyId);
+        var result = await _pilgrimsService.GetAllAsync(page, perPage, search, resolvedCompanyId, excludeFlightId);
         return Ok(result);
     }
 
@@ -98,7 +99,8 @@ public class PilgrimsController : ControllerBase
     [RequirePermission("pilgrims.create")]
     public async Task<IActionResult> Upload(IFormFile file)
     {
-        var (success, message, code, data) = await _pilgrimsService.UploadAsync(file);
+        var companyId = GetCompanyId();
+        var (success, message, code, data) = await _pilgrimsService.UploadAsync(file, companyId);
         if (!success)
             return BadRequest(ApiResponse<object>.Fail(message, code));
 

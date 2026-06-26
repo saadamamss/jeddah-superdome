@@ -21,6 +21,8 @@ public class CreateUserDto
 
     public int? RoleId { get; set; }
 
+    public int? CompanyId { get; set; }
+
     public string? Status { get; set; }
 }
 
@@ -33,6 +35,7 @@ public class UpdateUserDto
     public int? RoleId { get; set; }
     public string? Status { get; set; } // "active" | "inactive"
     public string? IdentityNumber { get; set; }
+    public int? CompanyId { get; set; }
 }
 
 public class DeleteUserDto

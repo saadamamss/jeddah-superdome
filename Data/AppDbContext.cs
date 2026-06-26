@@ -16,7 +16,9 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole, string>
     public DbSet<UserCompany> UserCompanies => Set<UserCompany>();
     public DbSet<Pilgrim> Pilgrims => Set<Pilgrim>();
     public DbSet<Flight> Flights => Set<Flight>();
+    public DbSet<FlightPilgrim> FlightPilgrims => Set<FlightPilgrim>();
     public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<UserNotification> UserNotifications => Set<UserNotification>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -74,6 +76,7 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole, string>
             e.Property(c => c.ContactNumber).HasMaxLength(20).IsRequired();
             e.Property(c => c.Email).HasMaxLength(200).IsRequired();
             e.Property(c => c.Address).HasMaxLength(500);
+            e.Property(c => c.IsActive).IsRequired();
             e.HasIndex(c => c.LicenseNumber).IsUnique();
             e.HasIndex(c => c.Email).IsUnique();
         });
@@ -105,9 +108,9 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole, string>
             e.Property(p => p.Email).HasMaxLength(200).IsRequired();
             e.HasIndex(p => p.Identity).IsUnique();
             e.HasOne(p => p.Company)
-                .WithMany()
+                .WithMany(c => c.Pilgrims)
                 .HasForeignKey(p => p.CompanyId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Flight
@@ -120,10 +123,33 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole, string>
             e.Property(f => f.Time).HasMaxLength(20).IsRequired();
             e.Property(f => f.Destination).HasMaxLength(200).IsRequired();
             e.Property(f => f.Transport).HasMaxLength(50).IsRequired();
+            e.Property(f => f.Status).HasMaxLength(20).IsRequired().HasDefaultValue("Scheduled");
+            e.Property(f => f.Capacity).HasDefaultValue(0);
+            e.HasIndex(f => f.FlightNumber).IsUnique();
             e.HasOne(f => f.Company)
                 .WithMany()
                 .HasForeignKey(f => f.CompanyId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
+            e.HasMany(f => f.FlightPilgrims)
+                .WithOne(fp => fp.Flight)
+                .HasForeignKey(fp => fp.FlightId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // FlightPilgrim
+        builder.Entity<FlightPilgrim>(e =>
+        {
+            e.ToTable("flight_pilgrims");
+            e.HasKey(fp => new { fp.FlightId, fp.PilgrimId });
+            e.Property(fp => fp.AssignedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            e.HasOne(fp => fp.Flight)
+                .WithMany(f => f.FlightPilgrims)
+                .HasForeignKey(fp => fp.FlightId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(fp => fp.Pilgrim)
+                .WithMany(p => p.FlightPilgrims)
+                .HasForeignKey(fp => fp.PilgrimId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Notification
@@ -136,6 +162,32 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole, string>
             e.Property(n => n.Target).HasMaxLength(100).IsRequired();
             e.Property(n => n.Type).HasMaxLength(50).IsRequired();
             e.Property(n => n.Method).HasMaxLength(50).IsRequired();
+            e.Property(n => n.SentByUserId).HasMaxLength(450);
+            e.Property(n => n.TargetCompanyId);
+            e.HasOne(n => n.SentByUser)
+                .WithMany()
+                .HasForeignKey(n => n.SentByUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+            e.HasOne(n => n.TargetCompany)
+                .WithMany()
+                .HasForeignKey(n => n.TargetCompanyId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // UserNotification
+        builder.Entity<UserNotification>(e =>
+        {
+            e.ToTable("user_notifications");
+            e.HasKey(un => un.Id);
+            e.HasOne(un => un.Notification)
+                .WithMany(n => n.UserNotifications)
+                .HasForeignKey(un => un.NotificationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(un => un.User)
+                .WithMany()
+                .HasForeignKey(un => un.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(un => new { un.UserId, un.NotificationId }).IsUnique();
         });
 
         // User → Role (optional FK)

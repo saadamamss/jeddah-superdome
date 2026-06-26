@@ -16,6 +16,7 @@ public static class DbSeeder
         // ── Seed Permissions ─────────────────────────────────────
         string[] permissionNames =
         [
+            "dashboard.view",
             "companies.view", "companies.create", "companies.edit", "companies.delete",
             "pilgrims.view", "pilgrims.create", "pilgrims.edit", "pilgrims.delete",
             "flights.view", "flights.create", "flights.edit", "flights.delete",
@@ -34,6 +35,17 @@ public static class DbSeeder
         // ── Seed Roles ───────────────────────────────────────────
         var allPermissions = await db.Permissions.ToListAsync();
 
+        // ── Helper: sync missing permissions to an existing role ─
+        async Task SyncPermissions(Role role, Func<Permission, bool> filter)
+        {
+            var existingIds = role.RolePermissions.Select(rp => rp.PermissionId).ToHashSet();
+            var missing = allPermissions.Where(p => filter(p) && !existingIds.Contains(p.Id)).ToList();
+            if (missing.Count == 0) return;
+            foreach (var perm in missing)
+                db.RolePermissions.Add(new RolePermission { RoleId = role.Id, PermissionId = perm.Id });
+            await db.SaveChangesAsync();
+        }
+
         // Admin role — all permissions
         var adminRole = await db.BusinessRoles.Include(r => r.RolePermissions).FirstOrDefaultAsync(r => r.Name == "Admin");
         if (adminRole is null)
@@ -45,6 +57,10 @@ public static class DbSeeder
             foreach (var perm in allPermissions)
                 db.RolePermissions.Add(new RolePermission { RoleId = adminRole.Id, PermissionId = perm.Id });
             await db.SaveChangesAsync();
+        }
+        else
+        {
+            await SyncPermissions(adminRole, _ => true);
         }
 
         // User role — view only
@@ -59,6 +75,10 @@ public static class DbSeeder
             foreach (var perm in viewPerms)
                 db.RolePermissions.Add(new RolePermission { RoleId = userRole.Id, PermissionId = perm.Id });
             await db.SaveChangesAsync();
+        }
+        else
+        {
+            await SyncPermissions(userRole, p => p.Name.EndsWith(".view"));
         }
 
         // Moderator role — create/edit + users view
@@ -76,22 +96,35 @@ public static class DbSeeder
                 db.RolePermissions.Add(new RolePermission { RoleId = modRole.Id, PermissionId = perm.Id });
             await db.SaveChangesAsync();
         }
+        else
+        {
+            await SyncPermissions(modRole, p =>
+                p.Name.EndsWith(".view") || p.Name.EndsWith(".create") || p.Name.EndsWith(".edit") ||
+                p.Name == "users.view");
+        }
 
-        // Company role — view own pilgrims, flights, and notifications
+        // Company role — manage own pilgrims, flights, receive notifications
         var companyRole = await db.BusinessRoles.Include(r => r.RolePermissions).FirstOrDefaultAsync(r => r.Name == "Company");
         if (companyRole is null)
         {
-            companyRole = new Role { Name = "Company", Description = "View own pilgrims, flights, notifications" };
+            companyRole = new Role { Name = "Company", Description = "Manage own pilgrims, flights, receive notifications" };
             db.BusinessRoles.Add(companyRole);
             await db.SaveChangesAsync();
 
             var companyPerms = allPermissions.Where(p =>
-                p.Name == "pilgrims.view" ||
-                p.Name == "flights.view" ||
+                p.Name.StartsWith("pilgrims.") ||
+                p.Name.StartsWith("flights.") ||
                 p.Name == "admin_notifications.view").ToList();
             foreach (var perm in companyPerms)
                 db.RolePermissions.Add(new RolePermission { RoleId = companyRole.Id, PermissionId = perm.Id });
             await db.SaveChangesAsync();
+        }
+        else
+        {
+            await SyncPermissions(companyRole, p =>
+                p.Name.StartsWith("pilgrims.") ||
+                p.Name.StartsWith("flights.") ||
+                p.Name == "admin_notifications.view");
         }
 
         // ── Seed Identity Roles (for JWT claims) ─────────────────

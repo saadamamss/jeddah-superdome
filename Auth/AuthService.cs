@@ -48,6 +48,10 @@ public class AuthService
         if (user is null)
             return (false, "Invalid credentials.", AppCodes.InvalidCredentials, null, null);
 
+        // Account deactivated?
+        if (!user.IsActive)
+            return (false, "Account is deactivated.", AppCodes.AccountDeactivated, null, null);
+
         // Account locked?
         if (user.LockedUntil.HasValue && user.LockedUntil > DateTime.UtcNow)
         {
@@ -329,6 +333,7 @@ public class AuthService
         return new UserDto
         {
             Id = user.IntId,
+            IdentityId = user.Id,
             Name = user.Name,
             Email = user.Email ?? string.Empty,
             Phone = user.Phone,

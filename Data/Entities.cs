@@ -39,9 +39,11 @@ public class Company
     public int ConnectedHujjaj { get; set; }
     public double? Latitude { get; set; }
     public double? Longitude { get; set; }
+    public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<UserCompany> UserCompanies { get; set; } = [];
+    public ICollection<Pilgrim> Pilgrims { get; set; } = [];
 }
 
 public class UserCompany
@@ -58,7 +60,7 @@ public class Pilgrim
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Identity { get; set; } = string.Empty;
-    public int? CompanyId { get; set; }
+    public int CompanyId { get; set; }
     public string Nationality { get; set; } = string.Empty;
     public string Gender { get; set; } = string.Empty;
     public DateTime? BirthDate { get; set; }
@@ -66,22 +68,36 @@ public class Pilgrim
     public string Email { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public Company? Company { get; set; }
+    public Company Company { get; set; } = null!;
+    public ICollection<FlightPilgrim> FlightPilgrims { get; set; } = [];
 }
 
 public class Flight
 {
     public int Id { get; set; }
     public string FlightNumber { get; set; } = string.Empty;
-    public int? CompanyId { get; set; }
+    public int CompanyId { get; set; }
     public DateTime? Date { get; set; }
     public string Time { get; set; } = string.Empty;
     public string Destination { get; set; } = string.Empty;
     public int NoOfHuj { get; set; }
+    public int Capacity { get; set; } = 0;
+    public string Status { get; set; } = "Scheduled";
     public string Transport { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public Company? Company { get; set; }
+    public Company Company { get; set; } = null!;
+    public ICollection<FlightPilgrim> FlightPilgrims { get; set; } = [];
+}
+
+public class FlightPilgrim
+{
+    public int FlightId { get; set; }
+    public int PilgrimId { get; set; }
+    public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
+
+    public Flight Flight { get; set; } = null!;
+    public Pilgrim Pilgrim { get; set; } = null!;
 }
 
 public class Notification
@@ -92,5 +108,24 @@ public class Notification
     public string Target { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Method { get; set; } = string.Empty;
+    public string? SentByUserId { get; set; }
+    public int? TargetCompanyId { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public Users.User? SentByUser { get; set; }
+    public Company? TargetCompany { get; set; }
+    public ICollection<UserNotification> UserNotifications { get; set; } = [];
+}
+
+public class UserNotification
+{
+    public int Id { get; set; }
+    public int NotificationId { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public bool IsRead { get; set; } = false;
+    public DateTime? ReadAt { get; set; }
+    public DateTime DeliveredAt { get; set; } = DateTime.UtcNow;
+
+    public Notification Notification { get; set; } = null!;
+    public Users.User User { get; set; } = null!;
 }

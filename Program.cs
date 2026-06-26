@@ -126,6 +126,25 @@ builder.Services.AddAuthentication(options =>
 
     options.Events = new JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            var path = context.HttpContext.Request.Path;
+            if (path.StartsWithSegments("/hubs"))
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    context.Token = accessToken;
+                }
+                else
+                {
+                    var cookieToken = context.Request.Cookies["access_token"];
+                    if (!string.IsNullOrEmpty(cookieToken))
+                        context.Token = cookieToken;
+                }
+            }
+            return Task.CompletedTask;
+        },
         OnChallenge = async context =>
         {
             context.HandleResponse();
@@ -167,6 +186,9 @@ builder.Services.AddScoped<NotificationsService>();
 builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<MailService>();
 builder.Services.AddScoped<UploadService>();
+
+// ── SignalR ─────────────────────────────────────────────────────
+builder.Services.AddSignalR();
 
 // ── Controllers ────────────────────────────────────────────────
 builder.Services.AddControllers(options =>
@@ -218,6 +240,7 @@ app.UseMiddleware<CookieToHeaderMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 // ── Auto-migrate + Seed ────────────────────────────────────────
 using (var scope = app.Services.CreateScope())

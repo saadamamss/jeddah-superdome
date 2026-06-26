@@ -8,8 +8,7 @@ public class StatisticsResponseDto
 public class DashboardStatisticsDto
 {
     public int CompaniesCount { get; set; }
-    public int CampsCount { get; set; }
-    public int LocationsCount { get; set; }
-    public int MainCompaniesCount { get; set; }
+    public int FlightsCount { get; set; }
     public int PilgrimsCount { get; set; }
+    public int UsersCount { get; set; }
 }

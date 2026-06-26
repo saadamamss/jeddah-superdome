@@ -4,6 +4,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using DotnetStarterKit.Common.Models;
 using DotnetStarterKit.Data;
+using DotnetStarterKit.Mail;
 using DotnetStarterKit.Users.DTOs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,15 @@ public class UsersService
 {
     private readonly UserManager<User> _userManager;
     private readonly AppDbContext _db;
+    private readonly MailService _mailService;
+    private readonly ILogger<UsersService> _logger;
 
-    public UsersService(UserManager<User> userManager, AppDbContext db)
+    public UsersService(UserManager<User> userManager, AppDbContext db, MailService mailService, ILogger<UsersService> logger)
     {
         _userManager = userManager;
         _db = db;
+        _mailService = mailService;
+        _logger = logger;
     }
 
     public async Task<object> GetAllAsync(int page, int perPage, string? search, int? roleId)
@@ -81,6 +86,14 @@ public class UsersService
         if (await _db.Users.AnyAsync(u => u.Email == dto.Email))
             return (false, "Email already exists.", AppCodes.Conflict, null);
 
+        // BR-03: Validate exactly-one-company — if CompanyId provided, user cannot already belong to another company
+        if (dto.CompanyId.HasValue)
+        {
+            var company = await _db.Companies.FindAsync(dto.CompanyId.Value);
+            if (company is null)
+                return (false, "Company not found.", AppCodes.NotFound, null);
+        }
+
         var user = new User
         {
             UserName = dto.Email,
@@ -107,14 +120,35 @@ public class UsersService
                 return (false, errors, AppCodes.ValidationError, null);
             }
 
+            // Link to company if provided
+            if (dto.CompanyId.HasValue)
+            {
+                _db.UserCompanies.Add(new UserCompany
+                {
+                    UserId = user.Id,
+                    CompanyId = dto.CompanyId.Value,
+                });
+                await _db.SaveChangesAsync();
+            }
+
             var created = await _db.Users
                 .Include(u => u.Role)
                     .ThenInclude(r => r!.RolePermissions)
                         .ThenInclude(rp => rp.Permission)
                 .Include(u => u.UserCompanies)
+                    .ThenInclude(uc => uc.Company)
                 .FirstAsync(u => u.Id == user.Id);
 
             await transaction.CommitAsync();
+
+            try
+            {
+                await _mailService.SendWelcomeAsync(dto.Email, dto.Name);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send welcome email to {Email}", dto.Email);
+            }
 
             return (true, "User created successfully.", AppCodes.Created, MapToDto(created));
         }
@@ -158,6 +192,33 @@ public class UsersService
             await _userManager.ResetPasswordAsync(user, token, dto.Password);
         }
 
+        // BR-03: Handle company association change
+        if (dto.CompanyId.HasValue)
+        {
+            var existingUc = user.UserCompanies.FirstOrDefault();
+            if (existingUc is not null)
+            {
+                if (existingUc.CompanyId != dto.CompanyId.Value)
+                {
+                    var company = await _db.Companies.FindAsync(dto.CompanyId.Value);
+                    if (company is null)
+                        return (false, "Company not found.", AppCodes.NotFound, null);
+                    existingUc.CompanyId = dto.CompanyId.Value;
+                }
+            }
+            else
+            {
+                var company = await _db.Companies.FindAsync(dto.CompanyId.Value);
+                if (company is null)
+                    return (false, "Company not found.", AppCodes.NotFound, null);
+                _db.UserCompanies.Add(new UserCompany
+                {
+                    UserId = user.Id,
+                    CompanyId = dto.CompanyId.Value,
+                });
+            }
+        }
+
         await _db.SaveChangesAsync();
 
         var updated = await _db.Users
@@ -165,6 +226,7 @@ public class UsersService
                 .ThenInclude(r => r!.RolePermissions)
                     .ThenInclude(rp => rp.Permission)
             .Include(u => u.UserCompanies)
+                .ThenInclude(uc => uc.Company)
             .FirstAsync(u => u.IntId == id);
 
         return (true, "User updated successfully.", AppCodes.Success, MapToDto(updated!));
@@ -176,14 +238,33 @@ public class UsersService
         if (user is null)
             return (false, "User not found.", AppCodes.NotFound);
 
-        var result = await _userManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return (false, errors, AppCodes.ValidationError);
-        }
+        // Soft-deactivate instead of hard-delete
+        user.IsActive = false;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
 
-        return (true, "User deleted successfully.", AppCodes.Success);
+        return (true, "User deactivated successfully.", AppCodes.Success);
+    }
+
+    public async Task<(bool Success, string Message, string Code, UserResponseDto? Data)> ToggleStatusAsync(int id)
+    {
+        var user = await _db.Users
+            .Include(u => u.Role)
+                .ThenInclude(r => r!.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
+            .Include(u => u.UserCompanies)
+                .ThenInclude(uc => uc.Company)
+            .FirstOrDefaultAsync(u => u.IntId == id);
+
+        if (user is null)
+            return (false, "User not found.", AppCodes.NotFound, null);
+
+        user.IsActive = !user.IsActive;
+        user.UpdatedAt = DateTime.UtcNow;
+        await _userManager.UpdateAsync(user);
+
+        var label = user.IsActive ? "activated" : "deactivated";
+        return (true, $"User {label} successfully.", AppCodes.Success, MapToDto(user));
     }
 
     public async Task<(bool Success, string Message, string Code, object? Data)> UploadAsync(IFormFile file)
@@ -252,6 +333,25 @@ public class UsersService
                 errors.Add($"Row {rowNum}: {userErrors}");
                 continue;
             }
+
+            // Link to company if CSV has CompanyId
+            if (!string.IsNullOrWhiteSpace(record.CompanyId) &&
+                int.TryParse(record.CompanyId, out var companyId) && companyId > 0)
+            {
+                var company = await _db.Companies.FindAsync(companyId);
+                if (company is not null)
+                {
+                    _db.UserCompanies.Add(new UserCompany
+                    {
+                        UserId = user.Id,
+                        CompanyId = companyId,
+                    });
+                }
+                else
+                {
+                    errors.Add($"Row {rowNum}: CompanyId '{record.CompanyId}' not found.");
+                }
+            }
             created++;
         }
 
@@ -279,7 +379,11 @@ public class UsersService
             .Select(rp => rp.Permission.Name)
             .ToArray() ?? [],
         ParentCompanies = user.UserCompanies
-            .Select(uc => (object)new { id = uc.CompanyId })
+            .Select(uc => (object)new
+            {
+                id = uc.CompanyId,
+                companyName = uc.Company?.CompanyName ?? "",
+            })
             .ToArray(),
     };
 }
@@ -291,4 +395,5 @@ public class CsvUserRow
     public string Phone { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string? Status { get; set; }
+    public string CompanyId { get; set; } = string.Empty;
 }

@@ -25,10 +25,9 @@ public class DashboardService
             Statistics = new DashboardStatisticsDto
             {
                 CompaniesCount = companiesCount,
-                CampsCount = flightsCount,
-                LocationsCount = pilgrimsCount,
-                MainCompaniesCount = usersCount,
+                FlightsCount = flightsCount,
                 PilgrimsCount = pilgrimsCount,
+                UsersCount = usersCount,
             },
         };
     }

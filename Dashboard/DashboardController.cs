@@ -1,3 +1,4 @@
+using DotnetStarterKit.Common.Filters;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,7 @@ public class DashboardController : ControllerBase
     }
 
     [HttpGet]
+    [RequirePermission("dashboard.view")]
     public async Task<IActionResult> GetStatistics()
     {
         var result = await _dashboardService.GetStatisticsAsync();

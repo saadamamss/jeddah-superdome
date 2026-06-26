@@ -5,6 +5,7 @@ using CsvHelper.Configuration;
 using DotnetStarterKit.Companies.DTOs;
 using DotnetStarterKit.Common.Models;
 using DotnetStarterKit.Data;
+using DotnetStarterKit.Mail;
 using DotnetStarterKit.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,16 +16,20 @@ public class CompaniesService
 {
     private readonly AppDbContext _db;
     private readonly UserManager<User> _userManager;
+    private readonly MailService _mailService;
+    private readonly ILogger<CompaniesService> _logger;
 
-    public CompaniesService(AppDbContext db, UserManager<User> userManager)
+    public CompaniesService(AppDbContext db, UserManager<User> userManager, MailService mailService, ILogger<CompaniesService> logger)
     {
         _db = db;
         _userManager = userManager;
+        _mailService = mailService;
+        _logger = logger;
     }
 
     public async Task<object> GetAllAsync(int page, int perPage, string? search)
     {
-        var query = _db.Companies.AsQueryable();
+        var query = _db.Companies.Where(c => c.IsActive);
 
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(c =>
@@ -48,7 +53,7 @@ public class CompaniesService
                 ContactNumber = c.ContactNumber,
                 Email = c.Email,
                 Address = c.Address,
-                ConnectedHujjaj = c.ConnectedHujjaj,
+                ConnectedHujjaj = c.Pilgrims.Count,
                 Latitude = c.Latitude,
                 Longitude = c.Longitude,
             })
@@ -71,7 +76,9 @@ public class CompaniesService
 
     public async Task<CompanyResponseDto?> GetByIdAsync(int id)
     {
-        var c = await _db.Companies.FindAsync(id);
+        var c = await _db.Companies
+            .Include(x => x.Pilgrims)
+            .FirstOrDefaultAsync(x => x.Id == id);
         if (c is null) return null;
 
         return new CompanyResponseDto
@@ -83,7 +90,7 @@ public class CompaniesService
             ContactNumber = c.ContactNumber,
             Email = c.Email,
             Address = c.Address,
-            ConnectedHujjaj = c.ConnectedHujjaj,
+            ConnectedHujjaj = c.Pilgrims.Count,
             Latitude = c.Latitude,
             Longitude = c.Longitude,
         };
@@ -150,6 +157,15 @@ public class CompaniesService
             await _db.SaveChangesAsync();
 
             await transaction.CommitAsync();
+
+            try
+            {
+                await _mailService.SendWelcomeAsync(dto.Email, dto.CompanyName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send welcome email to {Email}", dto.Email);
+            }
 
             return (true, "Company created successfully.", AppCodes.Created, new CompanyResponseDto
             {
@@ -230,19 +246,24 @@ public class CompaniesService
         if (company is null)
             return (false, "Company not found.", AppCodes.NotFound);
 
-        // Delete linked user
+        // Soft-deactivate: mark inactive instead of deleting
+        company.IsActive = false;
+
+        // Also deactivate linked user to prevent login
         var userCompany = await _db.UserCompanies.FirstOrDefaultAsync(uc => uc.CompanyId == id);
         if (userCompany is not null)
         {
             var user = await _userManager.FindByIdAsync(userCompany.UserId);
             if (user is not null)
-                await _userManager.DeleteAsync(user);
+            {
+                user.IsActive = false;
+                await _userManager.UpdateAsync(user);
+            }
         }
 
-        _db.Companies.Remove(company);
         await _db.SaveChangesAsync();
 
-        return (true, "Company deleted successfully.", AppCodes.Success);
+        return (true, "Company deactivated successfully.", AppCodes.Success);
     }
 
     public async Task<(bool Success, string Message, string Code, object? Data)> UploadAsync(IFormFile file)

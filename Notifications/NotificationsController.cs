@@ -18,6 +18,20 @@ public class NotificationsController : ControllerBase
         _notificationsService = notificationsService;
     }
 
+    private int? GetCompanyId()
+    {
+        var userType = User.FindFirst("userType")?.Value;
+        if (userType != "company") return null;
+
+        var companyIdStr = User.FindFirst("companyId")?.Value;
+        return int.TryParse(companyIdStr, out var companyId) ? companyId : null;
+    }
+
+    private string? GetUserId()
+    {
+        return User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    }
+
     [HttpGet]
     [RequirePermission("admin_notifications.view")]
     public async Task<IActionResult> GetAll(
@@ -25,7 +39,8 @@ public class NotificationsController : ControllerBase
         [FromQuery] int perPage = 10,
         [FromQuery] string? search = null)
     {
-        var result = await _notificationsService.GetAllAsync(page, perPage, search);
+        var companyId = GetCompanyId();
+        var result = await _notificationsService.GetAllAsync(page, perPage, search, companyId);
         return Ok(result);
     }
 
@@ -36,7 +51,8 @@ public class NotificationsController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ApiResponse<object>.Fail("Validation error.", AppCodes.ValidationError));
 
-        var (success, message, code, data) = await _notificationsService.SendAsync(dto);
+        var senderUserId = GetUserId();
+        var (success, message, code, data) = await _notificationsService.SendAsync(dto, senderUserId);
         if (!success)
             return BadRequest(ApiResponse<object>.Fail(message, code));
 
@@ -47,7 +63,8 @@ public class NotificationsController : ControllerBase
     [RequirePermission("admin_notifications.create")]
     public async Task<IActionResult> Resend(int id)
     {
-        var (success, message, code, data) = await _notificationsService.ResendAsync(id);
+        var senderUserId = GetUserId();
+        var (success, message, code, data) = await _notificationsService.ResendAsync(id, senderUserId);
         if (!success)
             return BadRequest(ApiResponse<object>.Fail(message, code));
 

@@ -49,28 +49,21 @@ public class MailService
         await SendAsync(toEmail, name, "Welcome to Jeddah Superdome", html);
     }
 
-    // ── Email Verification ─────────────────────────────────────
-    public async Task SendVerificationEmailAsync(string toEmail, string name, string token, string frontendUrl)
+    // ── Notification Email ─────────────────────────────────────
+    public async Task SendNotificationEmailAsync(string toEmail, string name, string subject, string body)
     {
-        var link = $"{frontendUrl}/verify-email?email={Uri.EscapeDataString(toEmail)}&token={token}";
-
         var html = $"""
             <div style="font-family:sans-serif;max-width:600px;margin:auto">
-                <h2>Verify Your Email</h2>
-                <p>Hi {name}, please verify your email address by clicking the button below.</p>
-                <p>This link expires in <strong>24 hours</strong>.</p>
-                <a href="{link}"
-                   style="display:inline-block;padding:12px 24px;background:#4F46E5;color:#fff;
-                          text-decoration:none;border-radius:6px;margin-top:16px">
-                    Verify Email
-                </a>
-                <p style="margin-top:24px;color:#6B7280;font-size:13px">
-                    Or copy this link: {link}
+                <h2>{subject}</h2>
+                <p>{body}</p>
+                <hr style="margin-top:24px" />
+                <p style="color:#6B7280;font-size:13px">
+                    This is an automated notification from Jeddah Superdome.
                 </p>
             </div>
             """;
 
-        await SendAsync(toEmail, name, "Verify Your Email", html);
+        await SendAsync(toEmail, name, subject, html);
     }
 
     // ── Password Reset ─────────────────────────────────────────

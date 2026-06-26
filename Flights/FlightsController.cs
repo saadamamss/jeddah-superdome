@@ -98,10 +98,46 @@ public class FlightsController : ControllerBase
     [RequirePermission("flights.create")]
     public async Task<IActionResult> Upload(IFormFile file)
     {
-        var (success, message, code, data) = await _flightsService.UploadAsync(file);
+        var companyId = GetCompanyId();
+        var (success, message, code, data) = await _flightsService.UploadAsync(file, companyId);
         if (!success)
             return BadRequest(ApiResponse<object>.Fail(message, code));
 
+        return Ok(new { data, status = new { success = true, message } });
+    }
+
+    // ── Pilgrim Assignment ─────────────────────────────────────
+
+    [HttpPost("{flightId:int}/pilgrims/{pilgrimId:int}")]
+    [RequirePermission("flights.edit")]
+    public async Task<IActionResult> AssignPilgrim(int flightId, int pilgrimId)
+    {
+        var companyId = GetCompanyId();
+        var (success, message, code) = await _flightsService.AssignPilgrimAsync(flightId, pilgrimId, companyId);
+        if (!success)
+            return BadRequest(ApiResponse<object>.Fail(message, code));
+        return Ok(new { status = new { success = true, message } });
+    }
+
+    [HttpDelete("{flightId:int}/pilgrims/{pilgrimId:int}")]
+    [RequirePermission("flights.edit")]
+    public async Task<IActionResult> UnassignPilgrim(int flightId, int pilgrimId)
+    {
+        var companyId = GetCompanyId();
+        var (success, message, code) = await _flightsService.UnassignPilgrimAsync(flightId, pilgrimId, companyId);
+        if (!success)
+            return BadRequest(ApiResponse<object>.Fail(message, code));
+        return Ok(new { status = new { success = true, message } });
+    }
+
+    [HttpGet("{flightId:int}/pilgrims")]
+    [RequirePermission("flights.view")]
+    public async Task<IActionResult> GetAssignedPilgrims(int flightId, [FromQuery] int page = 1, [FromQuery] int perPage = 10)
+    {
+        var companyId = GetCompanyId();
+        var (success, message, code, data) = await _flightsService.GetAssignedPilgrimsAsync(flightId, companyId, page, perPage);
+        if (!success)
+            return BadRequest(ApiResponse<object>.Fail(message, code));
         return Ok(new { data, status = new { success = true, message } });
     }
 
