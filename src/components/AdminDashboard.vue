@@ -42,10 +42,10 @@ const pilgrimHeaders = ref([
 const homeData = ref<{
   data?: {
     statistics?: {
-      campsCount?: number
-      locationsCount?: number
-      mainCompaniesCount?: number
       companiesCount?: number
+      flightsCount?: number
+      pilgrimsCount?: number
+      usersCount?: number
     }
   }
 }>({})
@@ -229,7 +229,7 @@ onMounted(async () => {
       <v-row v-else>
         <v-col cols="6" lg="3" md="3">
           <StatsWidget
-            :number="homeData?.data?.statistics?.campsCount || 0"
+            :number="homeData?.data?.statistics?.companiesCount || 0"
             :title="t('dashboard.stats.companiesCount')"
           >
             <template #icon>
@@ -256,7 +256,7 @@ onMounted(async () => {
         </v-col>
         <v-col cols="6" lg="3" md="3">
           <StatsWidget
-            :number="homeData?.data?.statistics?.locationsCount || 0"
+            :number="homeData?.data?.statistics?.pilgrimsCount || 0"
             :title="t('dashboard.stats.pilgrimsInside')"
           >
             <template #icon>
@@ -293,7 +293,7 @@ onMounted(async () => {
         </v-col>
         <v-col cols="6" lg="3" md="3">
           <StatsWidget
-            :number="homeData.data?.statistics?.mainCompaniesCount || 0"
+            :number="homeData.data?.statistics?.flightsCount || 0"
             :title="t('dashboard.stats.flightsCount')"
           >
             <template #icon>
@@ -318,10 +318,7 @@ onMounted(async () => {
           </StatsWidget>
         </v-col>
         <v-col cols="6" lg="3" md="3">
-          <StatsWidget
-            :number="homeData.data?.statistics?.companiesCount || 0"
-            :title="t('dashboard.stats.avgWaitTime')"
-          >
+          <StatsWidget :number="homeData.data?.statistics?.usersCount || 0" :title="t('dashboard.stats.avgWaitTime')">
             <template #icon>
               <svg fill="none" height="44" viewBox="0 0 44 44" width="44" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="22" cy="22" fill="#9C8055" opacity="0.4" r="20" />

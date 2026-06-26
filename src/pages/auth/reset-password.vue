@@ -13,16 +13,14 @@ const router = useRouter()
 const auth = useAuthStore()
 const appStore = useAppStore()
 
-const email = route.query.email
-const code = route.query.code
+const email = (route.query.email as string) || ''
+const token = (route.query.token as string) || ''
 
-if (!email || !code) {
-  // router.replace({ name: "forgot-password" });
+if (!email || !token) {
+  router.replace({ name: 'forgot-password' })
 }
 
 const formState = reactive({
-  email,
-  code,
   password: '',
   passwordConfirmation: '',
 })
@@ -30,7 +28,6 @@ const formState = reactive({
 const isSubmitting = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
-const isCreatingNewPassword = ref(true)
 
 const passwordValidator = (value: string) => {
   const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/
@@ -42,12 +39,7 @@ const confirmPasswordValidator = (value: string, target: string) => value === ta
 const submitNewPassword = async () => {
   try {
     isSubmitting.value = true
-    await auth.updatePassword({
-      phone: String(formState.email || ''),
-      code: String(formState.code || ''),
-      password: formState.password,
-      passwordConfirmation: formState.passwordConfirmation,
-    })
+    await auth.resetPassword(email, token, formState.password)
 
     appStore.showSnackbar({ message: t('auth.resetPassword.success'), color: 'success' })
     router.replace({ name: 'login' })
@@ -56,8 +48,9 @@ const submitNewPassword = async () => {
 
     const err = error as Record<string, unknown>
     const response = err?.response as Record<string, unknown> | undefined
-    if (response?.message) {
-      appStore.showSnackbar({ message: String(response.message), color: 'error' })
+    const data = response?.data as Record<string, unknown> | undefined
+    if (data?.message) {
+      appStore.showSnackbar({ message: String(data.message), color: 'error' })
       return
     }
 
@@ -82,12 +75,8 @@ const submitNewPassword = async () => {
         <div class="w-100 d-flex flex-column align-center justify-center pb-4 pt-3 px-4">
           <img alt="جدة سوبردوم" src="/jeddah-superdome.svg" width="140" />
           <h1 class="text-h5 text-sm-h4 font-weight-semibold mb-1 pt-10">
-            <span v-if="isCreatingNewPassword">{{ t('auth.resetPassword.title') }}</span>
-            <span v-else>{{ t('auth.resetPassword.subtitle') }}</span>
+            {{ t('auth.resetPassword.title') }}
           </h1>
-          <p v-if="!isCreatingNewPassword" class="mb-4 text-lg" style="color: #75797c">
-            {{ t('auth.resetPassword.description') }}
-          </p>
         </div>
       </div>
       <VCardText class="w-100 app-logo py-4 px-2 px-sm-6 px-xl-12 rounded-xl" flat>

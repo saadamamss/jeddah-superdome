@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { logger } from '@/@core/utils/logger'
 import { useAppStore } from '@/stores/app.store'
-import axios from '@/plugins/axios'
+import { usersService } from '@/services/users.service'
+import type { User } from '@/types'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -11,13 +12,13 @@ const props = defineProps({
 const appStore = useAppStore()
 const emit = defineEmits(['close', 'update:modelValue', 'delete'])
 const isLoading = ref(false)
-const newSupervisorId = ref(null)
-const form = ref(null)
-const operators = ref([])
+const newSupervisorId = ref<number | null>(null)
+const form = ref<{ validate: () => Promise<{ valid: boolean }> } | null>(null)
+const operators = ref<User[]>([])
 
 watch(
   () => props.modelValue,
-  (val) => {
+  (val: boolean) => {
     if (val) {
       getOperators()
     }
@@ -25,7 +26,7 @@ watch(
 )
 
 const confirmDelete = async () => {
-  const { valid } = await form.value.validate()
+  const { valid } = (await form.value?.validate()) ?? { valid: false }
 
   if (!valid) {
     appStore.showSnackbar({
@@ -47,12 +48,12 @@ const getOperators = async () => {
   try {
     isLoading.value = true
 
-    const response = await axios.get('/users?supervisorRoleId=2')
-    if (response.data?.data) {
-      operators.value = response.data.data.map((user) => {
-        user.name = user.firstname + ' ' + user.lastname
-        return user
-      })
+    const response = await usersService.getAll({ perPage: 100 })
+    if (response.data) {
+      operators.value = response.data.map((user: User) => ({
+        id: user.id,
+        name: user.name,
+      })) as unknown as User[]
     }
   } catch (error) {
     logger.error('Error fetching users:', error)
@@ -130,7 +131,7 @@ const getOperators = async () => {
                   :items="operators"
                   :loading="isLoading"
                   placeholder="اختر المشرف"
-                  :rules="[(v) => !!v]"
+                  :rules="[(v: unknown) => !!v]"
                 />
                 <!-- :rules="[(v) => !!v]" -->
               </div>

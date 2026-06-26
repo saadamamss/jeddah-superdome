@@ -21,18 +21,13 @@ const route = useRoute()
 
 const isSubmitting = ref(false)
 const isCreatingNewPassword = computed(() => route.query.new === '1')
-const code = computed(() => (route.query.code as string) || '')
-const phoneNumber = computed(() => (route.query.phone as string) || '')
+const token = computed(() => (route.query.token as string) || '')
+const email = computed(() => (route.query.email as string) || '')
 
 const updatePassword = async () => {
   try {
     isSubmitting.value = true
-    await auth.updatePassword({
-      phone: phoneNumber.value,
-      code: code.value,
-      password: formState.password || '',
-      passwordConfirmation: formState.passwordConfirmation || '',
-    })
+    await auth.resetPassword(email.value, token.value, formState.password || '')
 
     appStore.showSnackbar({ message: t('auth.createPassword.success'), color: 'success' })
 
@@ -42,9 +37,9 @@ const updatePassword = async () => {
   } catch (error: unknown) {
     logger.error(error)
 
-    const err = error as { response?: { message?: string } }
-    if (err?.response?.message) {
-      appStore.showSnackbar({ message: err.response.message, color: 'error' })
+    const err = error as { response?: { data?: { message?: string } } }
+    if (err?.response?.data?.message) {
+      appStore.showSnackbar({ message: err.response.data.message, color: 'error' })
       return
     }
 

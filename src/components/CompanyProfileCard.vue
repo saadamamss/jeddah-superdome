@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.store'
 import { logger } from '@/@core/utils/logger'
 import { authService } from '@/services/auth.service'
+import axios from '@axios'
 import Call from '@/components/icons/call.vue'
 import Company from '@/components/icons/company.vue'
 import Editicon from '@/components/icons/editicon.vue'
@@ -16,18 +17,41 @@ const { t } = useI18n()
 const auth = useAuthStore()
 
 const companyDetails = ref({
-  companyName: auth.company?.companyName ?? '',
-  licenseNo: auth.company?.licenseNo ?? '',
-  city: auth.company?.city ?? '',
-  phone: auth.company?.phone ?? '',
-  email: auth.company?.email ?? '',
-  address: auth.company?.address ?? '',
+  companyName: '',
+  licenseNo: '',
+  city: '',
+  phone: '',
+  email: '',
+  address: '',
 })
+const isLoading = ref(true)
 const isAddDialogVisible = ref(false)
 const successDialogOpen = ref(false)
 const isSaving = ref(false)
 
 const formData = ref({ ...companyDetails.value })
+
+const fetchCompanyProfile = async () => {
+  isLoading.value = true
+  try {
+    const response = await axios.get('/companies/profile')
+
+    const data = response.data.data
+    companyDetails.value = {
+      companyName: data.companyName ?? '',
+      licenseNo: data.licenseNumber ?? '',
+      city: data.city ?? '',
+      phone: data.contactNumber ?? '',
+      email: data.email ?? '',
+      address: data.address ?? '',
+    }
+    formData.value = { ...companyDetails.value }
+  } catch (error) {
+    logger.error('Error fetching company profile:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const updateCompanyDetails = async () => {
   try {
@@ -57,6 +81,10 @@ const cancelActionSuccessDialog = () => {
   successDialogOpen.value = false
   isAddDialogVisible.value = true
 }
+
+onMounted(() => {
+  fetchCompanyProfile()
+})
 </script>
 
 <template>

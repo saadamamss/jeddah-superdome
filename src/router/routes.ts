@@ -61,7 +61,7 @@ export default [
         component: () => import('@/pages/notifications/index.vue'),
         meta: {
           requiresAuth: true,
-          requiresPermission: 'admin_notifications.view',
+          requiresPermission: false,
         },
       },
       {

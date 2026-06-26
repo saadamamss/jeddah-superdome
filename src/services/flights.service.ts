@@ -3,7 +3,7 @@
  * Handles all flight-related API calls
  */
 import BaseService from './base.service'
-import type { Flight, PaginatedResponse } from '@/types'
+import type { Flight, FlightPilgrimAssignment, PaginatedResponse } from '@/types'
 
 class FlightsService extends BaseService {
   private readonly BASE = '/flights'
@@ -34,6 +34,36 @@ class FlightsService extends BaseService {
 
   async delete(id: number): Promise<{ status: { success: boolean; message: string } }> {
     return this.deleteRequest(`${this.BASE}/${id}`)
+  }
+
+  async assignPilgrim(flightId: number, pilgrimId: number): Promise<{ status: { success: boolean; message: string } }> {
+    return this.post(`${this.BASE}/${flightId}/pilgrims/${pilgrimId}`)
+  }
+
+  async unassignPilgrim(
+    flightId: number,
+    pilgrimId: number,
+  ): Promise<{ status: { success: boolean; message: string } }> {
+    return this.deleteRequest(`${this.BASE}/${flightId}/pilgrims/${pilgrimId}`)
+  }
+
+  async getAssignedPilgrims(
+    flightId: number,
+    params?: { page?: number; perPage?: number },
+  ): Promise<{
+    data: {
+      items: FlightPilgrimAssignment[]
+      pagination: {
+        currentPage: number
+        perPage: number
+        totalObjects: number
+        totalPages: number
+        itemsOnPage: number
+      }
+    }
+    status: { success: boolean; message: string }
+  }> {
+    return this.get(`${this.BASE}/${flightId}/pilgrims`, { params })
   }
 
   async upload(

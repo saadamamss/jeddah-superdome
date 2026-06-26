@@ -73,10 +73,14 @@
               >
                 <template #[`item.actions`]="{ item }">
                   <div class="d-flex gap-2">
-                    <v-btn class="text-sm text-black rounded-lg" color="#fff" size="small" @click="openDetails(item)">
-                      <template #prepend>
-                        <EyeIcon />
-                      </template>
+                    <v-btn
+                      class="text-sm text-black rounded-lg"
+                      color="#fff"
+                      size="small"
+                      @click="openDetails(item)"
+                      :prepend-icon="EyeIcon"
+                    >
+                      {{ t('pilgrims.viewButton') }}
                     </v-btn>
                     <v-btn
                       v-if="$can('edit', 'pilgrims')"
@@ -148,7 +152,7 @@
                     rounded="lg"
                   />
                 </VCol>
-                <VCol cols="12">
+                <VCol v-if="!authStore.isCompany" cols="12">
                   <label class="mb-2 d-block">{{ t('pilgrims.dialog.companyLabel') }}</label>
                   <v-select
                     v-model="formData.companyId"
@@ -320,6 +324,7 @@ import Fileadd from '@/components/icons/fileadd.vue'
 import Magnifier from '@/components/icons/magnifier.vue'
 import { pilgrimsService } from '@/services/pilgrims.service'
 import { companiesService } from '@/services/companies.service'
+import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { useTablePage } from '@/composables/useTablePage'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
@@ -330,6 +335,7 @@ import { validationRules } from '@/@core/utils/validators'
 import PilgrimDetailsDialog from './pilgrim-details.vue'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 const appStore = useAppStore()
 
 // Table state via composable
@@ -391,6 +397,7 @@ const handleUploadSubmit = async () => {
 }
 
 const fetchCompaniesList = async () => {
+  if (authStore.isCompany) return
   try {
     const response = await companiesService.getAll({ perPage: 100 })
     if (response?.status?.success) {
@@ -502,8 +509,13 @@ const {
 })
 
 watch(isAddDialogVisible, (open: boolean) => {
-  if (open && companiesList.value.length === 0) {
-    fetchCompaniesList()
+  if (open) {
+    if (authStore.isCompany) {
+      formData.value.companyId = authStore.user?.companyId ?? null
+    }
+    if (companiesList.value.length === 0) {
+      fetchCompaniesList()
+    }
   }
 })
 

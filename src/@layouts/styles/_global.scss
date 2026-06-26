@@ -36,8 +36,8 @@ ul {
 .v-select {
   .v-field {
     border-radius: 40px !important;
-    overflow: hidden;
-    border: none !important;
+    // overflow: hidden;
+    // border: none !important;
     box-shadow: none !important;
     background-color: rgba(249, 249, 249, 1) !important;
 
@@ -49,9 +49,9 @@ ul {
 
     &.v-field--variant-outlined {
       .v-field__outline {
-        --v-field-border-opacity: 0 !important;
-        border-color: transparent !important;
-        display: none !important;
+        // --v-field-border-opacity: 0 !important;
+        // border-color: transparent !important;
+        // display: none !important;
       }
     }
   }

@@ -1,14 +1,7 @@
 import { defineStore } from 'pinia'
 import { authService } from '@/services/auth.service'
 import { defineAbilityFromUser } from '@/plugins/casl/ability'
-import type {
-  CompanyInfo,
-  LoginCredentials,
-  OtpPayload,
-  ResetPasswordPayload,
-  UpdatePasswordPayload,
-  User,
-} from '@/types'
+import type { CompanyInfo, LoginCredentials, User } from '@/types'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
@@ -95,16 +88,12 @@ export const useAuthStore = defineStore('auth', () => {
     setUser(response.user)
   }
 
-  const resetPassword = async (payload: ResetPasswordPayload): Promise<unknown> => {
-    return authService.resetPassword(payload)
+  const forgotPassword = async (email: string): Promise<unknown> => {
+    return authService.forgotPassword({ email })
   }
 
-  const verifyOTP = async (data: OtpPayload): Promise<unknown> => {
-    return authService.verifyOtp(data)
-  }
-
-  const updatePassword = async (data: UpdatePasswordPayload): Promise<unknown> => {
-    return authService.updatePassword(data)
+  const resetPassword = async (email: string, token: string, newPassword: string): Promise<unknown> => {
+    return authService.resetPassword({ email, token, newPassword })
   }
 
   return {
@@ -120,8 +109,7 @@ export const useAuthStore = defineStore('auth', () => {
     refreshPermissions,
     logout,
     login,
+    forgotPassword,
     resetPassword,
-    verifyOTP,
-    updatePassword,
   }
 })

@@ -62,12 +62,14 @@ export interface CompanyInfo {
 // ─── User ─────────────────────────────────────────────────────
 export interface User {
   id: number
+  identityId: string
   name: string
   email: string
   phone: string
   identityNumber?: string
   role?: Role
   status: 'active' | 'inactive'
+  companyId?: number
   parentCompanies?: Company[]
   permissions?: string[]
   company?: CompanyInfo
@@ -97,7 +99,21 @@ export interface Flight {
   time: string
   destination: string
   noOfHuj: number
+  capacity?: number
+  status?: string
   transport: string
+}
+
+// ─── Flight Pilgrim Assignment ────────────────────────────────
+export interface FlightPilgrimAssignment {
+  pilgrimId: number
+  name: string
+  identity: string
+  nationality: string
+  gender: string
+  phone: string
+  email: string
+  assignedAt: string
 }
 
 // ─── Notification ─────────────────────────────────────────────
@@ -114,10 +130,9 @@ export interface Notification {
 // ─── Dashboard / Statistics ───────────────────────────────────
 export interface DashboardStatistics {
   companiesCount: number
-  campsCount: number
-  locationsCount: number
-  mainCompaniesCount: number
+  flightsCount: number
   pilgrimsCount: number
+  usersCount: number
 }
 
 export interface DashboardData {
@@ -134,21 +149,38 @@ export interface LoginResponse {
   user: User
 }
 
-// ─── OTP / Password Reset ─────────────────────────────────────
-export interface OtpPayload {
-  phone: string
-  code: string
+// ─── User Notification (for bell icon) ─────────────────────────
+export interface UserNotification {
+  id: number
+  notificationId: number
+  title: string
+  body: string
+  target: string
+  type: string
+  isRead: boolean
+  readAt?: string
+  deliveredAt: string
+  createdAt: string
 }
 
-export interface ResetPasswordPayload {
-  phone: string
+export interface UserNotificationsResponse {
+  data: UserNotification[]
+  unreadCount: number
+  pagination: Pagination
+  status: {
+    success: boolean
+    message?: string
+  }
 }
 
-export interface UpdatePasswordPayload {
-  phone: string
-  code: string
-  password: string
-  passwordConfirmation: string
+export interface UnreadCountResponse {
+  data: {
+    unreadCount: number
+  }
+  status: {
+    success: boolean
+    message?: string
+  }
 }
 
 // ─── Notification Send ────────────────────────────────────────

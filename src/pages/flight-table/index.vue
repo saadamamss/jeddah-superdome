@@ -71,6 +71,33 @@
                 :items-per-page="perPage"
                 :loading="isLoading"
               >
+                <template #[`item.status`]="{ item }">
+                  <v-chip
+                    :color="
+                      item.status === 'Cancelled'
+                        ? 'error'
+                        : item.status === 'Departed' || item.status === 'Arrived'
+                          ? 'success'
+                          : 'warning'
+                    "
+                    size="small"
+                    variant="tonal"
+                  >
+                    {{
+                      item.status === 'Scheduled'
+                        ? 'مجدولة'
+                        : item.status === 'Departed'
+                          ? 'منطلقة'
+                          : item.status === 'Arrived'
+                            ? 'وصلت'
+                            : item.status === 'Cancelled'
+                              ? 'ملغاة'
+                              : item.status === 'Delayed'
+                                ? 'مؤجلة'
+                                : item.status
+                    }}
+                  </v-chip>
+                </template>
                 <template #[`item.actions`]="{ item }">
                   <div class="d-flex gap-2">
                     <v-btn
@@ -82,6 +109,15 @@
                       @click="handleEdit(item)"
                     >
                       {{ t('flights.editButton') }}
+                    </v-btn>
+                    <v-btn
+                      v-if="$can('edit', 'flights')"
+                      class="text-sm text-black rounded-lg"
+                      color="#fff"
+                      size="small"
+                      @click="openManagePilgrims(item)"
+                    >
+                      {{ t('flights.pilgrimAssignment.manageButton') }}
                     </v-btn>
                     <v-btn
                       v-if="$can('delete', 'flights')"
@@ -154,7 +190,7 @@
                     type="date"
                   />
                 </VCol>
-                <VCol cols="12">
+                <VCol v-if="!authStore.isCompany" cols="12">
                   <label class="mb-2 d-block">{{ t('flights.dialog.companyLabel') }}</label>
                   <v-select
                     v-model="formData.companyId"
@@ -197,6 +233,32 @@
                     required
                     rounded="lg"
                     type="number"
+                  />
+                </VCol>
+                <VCol cols="12" md="6">
+                  <label class="mb-2 d-block">{{ t('flights.dialog.capacityLabel') }}</label>
+                  <VTextField
+                    v-model="formData.capacity"
+                    :placeholder="t('flights.dialog.capacityPlaceholder')"
+                    rounded="lg"
+                    type="number"
+                  />
+                </VCol>
+                <VCol cols="12" md="6">
+                  <label class="mb-2 d-block">{{ t('flights.dialog.statusLabel') }}</label>
+                  <v-select
+                    v-model="formData.status"
+                    :items="[
+                      { title: 'مجدولة', value: 'Scheduled' },
+                      { title: 'منطلقة', value: 'Departed' },
+                      { title: 'وصلت', value: 'Arrived' },
+                      { title: 'ملغاة', value: 'Cancelled' },
+                      { title: 'مؤجلة', value: 'Delayed' },
+                    ]"
+                    item-title="title"
+                    item-value="value"
+                    :placeholder="t('common.select')"
+                    rounded="lg"
                   />
                 </VCol>
               </VRow>
@@ -282,6 +344,13 @@
         @action="confirm"
         @cancel="close"
       />
+
+      <!-- Manage Pilgrims Dialog -->
+      <ManagePilgrimsDialog
+        v-if="manageDialogFlightId"
+        v-model="manageDialogVisible"
+        :flight-id="manageDialogFlightId"
+      />
     </v-container>
   </div>
 </template>
@@ -301,6 +370,7 @@ import Fileadd from '@/components/icons/fileadd.vue'
 import Magnifier from '@/components/icons/magnifier.vue'
 import { flightsService } from '@/services/flights.service'
 import { companiesService } from '@/services/companies.service'
+import { useAuthStore } from '@/stores/auth.store'
 import { useAppStore } from '@/stores/app.store'
 import { useTablePage } from '@/composables/useTablePage'
 import { useConfirmDialog } from '@/composables/useConfirmDialog'
@@ -308,8 +378,10 @@ import { useFileUpload } from '@/composables/useFileUpload'
 import { API_BASE_URL } from '@/config'
 import type { Company } from '@/types'
 import { validationRules } from '@/@core/utils/validators'
+import ManagePilgrimsDialog from './components/ManagePilgrimsDialog.vue'
 
 const { t } = useI18n()
+const authStore = useAuthStore()
 const appStore = useAppStore()
 
 // Table state via composable
@@ -325,6 +397,8 @@ const headers = ref([
   { title: t('flights.headers.time'), value: 'time' },
   { title: t('flights.headers.destination'), value: 'destination' },
   { title: t('flights.headers.pilgrimsCount'), value: 'noOfHuj' },
+  { title: t('flights.headers.capacity'), value: 'capacity' },
+  { title: t('flights.headers.status'), value: 'status' },
   { title: t('flights.headers.transport'), value: 'transport' },
   { title: '', value: 'actions' },
 ])
@@ -337,6 +411,13 @@ const isSubmitting = ref(false)
 const form = ref(null)
 const isEdit = ref(false)
 const editingFlightId = ref<number | null>(null)
+const manageDialogVisible = ref(false)
+const manageDialogFlightId = ref<number | null>(null)
+
+const openManagePilgrims = (item: { id: number }) => {
+  manageDialogFlightId.value = item.id
+  manageDialogVisible.value = true
+}
 
 const formData = ref({
   flightNumber: '',
@@ -346,6 +427,8 @@ const formData = ref({
   destination: '',
   transport: '',
   noOfHuj: '' as string | number,
+  capacity: '' as string | number,
+  status: 'Scheduled',
 })
 
 const {
@@ -372,6 +455,7 @@ const handleUploadSubmit = async () => {
 }
 
 const fetchCompaniesList = async () => {
+  if (authStore.isCompany) return
   try {
     const response = await companiesService.getAll({ perPage: 100 })
     if (response?.status?.success) {
@@ -393,6 +477,8 @@ const handleEdit = (item: Record<string, unknown>) => {
     destination: (item.destination as string) || '',
     transport: (item.transport as string) || '',
     noOfHuj: (item.noOfHuj as string) || '',
+    capacity: (item.capacity as string) || '',
+    status: (item.status as string) || 'Scheduled',
   }
   isAddDialogVisible.value = true
 }
@@ -412,6 +498,8 @@ const handleSubmit = async () => {
         destination: formData.value.destination,
         transport: formData.value.transport,
         noOfHuj: Number(formData.value.noOfHuj),
+        capacity: Number(formData.value.capacity) || 0,
+        status: formData.value.status || undefined,
       })
       appStore.showSnackbar({ message: t('flights.messages.editSuccess'), color: 'success' })
     } else {
@@ -423,6 +511,8 @@ const handleSubmit = async () => {
         destination: formData.value.destination,
         transport: formData.value.transport,
         noOfHuj: Number(formData.value.noOfHuj),
+        capacity: Number(formData.value.capacity) || 0,
+        status: formData.value.status || undefined,
       })
       appStore.showSnackbar({ message: t('flights.messages.addSuccess'), color: 'success' })
     }
@@ -436,6 +526,8 @@ const handleSubmit = async () => {
       destination: '',
       transport: '',
       noOfHuj: '',
+      capacity: '',
+      status: 'Scheduled',
     }
   } catch (error: unknown) {
     const axiosError = error as { response?: { data?: { message?: string } } }
@@ -471,8 +563,13 @@ const {
 })
 
 watch(isAddDialogVisible, (open: boolean) => {
-  if (open && companiesList.value.length === 0) {
-    fetchCompaniesList()
+  if (open) {
+    if (authStore.isCompany) {
+      formData.value.companyId = authStore.user?.companyId ?? null
+    }
+    if (companiesList.value.length === 0) {
+      fetchCompaniesList()
+    }
   }
 })
 

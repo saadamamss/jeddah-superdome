@@ -8,10 +8,14 @@ defineProps<{
   headers?: Record<string, unknown>[]
 }>()
 
-const emit = defineEmits(['update:options'])
+const emit = defineEmits(['update:options', 'click:row'])
 
 const handleTableUpdate = (options: Record<string, unknown>) => {
   emit('update:options', options)
+}
+
+const handleClickRow = (_event: unknown, row: Record<string, unknown>) => {
+  emit('click:row', _event, row)
 }
 </script>
 
@@ -26,6 +30,7 @@ const handleTableUpdate = (options: Record<string, unknown>) => {
       :page="page"
       :total-items="totalItems"
       @update:options="handleTableUpdate"
+      @click:row="handleClickRow"
     >
       <template v-for="(_, slot) in $slots" #[slot]="slotProps">
         <slot :name="slot" v-bind="slotProps" />

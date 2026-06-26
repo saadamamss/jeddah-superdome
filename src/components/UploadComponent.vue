@@ -1,5 +1,5 @@
 <template>
-  <v-card-text class="py-2" outlined>
+  <v-card-text class="py-2">
     <!-- Title -->
     <v-card-title class="text-h6 justify-center">
       {{ title }}
@@ -36,7 +36,6 @@
       v-if="!isUploading && !modelValue"
       class="text-center bg-primary_2 py-6 mb-6"
       :class="['drop-zone', { dragover: dragOver }]"
-      outlined
       @click="fileInput?.click()"
       @dragleave="dragOver = false"
       @dragover.prevent="dragOver = true"

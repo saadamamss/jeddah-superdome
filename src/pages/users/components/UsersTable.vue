@@ -92,10 +92,8 @@ const totalItems = computed(() => virtualDrones.value.length)
             <div>التصفيه:</div>
             <v-select
               v-model="selectedTeam"
-              dense
               item-title="title"
               :items="[{ title: 'الكل' }, { title: 'فريق أ' }, { title: 'فريق ب' }, { title: 'فريق ج' }]"
-              outlined
               placeholder="الفريق"
               return-object
               style="min-width: 277px"
@@ -106,13 +104,11 @@ const totalItems = computed(() => virtualDrones.value.length)
             <v-text-field
               v-model="search"
               clearable
-              dense
               label="بحث"
-              outlined
               prepend-inner-icon="mdi-magnify"
               style="min-width: 306px"
             />
-            <VBtn outlined prepend-icon="mdi-printer" @click="printTable"> طباعه </VBtn>
+            <VBtn variant="outlined" prepend-icon="mdi-printer" @click="printTable"> طباعه </VBtn>
             <!-- <VBtn color="primary" @click="isAddingDialog = true">
               إضافة مشغل جديد
             </VBtn> -->

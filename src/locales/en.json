@@ -261,6 +261,8 @@
       "time": "Time",
       "destination": "Destination",
       "pilgrimsCount": "Pilgrims Count",
+      "capacity": "Capacity",
+      "status": "Status",
       "transport": "Transport"
     },
     "dialog": {
@@ -277,7 +279,10 @@
       "destinationPlaceholder": "Makkah",
       "transportLabel": "Transport*",
       "pilgrimsCountLabel": "Expected Pilgrims Count*",
-      "pilgrimsCountPlaceholder": "Pilgrims Count"
+      "pilgrimsCountPlaceholder": "Pilgrims Count",
+      "capacityLabel": "Flight Capacity",
+      "capacityPlaceholder": "Max Capacity",
+      "statusLabel": "Flight Status"
     },
     "upload": {
       "title": "Upload Flight File",
@@ -304,6 +309,30 @@
       "addSuccess": "Flight added successfully",
       "editSuccess": "Flight updated successfully",
       "error": "An error occurred"
+    },
+    "pilgrimAssignment": {
+      "manageButton": "Manage Pilgrims",
+      "title": "Manage Pilgrims — Flight {flightNumber}",
+      "flightInfo": "{destination} | {date} | Capacity: {count}/{capacity}",
+      "assignTab": "Assign Pilgrim",
+      "assignedTab": "Assigned Pilgrims",
+      "assignSectionTitle": "Assign Pilgrim",
+      "searchAssigned": "Search assigned pilgrim",
+      "searchAvailable": "Search pilgrim...",
+      "assignButton": "Assign",
+      "assignSelected": "Assign Selected ({count})",
+      "unassignButton": "Unassign",
+      "noAssigned": "No pilgrims assigned yet",
+      "noAvailable": "No available pilgrims to assign",
+      "capacityFull": "Capacity reached",
+      "assignedCount": "Total assigned: {count}",
+      "selectedCount": "{selected} of {total} pilgrims selected",
+      "addPilgrims": "Assign Pilgrim",
+      "selectPilgrims": "Select pilgrims to assign",
+      "messages": {
+        "assignSuccess": "Pilgrim assigned to flight successfully",
+        "unassignSuccess": "Pilgrim unassigned from flight successfully"
+      }
     }
   },
   "users": {
@@ -320,6 +349,7 @@
       "name": "Name",
       "role": "Role",
       "phone": "Phone Number",
+      "company": "Company",
       "status": "Status"
     },
     "roles": {
@@ -405,6 +435,7 @@
     "title": "Notification Management",
     "breadcrumbHome": "Home",
     "breadcrumbTitle": "Notification Management",
+    "managementTitle": "Notification Management",
     "sendNew": "Send New Notification",
     "resend": " Resend",
     "deleteButton": "Delete",
@@ -416,7 +447,10 @@
       "body": "Notification Text",
       "target": "Target Audience",
       "type": "Notification Type",
-      "method": "Delivery Method"
+      "method": "Delivery Method",
+      "date": "Date",
+      "recipients": "Recipients",
+      "read": "Read"
     },
     "dialog": {
       "title": "Send New Notification",
@@ -438,9 +472,21 @@
       "methodRequired": "Delivery method is required",
       "sendButton": "Send"
     },
-    "targets": ["Companies", "Pilgrims", "Users"],
-    "types": ["Reminder", "Announcement", "Alert"],
-    "methods": ["In-App Notification", "Email", "Both"],
+    "targets": {
+      "companies": "Companies",
+      "pilgrims": "Pilgrims",
+      "users": "Users"
+    },
+    "types": {
+      "reminder": "Reminder",
+      "announcement": "Announcement",
+      "alert": "Alert"
+    },
+    "methods": {
+      "inApp": "In-App Notification",
+      "email": "Email",
+      "both": "Both"
+    },
     "success": {
       "sendTitle": "Notification Sent Successfully!",
       "sendSubtitle": "Return to notification management or send another notification.",

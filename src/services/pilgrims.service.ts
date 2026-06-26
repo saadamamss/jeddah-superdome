@@ -13,6 +13,7 @@ class PilgrimsService extends BaseService {
     perPage?: number
     search?: string
     companyId?: number
+    excludeFlightId?: number
   }): Promise<PaginatedResponse<Pilgrim>> {
     return this.get<PaginatedResponse<Pilgrim>>(this.BASE, { params })
   }

@@ -20,20 +20,20 @@ const isSubmitting = ref(false)
 const submitEmail = async () => {
   try {
     isSubmitting.value = true
-    await auth.resetPassword({ phone: formState.email || '' })
+    await auth.forgotPassword(formState.email || '')
 
-    router.replace({ name: 'otp', query: { email: formState.email || '' } })
+    appStore.showSnackbar({ message: t('auth.forgotPassword.success'), color: 'success' })
+    router.replace({ name: 'login' })
   } catch (error: unknown) {
     logger.error(error)
 
-    const err = error as { response?: { message?: string } }
-    if (err?.response?.message) {
-      appStore.showSnackbar({ message: err.response.message, color: 'error' })
+    const err = error as { response?: { data?: { message?: string } } }
+    if (err?.response?.data?.message) {
+      appStore.showSnackbar({ message: err.response.data.message, color: 'error' })
       return
     }
 
     appStore.showSnackbar({ message: t('auth.forgotPassword.error'), color: 'error' })
-    router.replace({ name: 'otp', query: { email: formState.email || '' } })
   } finally {
     isSubmitting.value = false
   }

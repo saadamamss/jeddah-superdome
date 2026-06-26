@@ -261,6 +261,8 @@
       "time": "الوقت",
       "destination": "الوجهة",
       "pilgrimsCount": "عدد الحجاج",
+      "capacity": "السعة",
+      "status": "الحالة",
       "transport": "وسيلة النقل"
     },
     "dialog": {
@@ -277,7 +279,10 @@
       "destinationPlaceholder": "مكة المكرمة",
       "transportLabel": "وسيلة النقل*",
       "pilgrimsCountLabel": "عدد الحجاج المتوقع*",
-      "pilgrimsCountPlaceholder": "عدد الحجاج"
+      "pilgrimsCountPlaceholder": "عدد الحجاج",
+      "capacityLabel": "سعة الرحلة",
+      "capacityPlaceholder": "السعة القصوى",
+      "statusLabel": "حالة الرحلة"
     },
     "upload": {
       "title": "رفع ملف الرحلات",
@@ -304,6 +309,30 @@
       "addSuccess": "تم إضافة الرحلة بنجاح",
       "editSuccess": "تم تعديل الرحلة بنجاح",
       "error": "حدث خطأ"
+    },
+    "pilgrimAssignment": {
+      "manageButton": "إدارة الحجاج",
+      "title": "إدارة الحجاج — رحلة رقم {flightNumber}",
+      "flightInfo": "{destination} | {date} | السعة: {count}/{capacity}",
+      "assignTab": "إسناد حاج",
+      "assignedTab": "الحجاج المسندون",
+      "assignSectionTitle": "إسناد حاج",
+      "searchAssigned": "بحث عن حاج مسند",
+      "searchAvailable": "بحث عن حاج...",
+      "assignButton": "إسناد",
+      "assignSelected": "إسناد المختار ({count})",
+      "unassignButton": "إلغاء",
+      "noAssigned": "لم يتم إسناد أي حجاج بعد",
+      "noAvailable": "لا يوجد حجاج متاحون للإسناد",
+      "capacityFull": "السعة ممتلئة",
+      "assignedCount": "إجمالي المسندين: {count}",
+      "selectedCount": "تم اختيار {selected} من {total} حجاج",
+      "addPilgrims": "إسناد حاج",
+      "selectPilgrims": "اختر الحجاج للإسناد",
+      "messages": {
+        "assignSuccess": "تم إسناد الحاج إلى الرحلة بنجاح",
+        "unassignSuccess": "تم إلغاء إسناد الحاج من الرحلة بنجاح"
+      }
     }
   },
   "users": {
@@ -320,6 +349,7 @@
       "name": "الاسم",
       "role": "الدور",
       "phone": "رقم الجوال",
+      "company": "الشركة",
       "status": "الحالة"
     },
     "roles": {
@@ -405,6 +435,7 @@
     "title": "إدارة الإشعارات",
     "breadcrumbHome": "الرئيسية",
     "breadcrumbTitle": "إدارة الإشعارات",
+    "managementTitle": "إدارة الإشعارات",
     "sendNew": "إرسال إشعار جديد",
     "resend": " إعادة الإرسال",
     "deleteButton": "حذف",
@@ -416,7 +447,10 @@
       "body": "نص الإشعار",
       "target": "الفئة المستهدفة",
       "type": "نوع الإشعار",
-      "method": "وسيلة الإرسال"
+      "method": "وسيلة الإرسال",
+      "date": "التاريخ",
+      "recipients": "المستلمين",
+      "read": "تمت القراءة"
     },
     "dialog": {
       "title": "إرسال إشعار جديد",
@@ -438,9 +472,21 @@
       "methodRequired": "وسيلة الإرسال مطلوب",
       "sendButton": "إرسال"
     },
-    "targets": ["شركات", "حجاج", "مستخدمين"],
-    "types": ["تذكير", "إعلان", "تنبيه"],
-    "methods": ["إشعار داخل النظام", "بريد إلكتروني", "كلاهما"],
+    "targets": {
+      "companies": "شركات",
+      "pilgrims": "حجاج",
+      "users": "مستخدمين"
+    },
+    "types": {
+      "reminder": "تذكير",
+      "announcement": "إعلان",
+      "alert": "تنبيه"
+    },
+    "methods": {
+      "inApp": "إشعار داخل النظام",
+      "email": "بريد إلكتروني",
+      "both": "كلاهما"
+    },
     "success": {
       "sendTitle": "تمت إرسال الإشعار بنجاح!",
       "sendSubtitle": "إعادة التوجه إلى إدارة الإشعارات أو أرسال إشعار آخر.",

@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { onMounted, watch } from 'vue'
 import navItems from '@/navigation/vertical'
 import { useThemeConfig } from '@core/composable/useThemeConfig'
+import { useNotifications } from '@/composables/useNotifications'
+import { useAuthStore } from '@/stores/auth.store'
 
 // Components
 import UserProfile from '@/layouts/components/UserProfile.vue'
@@ -11,6 +14,21 @@ import { VerticalNavLayout } from '@layouts/components'
 
 const { appRouteTransition, isLessThanOverlayNavBreakpoint } = useThemeConfig()
 const { width: windowWidth } = useWindowSize()
+const { init } = useNotifications()
+const authStore = useAuthStore()
+
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    init()
+  }
+})
+
+watch(
+  () => authStore.isAuthenticated,
+  (auth) => {
+    if (auth) init()
+  },
+)
 </script>
 
 <template>
@@ -43,7 +61,7 @@ const { width: windowWidth } = useWindowSize()
 
         <div class="d-none d-sm-block">
           <h2 class="text-h6">
-            <b>مرحبًا، عبدالله 👋</b>
+            <b>مرحبًا، {{ authStore.user?.name || 'مستخدم' }} 👋</b>
           </h2>
           <p class="text-sm text-secondary">نتمنى لك يومًا موفقًا في إدارة نقطة التجمع.</p>
         </div>
@@ -53,7 +71,7 @@ const { width: windowWidth } = useWindowSize()
         <!-- <NavbarThemeSwitcher /> -->
         <VSpacer />
         <div class="d-flex gap-3">
-          <Notifications :notifications="[]" />
+          <Notifications />
         </div>
         <div class="d-flex gap-3">
           <!-- <Notifications :notifications="notifications" /> -->

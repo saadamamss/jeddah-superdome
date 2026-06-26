@@ -4,14 +4,7 @@
  * Tokens are stored in HttpOnly cookies set by the backend — never in localStorage.
  */
 import BaseService from './base.service'
-import type {
-  CompanyInfo,
-  LoginCredentials,
-  OtpPayload,
-  ResetPasswordPayload,
-  UpdatePasswordPayload,
-  User,
-} from '@/types'
+import type { CompanyInfo, LoginCredentials, User } from '@/types'
 
 interface LoginResponse {
   user: User
@@ -45,16 +38,16 @@ class AuthService extends BaseService {
     await this.post<void>(`${this.BASE}/refresh`)
   }
 
-  async resetPassword(data: ResetPasswordPayload): Promise<{ status: { success: boolean; message: string } }> {
-    return this.post(`${this.BASE}/auth/app/reset-password`, data)
+  async forgotPassword(data: { email: string }): Promise<{ status: { success: boolean; message: string } }> {
+    return this.post(`${this.BASE}/forgot-password`, data)
   }
 
-  async verifyOtp(data: OtpPayload): Promise<{ status: { success: boolean } }> {
-    return this.post(`${this.BASE}/auth/app/verify-otp`, data)
-  }
-
-  async updatePassword(data: UpdatePasswordPayload): Promise<{ status: { success: boolean } }> {
-    return this.post(`${this.BASE}/auth/app/update-password`, data)
+  async resetPassword(data: {
+    email: string
+    token: string
+    newPassword: string
+  }): Promise<{ status: { success: boolean; message: string } }> {
+    return this.post(`${this.BASE}/reset-password`, data)
   }
 
   /** Get current user — backend returns user with company info if role is company */

@@ -4,10 +4,9 @@ import AppBreadcrumb from '@/components/AppBreadcrumb.vue'
 import { useAppStore } from '@/stores/app.store'
 import { usersService } from '@/services/users.service'
 import { useTablePage } from '@/composables/useTablePage'
-import { useConfirmDialog } from '@/composables/useConfirmDialog'
 import { useFileUpload } from '@/composables/useFileUpload'
 import { API_BASE_URL } from '@/config'
-import type { User } from '@/types'
+import type { Company, User } from '@/types'
 import DataTable from '@/components/dataTable.vue'
 import Pagination from '@/@core/components/Pagination.vue'
 import CustomeSwitch from '@/components/CustomeSwitch.vue'
@@ -17,8 +16,9 @@ import Fileadd from '@/components/icons/fileadd.vue'
 import Magnifier from '@/components/icons/magnifier.vue'
 import UploadComponent from '@/components/UploadComponent.vue'
 import SuccessDialog from '@/components/SuccessDialog.vue'
-import DeleteDialog from '@/components/DeleteDialog.vue'
+import DeleteOperatorConfirmationDialog from './components/DeleteOperatorConfirmationDialog.vue'
 import { rolesService } from '@/services/roles.service'
+import { companiesService } from '@/services/companies.service'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -39,6 +39,7 @@ const headers = [
   { title: t('users.headers.identity'), value: 'identityNumber', align: 'start' },
   { title: t('users.headers.name'), value: 'name' },
   { title: t('users.headers.role'), value: 'role' },
+  { title: t('users.headers.company'), value: 'company' },
   { title: t('users.headers.phone'), value: 'phone' },
   { title: t('users.headers.status'), value: 'status' },
   { title: '', value: 'actions' },
@@ -51,6 +52,7 @@ const uploadDialog = ref(false)
 const successDialogOpen = ref(false)
 const isSubmitting = ref(false)
 const editingUserId = ref<number | null>(null)
+const deletingUserId = ref<number | null>(null)
 
 // Form
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -63,6 +65,7 @@ const formData = ref({
   identityNumber: '',
   status: '' as 'active' | 'inactive' | '',
   roleId: null as number | null,
+  companyId: null as number | null,
 })
 
 const {
@@ -79,8 +82,9 @@ const {
   errorMessage: t('users.upload.error'),
 })
 
-// Available roles for selection — fetched from API
+// Available roles and companies for selection — fetched from API
 const roles = ref<{ id: number; name: string }[]>([])
+const companiesList = ref<Company[]>([])
 
 const fetchRoles = async () => {
   try {
@@ -90,6 +94,17 @@ const fetchRoles = async () => {
     }
   } catch {
     logger.error('Failed to fetch roles')
+  }
+}
+
+const fetchCompaniesList = async () => {
+  try {
+    const response = await companiesService.getAll({ perPage: 100 })
+    if (response?.status?.success) {
+      companiesList.value = response.data || []
+    }
+  } catch (error) {
+    logger.error('Error fetching companies list:', error)
   }
 }
 
@@ -129,11 +144,21 @@ const handleSubmit = async () => {
       identityNumber: formData.value.identityNumber || undefined,
       status: (formData.value.status || undefined) as 'active' | 'inactive' | undefined,
       roleId: formData.value.roleId ?? undefined,
+      companyId: formData.value.companyId ?? undefined,
     })
     appStore.showSnackbar({ message: t('users.messages.addSuccess'), color: 'success' })
     isAddDialogVisible.value = false
     await fetchUsers()
-    formData.value = { name: '', email: '', phone: '', password: '', identityNumber: '', status: '', roleId: null }
+    formData.value = {
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      identityNumber: '',
+      status: '',
+      roleId: null,
+      companyId: null,
+    }
   } catch (error: unknown) {
     const axiosError = error as { response?: { data?: { message?: string } } }
     appStore.showSnackbar({
@@ -145,27 +170,33 @@ const handleSubmit = async () => {
   }
 }
 
-const {
-  isOpen: deleteDialogOpen,
-  open: openDeleteDialog,
-  close,
-  confirm,
-} = useConfirmDialog({
-  onConfirm: async (id: number) => {
-    try {
-      await usersService.delete(id)
-      appStore.showSnackbar({ message: t('users.delete.success'), color: 'success' })
-      await fetchUsers()
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } }
-      appStore.showSnackbar({
-        message: axiosError.response?.data?.message || t('users.delete.error'),
-        color: 'error',
-      })
-      throw error
-    }
-  },
-})
+const deleteDialogOpen = ref(false)
+const isDeleteLoading = ref(false)
+
+const openDeleteDialog = (id: number) => {
+  deletingUserId.value = id
+  deleteDialogOpen.value = true
+}
+
+const handleDelete = async (newSupervisorId: number | null) => {
+  if (!deletingUserId.value) return
+  try {
+    isDeleteLoading.value = true
+    await usersService.delete(deletingUserId.value, { newSupervisorId: newSupervisorId ?? undefined })
+    appStore.showSnackbar({ message: t('users.delete.success'), color: 'success' })
+    deleteDialogOpen.value = false
+    deletingUserId.value = null
+    await fetchUsers()
+  } catch (error: unknown) {
+    const axiosError = error as { response?: { data?: { message?: string } } }
+    appStore.showSnackbar({
+      message: axiosError.response?.data?.message || t('users.delete.error'),
+      color: 'error',
+    })
+  } finally {
+    isDeleteLoading.value = false
+  }
+}
 
 const openEditDialog = (user: User) => {
   editingUserId.value = user.id
@@ -177,6 +208,7 @@ const openEditDialog = (user: User) => {
     identityNumber: user.identityNumber || '',
     status: user.status,
     roleId: user.role?.id ?? null,
+    companyId: user.parentCompanies?.[0]?.id ?? null,
   }
   isEditDialogVisible.value = true
 }
@@ -193,11 +225,21 @@ const handleEditSubmit = async () => {
       identityNumber: formData.value.identityNumber || undefined,
       status: formData.value.status as 'active' | 'inactive' | undefined,
       roleId: formData.value.roleId ?? undefined,
+      companyId: formData.value.companyId ?? undefined,
     })
     appStore.showSnackbar({ message: t('users.messages.editSuccess'), color: 'success' })
     isEditDialogVisible.value = false
     editingUserId.value = null
-    formData.value = { name: '', email: '', phone: '', password: '', identityNumber: '', status: '', roleId: null }
+    formData.value = {
+      name: '',
+      email: '',
+      phone: '',
+      password: '',
+      identityNumber: '',
+      status: '',
+      roleId: null,
+      companyId: null,
+    }
     await fetchUsers()
   } catch (error: unknown) {
     const axiosError = error as { response?: { data?: { message?: string } } }
@@ -213,6 +255,7 @@ const handleEditSubmit = async () => {
 onMounted(() => {
   fetchUsers()
   fetchRoles()
+  fetchCompaniesList()
 })
 </script>
 
@@ -298,6 +341,11 @@ onMounted(() => {
                   <v-chip v-if="item.role" color="primary" size="small" variant="tonal">
                     {{ item.role.name }}
                   </v-chip>
+                  <span v-else>-</span>
+                </template>
+
+                <template #[`item.company`]="{ item }">
+                  <span v-if="item.parentCompanies?.length">{{ item.parentCompanies[0].companyName }}</span>
                   <span v-else>-</span>
                 </template>
 
@@ -420,6 +468,18 @@ onMounted(() => {
                   rounded="lg"
                 />
               </VCol>
+              <VCol cols="12">
+                <label class="mb-2 d-block">{{ t('users.dialog.companyLabel') }}</label>
+                <v-select
+                  v-model="formData.companyId"
+                  item-title="companyName"
+                  item-value="id"
+                  :items="companiesList"
+                  :placeholder="t('common.select')"
+                  clearable
+                  rounded="lg"
+                />
+              </VCol>
             </VRow>
           </VForm>
         </VCardText>
@@ -521,6 +581,18 @@ onMounted(() => {
                   rounded="lg"
                 />
               </VCol>
+              <VCol cols="12">
+                <label class="mb-2 d-block">{{ t('users.dialog.companyLabel') }}</label>
+                <v-select
+                  v-model="formData.companyId"
+                  item-title="companyName"
+                  item-value="id"
+                  :items="companiesList"
+                  :placeholder="t('common.select')"
+                  clearable
+                  rounded="lg"
+                />
+              </VCol>
             </VRow>
           </VForm>
         </VCardText>
@@ -599,14 +671,11 @@ onMounted(() => {
       @cancel="successDialogOpen = false"
     />
 
-    <DeleteDialog
+    <DeleteOperatorConfirmationDialog
       v-model="deleteDialogOpen"
-      :action-text="t('users.delete.action')"
-      :cancel-text="t('users.delete.cancel')"
-      :subtitle="t('users.delete.subtitle')"
-      :title="t('users.delete.title')"
-      @action="confirm"
-      @cancel="close"
+      :is-deleting="isDeleteLoading"
+      @delete="handleDelete"
+      @close="deleteDialogOpen = false"
     />
   </div>
 </template>
