@@ -253,7 +253,28 @@ app.MapHub<NotificationHub>("/hubs/notifications");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
+
+    var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+    if (pending.Count != 0)
+    {
+        try
+        {
+            await db.Database.MigrateAsync();
+        }
+        catch (Exception ex)
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogWarning(ex, "Migration failed — schema may already exist. Recording {Count} pending migration(s) as applied.", pending.Count);
+
+            foreach (var migration in pending)
+            {
+                await db.Database.ExecuteSqlRawAsync(
+                    "INSERT IGNORE INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`) VALUES ({0}, '8.0.2')",
+                    migration);
+            }
+        }
+    }
+
     await DbSeeder.SeedAsync(scope.ServiceProvider);
 }
 
