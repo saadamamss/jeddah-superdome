@@ -253,56 +253,7 @@ app.MapHub<NotificationHub>("/hubs/notifications");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
-    var conn = db.Database.GetDbConnection();
-    await conn.OpenAsync();
-
-    // Check if any tables exist
-    await using (var checkCmd = conn.CreateCommand())
-    {
-        checkCmd.CommandText = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_type = 'BASE TABLE'";
-        var tableCount = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
-
-        if (tableCount == 0)
-        {
-            // Fresh database — run all migrations
-            logger.LogInformation("No tables found. Running all migrations...");
-            await db.Database.MigrateAsync();
-        }
-        else
-        {
-            // Existing database — ensure migration history table exists
-            await using (var createCmd = conn.CreateCommand())
-            {
-                createCmd.CommandText = """
-                    CREATE TABLE IF NOT EXISTS `__EFMigrationsHistory` (
-                        `MigrationId` varchar(150) NOT NULL,
-                        `ProductVersion` varchar(32) NOT NULL,
-                        PRIMARY KEY (`MigrationId`)
-                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-                    """;
-                await createCmd.ExecuteNonQueryAsync();
-            }
-
-            // Record all pending migrations as applied
-            var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
-            if (pending.Count != 0)
-            {
-                await using (var insertCmd = conn.CreateCommand())
-                {
-                    foreach (var migration in pending)
-                    {
-                        insertCmd.CommandText = $"INSERT IGNORE INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`) VALUES ('{migration.Replace("'", "''")}', '8.0.2')";
-                        await insertCmd.ExecuteNonQueryAsync();
-                    }
-                }
-
-                logger.LogInformation("Migration history synced ({Count} pending migration(s) recorded).", pending.Count);
-            }
-        }
-    }
-
+    await db.Database.MigrateAsync();
     await DbSeeder.SeedAsync(scope.ServiceProvider);
 }
 
