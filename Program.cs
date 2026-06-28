@@ -24,11 +24,18 @@ using Microsoft.AspNetCore.RateLimiting;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSerilog();
+
+// ── PORT binding (Railway / cloud fallback) ────────────────────
+var urls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+if (string.IsNullOrEmpty(urls))
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+    builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+}
 
 // ── Strongly-Typed Config ──────────────────────────────────────
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("App"));
