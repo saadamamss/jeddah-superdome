@@ -3,12 +3,17 @@ node_modules
 dist
 dist/
 # local env files
+.env
 .env.local
 .env.*.local
 
 # environment files
 .env.development
 .env.production
+
+# test artifacts
+playwright-report/
+test-results/
 
 # Log files
 npm-debug.log*
